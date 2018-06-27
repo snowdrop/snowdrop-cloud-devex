@@ -32,14 +32,26 @@ items:
         volumes:
         - name: shared-data
           emptyDir: {}
-        #initContainers:
-        #- image: 172.30.1.1:5000/k8s-supervisor/supervisord:1.0
-        #  imagePullPolicy: IfNotPresent
-        #  name: supervisord
+        initContainers:
+        - image: 172.30.1.1:5000/k8s-supervisor/copy-supervisord:1.0
+          imagePullPolicy: IfNotPresent
+          name: copy-supervisord
+          command:
+            - "/usr/bin/cp"
+          args:
+            - "-r"
+            - "/opt/supervisord"
+            - /var/lib/
+          volumeMounts:
+          - name: shared-data
+            mountPath: /var/lib/supervisord
         containers:
         - image: docker-registry.default.svc:5000/k8s-supervisor/spring-boot-http
           imagePullPolicy: IfNotPresent
           name: spring-boot-supervisord
+          volumeMounts:
+          - name: shared-data
+            mountPath: /var/lib/supervisord
           ports:
           - containerPort: 8080
             protocol: TCP
@@ -106,9 +118,9 @@ items:
   metadata:
     labels:
       app: spring-boot-supervisord
-    name: supervisord
+    name: copy-supervisord
   spec:
     lookupPolicy:
       local: false
   status:
-    dockerImageRepository: docker-registry.default.svc:5000/k8s-supervisor/supervisord:1.0
+    dockerImageRepository: docker-registry.default.svc:5000/k8s-supervisor/copy-supervisord:1.0

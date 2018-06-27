@@ -1,0 +1,15 @@
+FROM centos
+
+ENV SUPERVISORD_DIR /opt/supervisord
+
+RUN mkdir -p ${SUPERVISORD_DIR}/conf ${SUPERVISORD_DIR}/bin
+
+ADD conf/supervisor.conf ${SUPERVISORD_DIR}/conf/
+ADD conf/echo.sh ${SUPERVISORD_DIR}/conf/
+ADD https://github.com/ochinchina/supervisord/releases/download/v0.5/supervisord_0.5_linux_amd64 ${SUPERVISORD_DIR}/bin/supervisord
+
+RUN chgrp -R 0 ${SUPERVISORD_DIR} && \
+    chmod -R g+rwX ${SUPERVISORD_DIR} && \
+    chmod -R 666 ${SUPERVISORD_DIR}/conf/* && \
+    chmod 775 ${SUPERVISORD_DIR}/bin/supervisord && \
+    chmod 775 ${SUPERVISORD_DIR}/conf/echo.sh

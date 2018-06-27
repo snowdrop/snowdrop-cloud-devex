@@ -69,16 +69,18 @@ oc logs supervisord-pod
   rm -rf target/*-1.0.jar
   ```
   
-- Build the docker image of the Spring Boot Application and push it to the Openshift docker registry
+- Build the docker image of the Spring Boot Application, like also the supervisord and push it to the OpenShift docker registry
  
   ```bash
-  docker build -t $(minishift openshift registry)/k8s-supervisor/spring-boot-http:1.0 .
+  docker build -t $(minishift openshift registry)/k8s-supervisor/spring-boot-http:1.0 . -f Dockerfile-spring-boot
   docker push $(minishift openshift registry)/k8s-supervisor/spring-boot-http:1.0
+  docker build -t $(minishift openshift registry)/k8s-supervisor/copy-supervisord:1.0 -f Dockerfile-copy-supervisord .
+  docker push $(minishift openshift registry)/k8s-supervisor/copy-supervisord:1.0
   ```  
   
 - The application is created on the cloud platform
   ```bash
   oc create -f openshift/spring-boot-supervisord.yaml
-  docker push $(minishift openshift registry)/k8s-supervisor/supervisord:1.0
+  docker push $(minishift openshift registry)/k8s-supervisor/copy-supervisord:1.0
   docker push $(minishift openshift registry)/k8s-supervisor/spring-boot-http:1.0
   ```  
