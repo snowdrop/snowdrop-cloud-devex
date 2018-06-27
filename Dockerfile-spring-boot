@@ -3,4 +3,3 @@ FROM fabric8/java-alpine-openjdk8-jre:latest
 ENV JAVA_APP_DIR=/deployments
 EXPOSE 8080
 COPY target /deployments/
-ENTRYPOINT ["/var/lib/supervisord/bin/supervisord", "-c", "/var/lib/supervisord/conf/supervisor.conf"]

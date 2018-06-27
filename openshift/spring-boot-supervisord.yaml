@@ -49,6 +49,11 @@ items:
         - image: docker-registry.default.svc:5000/k8s-supervisor/spring-boot-http
           imagePullPolicy: IfNotPresent
           name: spring-boot-supervisord
+          command:
+            - "/var/lib/supervisord/bin/supervisord"
+          args:
+            - "-c"
+            - "/var/lib/supervisord/conf/supervisor.conf"
           volumeMounts:
           - name: shared-data
             mountPath: /var/lib/supervisord
