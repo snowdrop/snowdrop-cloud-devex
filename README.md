@@ -1,29 +1,29 @@
 # k8s-supervisor
 
-- Compile locally
+- Compile locally and test it
 
 ```bash
 mkdir ~/Temp/go-supervisor
 export GOPATH=~/Temp/go-supervisor
 go get -u github.com/ochinchina/supervisord
-$GOPATH/bin/supervisord -c /Users/dabou/MyProjects/odo-supervisor/supervisor-local.conf
+$GOPATH/bin/supervisord -c supervisor-local.conf
 ```
 
-- Create k8s-supervisor project
+- Create k8s-supervisor project on OpenShift
 
 ```bash
 oc new-project k8s-supervisor
 eval $(minishift docker-env)
 ```
-- Build docker image and push it
+- Build the supervisord docker image and push it
 
 ```bash
 docker login -u admin -p $(oc whoami -t) $(minishift openshift registry)
-imagebuilder -t $(minishift openshift registry)/k8s-supervisor/supervisord:v1 -f Dockerfile .
+imagebuilder -t $(minishift openshift registry)/k8s-supervisor/supervisord:v1 -f Dockerfile-supervisord .
 docker push $(minishift openshift registry)/k8s-supervisor/supervisord:v1
 ```
 
-- Create application using `oc new-app` command
+- Create a `supervisord` application using `oc new-app` command
 
 ```bash
 oc new-app --name=docker-supervisord -i supervisord:v1 -l app=supervisord
@@ -41,28 +41,15 @@ oc new-app --name=docker-supervisord -i supervisord:v1 -l app=supervisord
     Run 'oc status' to view your app.
 ```
 
-- Create application using pod file
+- Create `supervisord` application using `pod` yaml file
 
 ```bash
-oc delete -f supervisord-pod.yml
-oc create -f supervisord-pod.yml
+oc delete -f openshift/supervisord-pod.yml
+oc create -f openshift/supervisord-pod.yml
 oc logs supervisord-pod
 ```
 
-- Create supervisord conf
-
-```bash
-cat > supervisor.conf << 'EOF'
-cat supervisor.conf
-[program:test]
-command = /your/program args
-[inet_http_server]
-port=127.0.0.1:9001
-EOF
-
-```
-
-- all in one
+- All in one
 
 ```bash
 imagebuilder -t $(minishift openshift registry)/k8s-supervisor/supervisord:v1 -f Dockerfile .
@@ -71,73 +58,4 @@ oc delete -f supervisord-pod.yml
 sleep 10s
 oc create -f supervisord-pod.yml
 oc logs supervisord-pod
-```
-
-
-
-
-
-
-
-
-
-
-
-- Test Initcontainer
-
-```bash
-cat > src/my-app.yml << 'EOF'
-apiVersion: v1
-kind: Pod
-metadata:
-  name: myapp-pod
-  labels:
-    app: myapp
-spec:
-  containers:
-  - name: myapp-container
-    image: busybox
-    command: ['sh', '-c', 'echo The app is running! && sleep 3600']
-  initContainers:
-  - name: init-myservice
-    image: busybox
-    command: ['sh', '-c', 'until nslookup myservice; do echo waiting for myservice; sleep 2; done;']
-  - name: init-mydb
-    image: busybox
-    command: ['sh', '-c', 'until nslookup mydb; do echo waiting for mydb; sleep 2; done;']
-EOF
-
-cat > src/service.yml << 'EOF'
-kind: Service
-apiVersion: v1
-metadata:
-  name: myservice
-spec:
-  ports:
-  - protocol: TCP
-    port: 80
-    targetPort: 9376
----
-kind: Service
-apiVersion: v1
-metadata:
-  name: mydb
-spec:
-  ports:
-  - protocol: TCP
-    port: 80
-    targetPort: 9377
-EOF
-
-```
-
-- Install the pod
-
-```bash
-oc create -f src/my-app.yml
-...
-oc logs myapp-pod -c init-myservice
-oc logs myapp-pod -c init-mydb
-oc create -f src/service.yml
-oc get -f src/myapp.yaml
 ```
