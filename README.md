@@ -15,12 +15,12 @@ $GOPATH/bin/supervisord -c supervisor-local.conf
 oc new-project k8s-supervisor
 eval $(minishift docker-env)
 ```
-- Build the supervisord docker image and push it
+- Build the `supervisord` docker image using our configuration file and push it
 
 ```bash
 docker login -u admin -p $(oc whoami -t) $(minishift openshift registry)
-imagebuilder -t $(minishift openshift registry)/k8s-supervisor/supervisord:v1 -f Dockerfile-supervisord .
-docker push $(minishift openshift registry)/k8s-supervisor/supervisord:v1
+imagebuilder -t $(minishift openshift registry)/k8s-supervisor/supervisord:1.0 -f Dockerfile-supervisord .
+docker push $(minishift openshift registry)/k8s-supervisor/supervisord:1.0
 ```
 
 - Create a `supervisord` application using `oc new-app` command
@@ -59,3 +59,26 @@ sleep 10s
 oc create -f supervisord-pod.yml
 oc logs supervisord-pod
 ```
+
+# Spring Boot Application and initContainer
+
+- We use maven to package the project as a `uberjar` file
+
+  ```bash
+  mvn clean package
+  rm -rf target/*-1.0.jar
+  ```
+  
+- Build the docker image of the Spring Boot Application and push it to the Openshift docker registry
+ 
+  ```bash
+  docker build -t $(minishift openshift registry)/k8s-supervisor/spring-boot-http:1.0 .
+  docker push $(minishift openshift registry)/k8s-supervisor/spring-boot-http:1.0
+  ```  
+  
+- The application is created on the cloud platform
+  ```bash
+  oc create -f openshift/spring-boot-supervisord.yaml
+  docker push $(minishift openshift registry)/k8s-supervisor/supervisord:1.0
+  docker push $(minishift openshift registry)/k8s-supervisor/spring-boot-http:1.0
+  ```  
