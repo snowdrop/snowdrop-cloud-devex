@@ -6,6 +6,7 @@
 mkdir ~/Temp/go-supervisor
 export GOPATH=~/Temp/go-supervisor
 go get -u github.com/ochinchina/supervisord
+$GOPATH/bin/supervisord -c /Users/dabou/MyProjects/odo-supervisor/supervisor-local.conf
 ```
 
 - Create k8s-supervisor project
