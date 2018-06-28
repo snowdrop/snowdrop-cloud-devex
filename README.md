@@ -7,6 +7,12 @@ cd $GOPATH
 go get 
 ```
 
+- Install the dc without initContainer
+```bash
+oc new-project k8s-supervisord
+oc create -f deploy/openshift/dc.yml
+```
+
 - Run the controller locally
 
 ```bash
