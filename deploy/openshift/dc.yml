@@ -3,7 +3,10 @@ kind: DeploymentConfig
 metadata:
   labels:
     app: spring-boot-supervisord
+    io.openshift.odo: "inject-supervisord"
   name: spring-boot-supervisord
+  annotations:
+    io.openshift.odo: "inject-supervisord"
 spec:
   replicas: 1
   selector:
