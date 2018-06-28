@@ -101,7 +101,6 @@ func findDeploymentconfig(config *restclient.Config) {
 				glog.Error("Error to get the Deployment Config %s. Error is : %s\n", dc.Name, err)
 			}
 
-			//dc.Spec.Template = supervisordInitContainer()
 			dc.Spec.Template.Spec.InitContainers = []corev1.Container { *supervisordInitContainer() }
 			_, updatedErr := deploymentConfigV1client.DeploymentConfigs(namespace).Update(dc)
 			return updatedErr
