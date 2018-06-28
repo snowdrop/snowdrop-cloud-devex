@@ -28,6 +28,7 @@ items:
         labels:
           app: spring-boot-supervisord
           deploymentconfig: spring-boot-supervisord
+      name: spring-boot
       spec:
         volumes:
         - name: shared-data

@@ -80,7 +80,19 @@ oc logs supervisord-pod
   
 - The application is created on the cloud platform
   ```bash
+  oc delete all --all   
   oc create -f openshift/spring-boot-supervisord.yaml
   docker push $(minishift openshift registry)/k8s-supervisor/copy-supervisord:1.0
   docker push $(minishift openshift registry)/k8s-supervisor/spring-boot-http:1.0
+  ```  
+  
+- Check status and test
+  ```bash
+  SB_POD=$(oc get pods -l app=spring-boot-supervisord -o name)
+  oc rsh $SB_POD /var/lib/supervisord/bin/supervisord ctl status
+  oc rsh $SB_POD /var/lib/supervisord/bin/supervisord ctl pid run-java
+  http http://sb-k8s-supervisor.192.168.65.4.nip.io/api/greeting
+  oc rsh $SB_POD /var/lib/supervisord/bin/supervisord ctl stop run-java
+  oc rsh $SB_POD /var/lib/supervisord/bin/supervisord ctl start run-java
+  http http://sb-k8s-supervisor.192.168.65.4.nip.io/api/greeting
   ```  
