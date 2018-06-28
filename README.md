@@ -3,8 +3,8 @@
 - Install the project
 
 ```bash
-cd $GOPATH
-go get 
+cd $GOPATH/src
+go get gityhub.com/cmoulliard/k8s-supervisor
 ```
 
 - Install the dc without initContainer
