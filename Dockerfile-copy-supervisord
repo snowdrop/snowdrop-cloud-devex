@@ -1,4 +1,4 @@
-FROM centos
+FROM busybox
 
 ENV SUPERVISORD_DIR /opt/supervisord
 

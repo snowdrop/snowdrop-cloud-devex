@@ -38,8 +38,9 @@ items:
           imagePullPolicy: IfNotPresent
           name: copy-supervisord
           command:
-            - "/usr/bin/cp"
+            - "/bin/busybox"
           args:
+            - "/usr/bin/cp"
             - "-r"
             - "/opt/supervisord"
             - /var/lib/
