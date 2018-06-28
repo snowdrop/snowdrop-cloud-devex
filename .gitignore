@@ -1,1 +1,5 @@
 .idea
+.vscode/
+
+Gopkg.lock
+vendor/
