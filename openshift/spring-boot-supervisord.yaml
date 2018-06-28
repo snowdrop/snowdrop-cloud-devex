@@ -43,7 +43,7 @@ items:
             - "/usr/bin/cp"
             - "-r"
             - "/opt/supervisord"
-            - /var/lib/
+            - "/var/lib/"
           volumeMounts:
           - name: shared-data
             mountPath: /var/lib/supervisord
