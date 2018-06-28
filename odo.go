@@ -8,6 +8,7 @@ import (
 
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/util/retry"
 
 	// "github.com/cmoulliard/k8s-odo-supervisor/pkg/signals"
 
@@ -93,37 +94,36 @@ func findDeploymentconfig(config *restclient.Config) {
 	}
 	for _, d := range deploymentList.Items {
 		fmt.Printf("%s\n", d.Name)
-		d.Spec.Template = supervisordInitContainer()
-		_, err := deploymentConfigV1client.DeploymentConfigs(namespace).Update(&d)
-		if err != nil {
-			glog.Error("Error to update the Deployment Config ! %s\n", err)
+
+		retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+			dc, err := deploymentConfigV1client.DeploymentConfigs(namespace).Get(d.Name, metav1.GetOptions{})
+			if err != nil {
+				glog.Error("Error to get the Deployment Config %s. Error is : %s\n", dc.Name, err)
+			}
+
+			//dc.Spec.Template = supervisordInitContainer()
+			dc.Spec.Template.Spec.InitContainers = []corev1.Container { *supervisordInitContainer() }
+			_, updatedErr := deploymentConfigV1client.DeploymentConfigs(namespace).Update(dc)
+			return updatedErr
+		})
+		if retryErr != nil {
+			panic(fmt.Errorf("Update failed: %v", retryErr))
 		}
+		fmt.Println("Updated deployment...")
 		//fmt.Printf("Raw printout of the dc %+v\n", d)
 	}
 }
 
-func supervisordInitContainer() *corev1.PodTemplateSpec {
-	return &corev1.PodTemplateSpec{
-		ObjectMeta: metav1.ObjectMeta{
-			Labels: map[string]string{
-				"app": "spring-boot-supervisord",
-				"deploymentconfig": "spring-boot-supervisord",
-			},
-		},
-		Spec: corev1.PodSpec{
-			InitContainers: []corev1.Container{
-				{
-					Name:    "copy-supervisord",
-					Image:   "docker/dd/dd",
-					Command: []string{"/usr/bin/cp"},
-					Args:    []string{"-r","/opt/supervisord"," /var/lib/"},
-					VolumeMounts: []corev1.VolumeMount{
-						{
-						 Name: "shared-data",
-						 MountPath: "/var/lib/supervisord",
-						},
-					},
-				},
+func supervisordInitContainer() *corev1.Container {
+	return &corev1.Container{
+		Name:    "copy-supervisord",
+		Image:   "docker/dd/dd",
+		Command: []string{"/usr/bin/cp"},
+		Args:    []string{"-r", "/opt/supervisord", " /var/lib/"},
+		VolumeMounts: []corev1.VolumeMount{
+			{
+				Name:      "shared-data",
+				MountPath: "/var/lib/supervisord",
 			},
 		},
 	}
