@@ -42,7 +42,6 @@
  
   ```bash
   docker build -t $(minishift openshift registry)/k8s-supervisord/spring-boot-http:1.0 . -f Dockerfile-spring-boot
-  docker push $(minishift openshift registry)/k8s-supervisord/spring-boot-http:1.0
   ```   
 
 - Execute the go program locally to inject the `initContainer`
@@ -87,3 +86,29 @@
     name: shared-data
   ...
   ```
+
+- Trigger a Deployment by pushing the spring Boot image
+  ```bash
+  cd spring-boot
+  docker push $(minishift openshift registry)/k8s-supervisord/spring-boot-http:1.0
+  ```
+  
+- Check status of the pod created and next start a command
+  ```bash
+  SB_POD=$(oc get pods -l app=spring-boot-supervisord -o name)
+  SERVICE_IP=$(minishift ip)
+
+  oc rsh $SB_POD /var/lib/supervisord/bin/supervisord ctl status
+  echo                             STOPPED   
+  run-java                         STOPPED   
+  compile-java                     STOPPED   
+
+  oc rsh $SB_POD /var/lib/supervisord/bin/supervisord ctl start run-java
+  run-java: started
+  
+  oc rsh $SB_POD /var/lib/supervisord/bin/supervisord ctl status          
+  echo                             STOPPED   
+  run-java                         RUNNING   pid 35, uptime 0:00:04
+  compile-java                     STOPPED   
+  ```  
+  
