@@ -9,6 +9,7 @@ import (
 	"text/template"
 	"strings"
 	"os/exec"
+	"fmt"
 )
 
 const (
@@ -64,25 +65,33 @@ func main() {
 	}
 	defer outFile.Close()
 
-	// Write bytes to file
+	// Write template result to file
 	error := t.Execute(outFile, m)
 	if error != nil {
 		log.Fatal(error)
 	}
 
-	// Launch Supervisord ....
-	app := "/opt/supervisord/bin/"
+	// // Launch Supervisord ....
+	// cmd := exec.Command("/opt/supervisord/bin/supervisord", "-c", "/opt/supervisord/conf/supervisor.conf")
+	// // Combine stdout and stderr
+	// printCommand(cmd)
+	// output, err := cmd.CombinedOutput()
+	// printError(err)
+	// printOutput(output)
+}
 
-	arg0 := "-c"
-	arg1 := "conf/supervisor.conf"
+func printCommand(cmd *exec.Cmd) {
+	fmt.Printf("==> Executing: %s\n", strings.Join(cmd.Args, " "))
+}
 
-	cmd := exec.Command(app, arg0, arg1)
-	stdout, err := cmd.Output()
-
+func printError(err error) {
 	if err != nil {
-		println(err.Error())
-		return
+		os.Stderr.WriteString(fmt.Sprintf("==> Error: %s\n", err.Error()))
 	}
+}
 
-	print(string(stdout))
+func printOutput(outs []byte) {
+	if len(outs) > 0 {
+		fmt.Printf("==> Output: %s\n", string(outs))
+	}
 }
