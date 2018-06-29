@@ -1,4 +1,4 @@
-# Intsructions to inject an initcontainer and enrich the Deployment of a S2I Application
+# Instructions to inject an initcontainer containing supervisord and enrich the Deployment of a S2I Application
 
 - Install the project
   ```bash
