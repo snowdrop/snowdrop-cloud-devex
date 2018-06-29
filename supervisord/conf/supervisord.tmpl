@@ -1,0 +1,7 @@
+{{range $index, $element := .}}{{range $element}}[program:{{.Name}}]
+command = {{.Command}}
+stdout_logfile=/dev/stdout
+stdout_events_enabled=true
+
+{{end}}{{end}}[inet_http_server]
+port=localhost:9001
