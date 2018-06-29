@@ -21,7 +21,7 @@ type Program struct {
 }
 
 func main() {
-	// Read Supervisord.tmplgit  file
+	// Read Supervisord.tmpl file
 	currentDir, err := os.Getwd()
 	f, err := os.Open(currentDir + "/" + templateFile)
 	if err != nil {
