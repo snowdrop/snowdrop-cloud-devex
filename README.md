@@ -40,12 +40,12 @@
   docker build -t $(minishift openshift registry)/k8s-supervisord/spring-boot-http:1.0 . -f Dockerfile-spring-boot
   ```   
   
-- Install the `SpringBoot` application without the `initContainer`, shared volume, ...
+- Deploy the `SpringBoot` application without the `initContainer`, shared volume, ...
   ```bash
   oc create -f openshift/spring-boot.yaml
   ```  
 
-- Execute the go program locally to inject the `initContainer`
+- Execute the go program locally to enhance the `DeploymentConfig`
 
   **REMARK**: Rename $HOME with the full path to access your `.kube/config` folder
 
@@ -88,7 +88,7 @@
   ...
   ```
 
-- Trigger a Deployment by pushing the spring Boot image
+- Trigger a Deployment by pushing the images
   ```bash
   docker push $(minishift openshift registry)/k8s-supervisord/copy-supervisord:1.0
   docker push $(minishift openshift registry)/k8s-supervisord/spring-boot-http:1.0
