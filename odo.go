@@ -96,7 +96,7 @@ func findDeploymentconfig(config *restclient.Config) {
 	for _, d := range deploymentList.Items {
 		fmt.Printf("%s\n", d.Name)
 
-		// TODO : Check if deploymentConfig contains the initContainer for copy-supervisord. If no, we paytch it
+		// TODO : Check if deploymentConfig contains the initContainer for copy-supervisord. If no, we patch it
 
 		retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 			dc, err := deploymentConfigV1client.DeploymentConfigs(namespace).Get(d.Name, metav1.GetOptions{})
@@ -104,7 +104,30 @@ func findDeploymentconfig(config *restclient.Config) {
 				glog.Error("Error to get the Deployment Config %s. Error is : %s\n", dc.Name, err)
 			}
 
+			// Add emptyDir volume shared by initContainer and Container
+			dc.Spec.Template.Spec.Volumes = []corev1.Volume{
+				{
+					Name:"shared-data",
+					VolumeSource: corev1.VolumeSource{
+						EmptyDir: &corev1.EmptyDirVolumeSource{},
+					},
+				},
+			}
+
+			// Add command to the s2i image in order to start the supervisord
+			dc.Spec.Template.Spec.Containers[0].Command = append(dc.Spec.Template.Spec.Containers[0].Command, "/var/lib/supervisord/bin/supervisord")
+			dc.Spec.Template.Spec.Containers[0].Args = append(dc.Spec.Template.Spec.Containers[0].Args, "-c","/var/lib/supervisord/conf/supervisor.conf")
+			dc.Spec.Template.Spec.Containers[0].VolumeMounts = []corev1.VolumeMount{
+				{
+					Name: "shared-data",
+					MountPath: "/var/lib/supervisord",
+				},
+			}
+
+			// Inject an initcontainer containing binary go of the supervisord
 			dc.Spec.Template.Spec.InitContainers = []corev1.Container { *supervisordInitContainer() }
+
+			// Update the DeploymentConfig
 			_, updatedErr := deploymentConfigV1client.DeploymentConfigs(namespace).Update(dc)
 			return updatedErr
 		})
@@ -126,6 +149,13 @@ func supervisordInitContainer() *corev1.Container {
 			{
 				Name:      "shared-data",
 				MountPath: "/var/lib/supervisord",
+			},
+		},
+		// TODO : The following list should be calculated based on the labels of the S2I image
+		Env: []corev1.EnvVar {
+			{
+				Name: "CMDS",
+				Value: "echo:/var/lib/supervisord/conf/echo.sh;run-java:/usr/local/s2i/run;compile-java:/usr/local/s2i/assemble",
 			},
 		},
 	}

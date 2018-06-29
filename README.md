@@ -16,19 +16,13 @@
   eval $(minishift docker-env)
   docker login -u admin -p $(oc whoami -t) $(minishift openshift registry)
   ```
-
-- Install the `DeploymentConfig` of the SpringBoot application without the `initContainer`
-  ```bash
-  oc create -f openshift/dc.yml
-  ```
-
+  
 - Build the `copy-supervisord` docker image containing the `go supervisord` application
 
   ```bash
   cd supervisord
   docker build -t $(minishift openshift registry)/k8s-supervisord/copy-supervisord:1.0 -f Dockerfile-copy-supervisord .
   imagebuilder -t $(minishift openshift registry)/k8s-supervisord/copy-supervisord:1.0 .
-  docker push $(minishift openshift registry)/k8s-supervisord/copy-supervisord:1.0
   ```
 
 - Compile the spring Boot application using maven to package the project as a `uberjar` file
@@ -44,6 +38,11 @@
   ```bash
   docker build -t $(minishift openshift registry)/k8s-supervisord/spring-boot-http:1.0 . -f Dockerfile-spring-boot
   ```   
+  
+- Install the `SpringBoot` application without the `initContainer`, shared volume, ...
+  ```bash
+  oc create -f openshift/spring-boot.yaml
+  ```  
 
 - Execute the go program locally to inject the `initContainer`
 
@@ -57,7 +56,7 @@
   Updated deployment...
   ```
 
-- Verify if the `initContainer` has been injected with the `DeploymentConfig`
+- Verify if the `initContainer` has been injected within the `DeploymentConfig`
 
   ```bash
   oc get dc/spring-boot-supervisord -o yaml | grep -A 25 initContainer
@@ -90,7 +89,7 @@
 
 - Trigger a Deployment by pushing the spring Boot image
   ```bash
-  cd spring-boot
+  docker push $(minishift openshift registry)/k8s-supervisord/copy-supervisord:1.0
   docker push $(minishift openshift registry)/k8s-supervisord/spring-boot-http:1.0
   ```
   
