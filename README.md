@@ -4,13 +4,13 @@
 
 ```bash
 cd $GOPATH/src
-go get gityhub.com/cmoulliard/k8s-supervisor
+go get github.com/cmoulliard/k8s-supervisor
 ```
 
 - Install the dc without initContainer
 ```bash
 oc new-project k8s-supervisord
-oc create -f deploy/openshift/dc.yml
+oc create -f openshift/dc.yml
 ```
 
 - Execute the program locally
@@ -23,7 +23,7 @@ spring-boot-supervisord
 Updated deployment...
 ```
 
-- Verify if the initContainer has been injected
+- Verify if the `initContainer` has been injected
 
 ```bash
 oc get dc/spring-boot-supervisord -o yaml | grep -A 25 initContainer

@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: ImageStream
-metadata:
-  labels:
-    app: spring-boot-supervisord
-  name: copy-supervisord
