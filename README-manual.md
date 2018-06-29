@@ -13,7 +13,7 @@
   mkdir ~/Temp/go-supervisor
   export GOPATH=~/Temp/go-supervisor
   go get -u github.com/ochinchina/supervisord
-  $GOPATH/bin/supervisord -c docker/conf/supervisor-local.conf
+  $GOPATH/bin/supervisord -c supervisord/conf/supervisor-local.conf
   ```
 
 - Create `k8s-supervisord` project on OpenShift
@@ -48,7 +48,7 @@
   docker push $(minishift openshift registry)/k8s-supervisord/spring-boot-http:1.0
   ```  
   
-- Deploy the application on `OpenShift`
+- Deploy the application on `OpenShift` using the list of the resources" deploymentconfig, service, route, imageStreams
   ```bash
   oc delete all --all   
   oc create -f openshift/spring-boot-supervisord.yaml

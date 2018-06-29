@@ -34,8 +34,8 @@ items:
         - name: shared-data
           emptyDir: {}
         initContainers:
-        - # image: docker-registry.default.svc:5000/k8s-supervisord/copy-supervisord:1.0 --> DNS resolution issue with minishift (https://github.com/openshift/origin/issues/17392)
-          image: 172.30.1.1:5000/:5000/k8s-supervisord/copy-supervisord:1.0
+        - #image: docker-registry.default.svc:5000/k8s-supervisord/copy-supervisord:1.0 # DNS resolution issue with minishift (https://github.com/openshift/origin/issues/17392)
+          image: 172.30.1.1:5000/k8s-supervisord/copy-supervisord:1.0
           imagePullPolicy: IfNotPresent
           name: copy-supervisord
           command:

@@ -96,6 +96,8 @@ func findDeploymentconfig(config *restclient.Config) {
 	for _, d := range deploymentList.Items {
 		fmt.Printf("%s\n", d.Name)
 
+		// TODO : Check if deploymentConfig contains the initContainer for copy-supervisord. If no, we paytch it
+
 		retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 			dc, err := deploymentConfigV1client.DeploymentConfigs(namespace).Get(d.Name, metav1.GetOptions{})
 			if err != nil {
