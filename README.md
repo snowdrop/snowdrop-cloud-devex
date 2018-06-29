@@ -19,14 +19,14 @@
   
 - Build the `copy-supervisord` docker image containing the `go supervisord` application
 
-  **WARNING**: In order to build a docker multi-stage image, it is required to install [imagebuilder](https://github.com/openshift/imagebuilder) 
+  **WARNING**: In order to build a multi-stages docker image, it is required to install [imagebuilder](https://github.com/openshift/imagebuilder) 
 
   ```bash
   cd supervisord
   imagebuilder -t $(minishift openshift registry)/k8s-supervisord/copy-supervisord:1.0 .
   ```
 
-- Compile the spring Boot application using maven's tool to package the application as a `uberjar` file
+- Next, compile the spring Boot application using maven's tool to package the application as a `uberjar` file
 
   ```bash
   cd spring-boot
