@@ -5,9 +5,10 @@
 ```bash
 cd $GOPATH/src
 go get github.com/cmoulliard/k8s-supervisor
+dep ensure
 ```
 
-- Install the dc without initContainer
+- Install the `DeploymentConfig` of the SpringBoot application without the `initContainer`
 ```bash
 oc new-project k8s-supervisord
 oc create -f openshift/dc.yml
@@ -15,8 +16,10 @@ oc create -f openshift/dc.yml
 
 - Execute the program locally
 
+**REMARK**: Rename $HOME with the full path to access your `.kube/config` folder
+
 ```bash
-go run *.go -kubeconfig=/Users/dabou/.kube/config
+go run *.go -kubeconfig=$HOME/.kube/config
 Fetching about DC to be injected
 Listing deployments in namespace k8s-supervisord: 
 spring-boot-supervisord
