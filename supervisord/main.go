@@ -8,8 +8,6 @@ import (
 	"os"
 	"text/template"
 	"strings"
-	"os/exec"
-	"fmt"
 )
 
 const (
@@ -23,15 +21,16 @@ type Program struct {
 }
 
 func main() {
-	// Read Supervisord Template file
+	// Read Supervisord.tmplgit  file
 	currentDir, err := os.Getwd()
 	f, err := os.Open(currentDir + "/" + templateFile)
 	if err != nil {
 		panic(err)
 	}
-	// close fi on exit and check for its returned error
+	// Close file on exit
 	defer f.Close()
 
+	// Read file content
 	data, err := ioutil.ReadAll(f)
 	if err != nil {
 		panic(err)
@@ -50,7 +49,7 @@ func main() {
 		panic("No commands provided !")
 	}
 
-	//create a supervisord.conf template
+	// Create a template
 	t := template.New("Supervisord template")
 	t, _ = t.Parse(string(data)) //parse it
 
@@ -65,33 +64,9 @@ func main() {
 	}
 	defer outFile.Close()
 
-	// Write template result to file
+	// Write template result to the supervisord.conf
 	error := t.Execute(outFile, m)
 	if error != nil {
 		log.Fatal(error)
-	}
-
-	// // Launch Supervisord ....
-	// cmd := exec.Command("/opt/supervisord/bin/supervisord", "-c", "/opt/supervisord/conf/supervisor.conf")
-	// // Combine stdout and stderr
-	// printCommand(cmd)
-	// output, err := cmd.CombinedOutput()
-	// printError(err)
-	// printOutput(output)
-}
-
-func printCommand(cmd *exec.Cmd) {
-	fmt.Printf("==> Executing: %s\n", strings.Join(cmd.Args, " "))
-}
-
-func printError(err error) {
-	if err != nil {
-		os.Stderr.WriteString(fmt.Sprintf("==> Error: %s\n", err.Error()))
-	}
-}
-
-func printOutput(outs []byte) {
-	if len(outs) > 0 {
-		fmt.Printf("==> Output: %s\n", string(outs))
 	}
 }
