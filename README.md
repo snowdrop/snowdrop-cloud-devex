@@ -5,7 +5,7 @@
 ```bash
 cd $GOPATH/src
 go get github.com/cmoulliard/k8s-supervisor
-dep ensure
+cd k8s-supervisor && dep ensure
 ```
 
 - Install the `DeploymentConfig` of the SpringBoot application without the `initContainer`
