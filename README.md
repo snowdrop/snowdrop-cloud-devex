@@ -1,11 +1,11 @@
-# Go odo controller
+# Intsructions to inject an initcontainer and enrich the Deployment of a S2I Application
 
 - Install the project
   ```bash
   cd $GOPATH/src
   go get github.com/cmoulliard/k8s-supervisor
   cd k8s-supervisor && dep ensure
-  ```
+  ```   
 
 - Create `k8s-supervisord` project on OpenShift
   ```bash
@@ -19,13 +19,14 @@
   
 - Build the `copy-supervisord` docker image containing the `go supervisord` application
 
+  **WARNING**: In order to build a docker multi-stage image, it is required to install [imagebuilder](https://github.com/openshift/imagebuilder) 
+
   ```bash
   cd supervisord
-  docker build -t $(minishift openshift registry)/k8s-supervisord/copy-supervisord:1.0 -f Dockerfile-copy-supervisord .
   imagebuilder -t $(minishift openshift registry)/k8s-supervisord/copy-supervisord:1.0 .
   ```
 
-- Compile the spring Boot application using maven to package the project as a `uberjar` file
+- Compile the spring Boot application using maven's tool to package the application as a `uberjar` file
 
   ```bash
   cd spring-boot
