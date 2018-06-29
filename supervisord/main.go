@@ -8,6 +8,7 @@ import (
 	"os"
 	"text/template"
 	"strings"
+	"os/exec"
 )
 
 const (
@@ -69,20 +70,19 @@ func main() {
 		log.Fatal(error)
 	}
 
-	// app := "echo"
+	// Launch Supervisord ....
+	app := "/opt/supervisord/bin/"
 
-	// arg0 := "-e"
-	// arg1 := "Hello world"
-	// arg2 := "\n\tfrom"
-	// arg3 := "golang"
+	arg0 := "-c"
+	arg1 := "conf/supervisor.conf"
 
-	// cmd := exec.Command(app, arg0, arg1, arg2, arg3)
-	// stdout, err := cmd.Output()
+	cmd := exec.Command(app, arg0, arg1)
+	stdout, err := cmd.Output()
 
-	// if err != nil {
-	// 	println(err.Error())
-	// 	return
-	// }
+	if err != nil {
+		println(err.Error())
+		return
+	}
 
-	// print(string(stdout))
+	print(string(stdout))
 }
