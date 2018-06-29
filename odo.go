@@ -29,7 +29,7 @@ var (
 
 const (
 	namespace = "k8s-supervisord"
-	supervisordimage = "docker/dd/dd"
+	supervisordimage = "172.30.1.1:5000/k8s-supervisord/copy-supervisord:1.0"
 )
 
 /*func main() {
