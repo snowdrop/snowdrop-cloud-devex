@@ -29,6 +29,7 @@ var (
 
 const (
 	namespace = "k8s-supervisord"
+	supervisordimage = "docker/dd/dd"
 )
 
 /*func main() {
@@ -116,7 +117,7 @@ func findDeploymentconfig(config *restclient.Config) {
 func supervisordInitContainer() *corev1.Container {
 	return &corev1.Container{
 		Name:    "copy-supervisord",
-		Image:   "docker/dd/dd",
+		Image:   supervisordimage,
 		Command: []string{"/usr/bin/cp"},
 		Args:    []string{"-r", "/opt/supervisord", " /var/lib/"},
 		VolumeMounts: []corev1.VolumeMount{
