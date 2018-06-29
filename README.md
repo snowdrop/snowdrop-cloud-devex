@@ -27,6 +27,7 @@
   ```bash
   cd supervisord
   docker build -t $(minishift openshift registry)/k8s-supervisord/copy-supervisord:1.0 -f Dockerfile-copy-supervisord .
+  imagebuilder -t $(minishift openshift registry)/k8s-supervisord/copy-supervisord:1.0 .
   docker push $(minishift openshift registry)/k8s-supervisord/copy-supervisord:1.0
   ```
 
