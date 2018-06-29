@@ -120,8 +120,8 @@ func supervisordInitContainer() *corev1.Container {
 	return &corev1.Container{
 		Name:    "copy-supervisord",
 		Image:   supervisordimage,
-		Command: []string{"/usr/bin/cp"},
-		Args:    []string{"-r", "/opt/supervisord", " /var/lib/"},
+		Command: []string{"/bin/busybox"},
+		Args:    []string{"/usr/bin/cp","-r", "/opt/supervisord", " /var/lib/"},
 		VolumeMounts: []corev1.VolumeMount{
 			{
 				Name:      "shared-data",
