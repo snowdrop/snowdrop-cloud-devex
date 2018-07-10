@@ -16,7 +16,6 @@ import (
 	appsocpv1 "github.com/openshift/client-go/apps/clientset/versioned/typed/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"istio.io/istio/pkg/log"
 )
 
 var (

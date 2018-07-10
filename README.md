@@ -123,7 +123,19 @@
   oc rsh $SB_POD /var/lib/supervisord/bin/supervisord ctl start compile-java 
   oc logs $SB_POD -f 
   
+- Start the java application compiled
+  ```bash
   oc rsh $SB_POD /var/lib/supervisord/bin/supervisord ctl start run-java
   oc logs $SB_POD -f 
   ```
+  
+- Create an odo application and then push the project
+  ```bash
+  cd spring-boot
+  odo app create springbootapp
+  go run ../
+  // TODO -> Change our code to create an application using new supervisord's approach
+  odo push
+  ```
+    
 
