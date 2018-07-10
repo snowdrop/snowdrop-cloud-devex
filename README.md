@@ -37,7 +37,8 @@
 - Build the docker image of the `Spring Boot Application` and push it to the `OpenShift` docker registry. 
  
   ```bash
-  docker build -t $(minishift openshift registry)/k8s-supervisord/spring-boot-http:1.0 . -f Dockerfile-spring-boot
+  docker build -t $(minishift openshift registry)/k8s-supervisord/spring-boot-http:1.0 . -f Dockerfile
+  docker build -t $(minishift openshift registry)/k8s-supervisord/spring-boot-http:1.0 . -f Dockerfile-src
   ```   
   
 - Deploy the `SpringBoot` application without the `initContainer`, shared volume, ...
@@ -113,3 +114,41 @@
   compile-java                     STOPPED   
   ```  
   
+docker build -t $(minishift openshift registry)/k8s-supervisord/spring-boot-http:1.0 . -f Dockerfile-src
+docker push $(minishift openshift registry)/k8s-supervisord/spring-boot-http:1.0
+  
+SB_POD=$(oc get pods -l app=spring-boot-supervisord -o name)
+SERVICE_IP=$(minishift ip) 
+oc rsh $SB_POD /var/lib/supervisord/bin/supervisord ctl status
+oc rsh $SB_POD /var/lib/supervisord/bin/supervisord ctl start compile-java 
+oc rsh $SB_POD /var/lib/supervisord/bin/supervisord ctl status
+
+oc rsh $SB_POD /var/lib/supervisord/bin/supervisord ctl start run-java
+
+GOOD
+
+exec java -javaagent:/opt/jolokia/jolokia.jar=config=/opt/jolokia/etc/jolokia.properties 
+         -XX:+UnlockExperimentalVMOptions 
+         -XX:+UseCGroupMemoryLimitForHeap
+         -XX:+UseParallelOldGC
+         -XX:MinHeapFreeRatio=10
+         -XX:MaxHeapFreeRatio=20
+         -XX:GCTimeRatio=4
+         -XX:AdaptiveSizePolicyWeight=90
+         -XX:MaxMetaspaceSize=100m
+         -XX:+ExitOnOutOfMemoryError
+         -cp . -jar /deployments/ocp-docker-build-install-1.0-exec.jar
+
+BAD
+
+exec java -javaagent:/opt/jolokia/jolokia.jar=config=/opt/jolokia/etc/jolokia.properties 
+          -XX:+UnlockExperimentalVMOptions
+          -XX:+UseCGroupMemoryLimitForHeap
+          -XX:+UseParallelOldGC
+          -XX:MinHeapFreeRatio=10
+          -XX:MaxHeapFreeRatio=20
+          -XX:GCTimeRatio=4
+          -XX:AdaptiveSizePolicyWeight=90
+          -XX:MaxMetaspaceSize=100m
+          -XX:+ExitOnOutOfMemoryError
+          -cp . -jar
