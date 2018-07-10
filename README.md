@@ -1,4 +1,4 @@
-# Instructions to inject an initcontainer containing supervisord and enrich the Deployment of a S2I Application
+# Instructions to inject a Supervisord's initcontainer and enrich the Deployment of a Spring Boot S2I Application
 
 - Install the project
   ```bash
@@ -7,46 +7,9 @@
   cd k8s-supervisor && dep ensure
   ```   
 
-- Create `k8s-supervisord` project on OpenShift
+- Create the `k8s-supervisord` project on OpenShift
   ```bash
   oc new-project k8s-supervisord
-  ```
-- Export Docker ENV var to access the docker daemon and next login
-  ```bash
-  eval $(minishift docker-env)
-  docker login -u admin -p $(oc whoami -t) $(minishift openshift registry)
-  ```
-  
-- Build the `copy-supervisord` docker image containing the `go supervisord` application
-
-  **WARNING**: In order to build a multi-stages docker image, it is required to install [imagebuilder](https://github.com/openshift/imagebuilder) 
-
-  ```bash
-  cd supervisord
-  imagebuilder -t $(minishift openshift registry)/k8s-supervisord/copy-supervisord:1.0 .
-
-  imagebuilder -t cmoulliard/copy-supervisord:1.0 .
-  docker tag b74c32ba6bd8 quay.io/snowdrop/supervisord
-  docker push quay.io/snowdrop/supervisord
-  ```
-
-- Next, compile the spring Boot application using maven's tool to package the application as a `uberjar` file
-
-  ```bash
-  cd spring-boot
-  mvn clean package
-  rm -rf target/*-1.0.jar
-  ```
-  
-- Build the docker image of the `Spring Boot Application` and push it to the `OpenShift` docker registry. 
- 
-  ```bash
-  docker build -t $(minishift openshift registry)/k8s-supervisord/spring-boot-http:1.0 . -f Dockerfile
-  ```   
-  
-- Deploy the `SpringBoot` application without the `initContainer`, shared volume, ...
-  ```bash
-  oc create -f openshift/spring-boot.yaml
   ```  
 
 - Execute the go program locally to enhance the `DeploymentConfig`
@@ -54,7 +17,7 @@
   **REMARK**: Rename $HOME with the full path to access your `.kube/config` folder
 
   ```bash
-  go run *.go -kubeconfig=$HOME/.kube/config
+  go run create.go -kubeconfig=$HOME/.kube/config
   Fetching about DC to be injected
   Listing deployments in namespace k8s-supervisord: 
   spring-boot-supervisord
@@ -90,12 +53,6 @@
   - emptyDir: {}
     name: shared-data
   ...
-  ```
-
-- Trigger a Deployment by pushing the images
-  ```bash
-  docker push $(minishift openshift registry)/k8s-supervisord/copy-supervisord:1.0
-  docker push $(minishift openshift registry)/k8s-supervisord/spring-boot-http:1.0
   ```
   
 - Check status of the pod created and next start a command
@@ -142,4 +99,35 @@
   odo push
   ```
     
+## Developer section
+
+- Export Docker ENV var to access the docker daemon
+  ```bash
+  eval $(minishift docker-env)
+  ```
+
+- To build the `copy-supervisord` docker image containing the `go supervisord` application, then follow these instructions
+
+  **WARNING**: In order to build a multi-stages docker image, it is required to install [imagebuilder](https://github.com/openshift/imagebuilder) 
+
+  ```bash
+  cd supervisord
+  imagebuilder -t <username>/copy-supervisord:latest .
+  ```
+  
+- Tag the docker image and push it to `quay.io`
+
+  ```bash
+  docker tag b74c32ba6bd8 quay.io/snowdrop/supervisord
+  docker login quai.io
+  docker push quay.io/snowdrop/supervisord
+  ```
+  
+- Build the docker image of `Spring Boot S2I`
+ 
+  ```bash
+  docker build -t <username>/spring-boot-http:latest .
+  docker tag 00c6b955c3e1 quay.io/snowdrop/spring-boot-s2i
+  docker push quay.io/snowdrop/spring-boot-s2i
+  ```    
 
