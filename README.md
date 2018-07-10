@@ -1,6 +1,15 @@
 # Instructions to inject a Supervisord's initcontainer and enrich the Deployment of a Spring Boot S2I Application
 
-## Download the project
+## Table of Contents
+
+ * [Download the project and install it](#download-the-project-and-install-it)
+ * [Create the deploymentConfig for the local spring Boot project](#create-the-deploymentconfig-for-the-local-spring-boot-project)
+ * [Push the code](#push-the-code)
+ * [Compile and start the Spring Boot Java App](#compile-and-start-the-spring-boot-java-app)
+ * [Clean up](#clean-up)
+ * [Developer section](#developer-section)
+
+## Download the project and install it
 
 - Install the project within your `$GOPATH`'s workspace
   ```bash
@@ -13,6 +22,8 @@
   ```bash
   oc new-project k8s-supervisord
   ```  
+
+## Create the deploymentConfig for the local spring Boot project
 
 - Execute the `go` program locally to deploy the `Java S2I - Supervisord` pod
 
@@ -54,6 +65,8 @@
   ...
   ```
   
+## Push the code  
+  
 - Check the status of the supervisord to verify the programs which are available
   ```bash
   SB_POD=$(oc get pods -l app=spring-boot-supervisord -o name)
@@ -71,6 +84,8 @@
   oc cp ./pom.xml $SB_POD_NAME:/tmp/src/ -c spring-boot-supervisord
   oc cp ./src $SB_POD_NAME:/tmp/src/ -c spring-boot-supervisord
   oc rsh $SB_POD ls -la /tmp/src/
+  
+## Compile and start the Spring Boot Java App
   
 - Compile it within the pod  
   ```bash
@@ -91,7 +106,8 @@
   {"content":"Hello, World!"}% 
   ``` 
   
-- Cleanup
+## Clean up
+  
   ```bash
   oc delete all --all
   ```  
