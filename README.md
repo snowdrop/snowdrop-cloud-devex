@@ -25,10 +25,10 @@
 
 ## Create the deploymentConfig for the local spring Boot project
 
-- Execute the `go` program locally to deploy the `Java S2I - Supervisord` pod
+- Execute the `go` program locally to deploy the `Java S2I - Supervisord` pod and pass as parameter the path to access the `MANIFEST` file
 
   ```bash
-  go run create.go -kubeconfig=$HOME/.kube/config
+  go run create.go -kubeconfig=$HOME/.kube/config /path/to/MANIFEST
   INFO[0000] [Step 1] - Create Kube Client & Clientset    
   INFO[0000] [Step 2] - Create ImageStreams for Supervisord and Java S2I Image of SpringBoot 
   INFO[0000] [Step 3] - Create DeploymentConfig using Supervisord and Java S2I Image of SpringBoot 

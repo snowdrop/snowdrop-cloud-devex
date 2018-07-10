@@ -2,16 +2,12 @@ package main
 
 import (
 	"flag"
-	"fmt"
-
 	"github.com/golang/glog"
+	"gopkg.in/yaml.v2"
 	log "github.com/sirupsen/logrus"
 
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/util/retry"
-
-	// "github.com/cmoulliard/k8s-odo-supervisor/pkg/signals"
 
 	restclient "k8s.io/client-go/rest"
 	appsocpv1 "github.com/openshift/client-go/apps/clientset/versioned/typed/apps/v1"
@@ -25,6 +21,8 @@ import (
 	routev1 "github.com/openshift/api/route/v1"
 
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"io/ioutil"
+	"os"
 )
 
 var (
@@ -38,15 +36,38 @@ var (
 
 const (
 	namespace            = "k8s-supervisord"
+
 	supervisordimage     = "172.30.1.1:5000/k8s-supervisord/copy-supervisord:1.0"
-	appname              = "spring-boot-supervisord"
 	appImagename         = "spring-boot-http"
-	supervisordName      = "spring-boot-supervisord"
+
 	supervisordImageName = "copy-supervisord"
 )
 
+type Application struct {
+	Name string
+	Port int
+}
+
+var appConfig = Application{}
+
 func main() {
 	flag.Parse()
+
+	log.Info("[Step 0] - Parse Application's Config")
+	filename := os.Args[2]
+
+	source, err := ioutil.ReadFile(filename)
+	if err != nil {
+		panic(err)
+	}
+	err = yaml.Unmarshal(source, &appConfig)
+	if err != nil {
+		panic(err)
+	}
+	log.Debug("Application's config")
+	log.Debug("--------------------")
+	log.Debug("Name : ", appConfig.Name)
+	log.Debug("Port : ", appConfig.Port)
 
 	log.Info("[Step 1] - Create Kube Client & Clientset")
 
@@ -96,7 +117,7 @@ func imageStreams() *[]imagev1.ImageStream {
 			ObjectMeta: metav1.ObjectMeta{
 				Name: appImagename,
 				Labels: map[string]string{
-					"app": appname,
+					"app": appConfig.Name,
 				},
 			},
 			Spec: imagev1.ImageStreamSpec{
@@ -118,7 +139,7 @@ func imageStreams() *[]imagev1.ImageStream {
 			ObjectMeta: metav1.ObjectMeta{
 				Name: supervisordImageName,
 				Labels: map[string]string{
-					"app": appname,
+					"app": appConfig.Name,
 				},
 			},
 			Spec: imagev1.ImageStreamSpec{
@@ -154,23 +175,23 @@ func createService(clientset *kubernetes.Clientset, dc *appsv1.DeploymentConfig)
 	}
 	svc := corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: appname,
+			Name: appConfig.Name,
 			Labels: map[string]string{
-				"app": appname,
+				"app": appConfig.Name,
 			},
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: svcPorts,
 			Selector: map[string]string{
-				"app":              appname,
-				"deploymentconfig": appname,
+				"app":              appConfig.Name,
+				"deploymentconfig": appConfig.Name,
 			},
 		},
 	}
 
 	_, errService := clientset.CoreV1().Services(namespace).Create(&svc)
 	if errService != nil {
-		glog.Fatal("unable to create Service for %s", appname)
+		glog.Fatal("unable to create Service for %s", appConfig.Name)
 	}
 }
 
@@ -183,16 +204,16 @@ func createRoute(config *restclient.Config) {
 	}
 	route := &routev1.Route{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:   appname,
+			Name:   appConfig.Name,
 			Labels: map[string]string{
-				"app": appname,
+				"app": appConfig.Name,
 			},
 
 		},
 		Spec: routev1.RouteSpec{
 			To: routev1.RouteTargetReference{
 				Kind: "Service",
-				Name: appname,
+				Name: appConfig.Name,
 			},
 		},
 	}
@@ -220,27 +241,27 @@ func createDeploymentConfig(config *restclient.Config) *appsv1.DeploymentConfig 
 func javaDeploymentConfig() *appsv1.DeploymentConfig {
 	return &appsv1.DeploymentConfig{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: appname,
+			Name: appConfig.Name,
 			Labels: map[string]string{
-				"app":              appname,
+				"app":              appConfig.Name,
 				"io.openshift.odo": "inject-supervisord",
 			},
 		},
 		Spec: appsv1.DeploymentConfigSpec{
 			Replicas: 1,
 			Selector: map[string]string{
-				"app":              appname,
-				"deploymentconfig": appname,
+				"app":              appConfig.Name,
+				"deploymentconfig": appConfig.Name,
 			},
 			Strategy: appsv1.DeploymentStrategy{
 				Type: appsv1.DeploymentStrategyTypeRolling,
 			},
 			Template: &corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Name: appname,
+					Name: appConfig.Name,
 					Labels: map[string]string{
-						"app":              appname,
-						"deploymentconfig": appname,
+						"app":              appConfig.Name,
+						"deploymentconfig": appConfig.Name,
 					},
 				},
 				Spec: corev1.PodSpec{
@@ -248,7 +269,7 @@ func javaDeploymentConfig() *appsv1.DeploymentConfig {
 					Containers: []corev1.Container{
 						{
 							Image: appImagename + ":latest",
-							Name:  appname,
+							Name:  appConfig.Name,
 							Ports: []corev1.ContainerPort{
 								{
 									ContainerPort: 8080,
@@ -299,7 +320,7 @@ func javaDeploymentConfig() *appsv1.DeploymentConfig {
 					ImageChangeParams: &appsv1.DeploymentTriggerImageChangeParams{
 						Automatic: true,
 						ContainerNames: []string{
-							appname,
+							appConfig.Name,
 						},
 						From: corev1.ObjectReference{
 							Kind: "ImageStreamTag",
@@ -309,63 +330,6 @@ func javaDeploymentConfig() *appsv1.DeploymentConfig {
 				},
 			},
 		},
-	}
-}
-
-func findDeploymentconfig(config *restclient.Config) {
-	deploymentConfigV1client, err := appsocpv1.NewForConfig(config)
-	if err != nil {
-		glog.Fatalf("Error building kubeconfig: %s", err.Error())
-	}
-
-	deploymentList, err := deploymentConfigV1client.DeploymentConfigs(namespace).List(filter)
-	fmt.Printf("Listing deployments in namespace %s: \n", namespace)
-	if err != nil {
-		glog.Error("Error to get Deployment Config !")
-	}
-	for _, d := range deploymentList.Items {
-		fmt.Printf("%s\n", d.Name)
-
-		// TODO : Check if deploymentConfig contains the initContainer for copy-supervisord. If no, we patch it
-
-		retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-			dc, err := deploymentConfigV1client.DeploymentConfigs(namespace).Get(d.Name, metav1.GetOptions{})
-			if err != nil {
-				glog.Error("Error to get the Deployment Config %s. Error is : %s\n", dc.Name, err)
-			}
-
-			// Add emptyDir volume shared by initContainer and Container
-			dc.Spec.Template.Spec.Volumes = []corev1.Volume{
-				{
-					Name: "shared-data",
-					VolumeSource: corev1.VolumeSource{
-						EmptyDir: &corev1.EmptyDirVolumeSource{},
-					},
-				},
-			}
-
-			// Add command to the s2i image in order to start the supervisord
-			dc.Spec.Template.Spec.Containers[0].Command = append(dc.Spec.Template.Spec.Containers[0].Command, "/var/lib/supervisord/bin/supervisord")
-			dc.Spec.Template.Spec.Containers[0].Args = append(dc.Spec.Template.Spec.Containers[0].Args, "-c", "/var/lib/supervisord/conf/supervisor.conf")
-			dc.Spec.Template.Spec.Containers[0].VolumeMounts = []corev1.VolumeMount{
-				{
-					Name:      "shared-data",
-					MountPath: "/var/lib/supervisord",
-				},
-			}
-
-			// Inject an initcontainer containing binary go of the supervisord
-			dc.Spec.Template.Spec.InitContainers = []corev1.Container{*supervisordInitContainer()}
-
-			// Update the DeploymentConfig
-			_, updatedErr := deploymentConfigV1client.DeploymentConfigs(namespace).Update(dc)
-			return updatedErr
-		})
-		if retryErr != nil {
-			panic(fmt.Errorf("Update failed: %v", retryErr))
-		}
-		fmt.Println("Updated deployment...")
-		//fmt.Printf("Raw printout of the dc %+v\n", d)
 	}
 }
 
