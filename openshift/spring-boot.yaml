@@ -35,6 +35,11 @@ items:
         - image: docker-registry.default.svc:5000/k8s-supervisord/spring-boot-http
           imagePullPolicy: IfNotPresent
           name: spring-boot-supervisord
+          env:
+          - name: JAVA_APP_DIR
+            value: '/deployments'
+          - name: JAVA_APP_JAR
+            value: '*-exec.jar'
           ports:
           - containerPort: 8080
             protocol: TCP
