@@ -1,27 +1,26 @@
 # Instructions to inject a Supervisord's initcontainer and enrich the Deployment of a Spring Boot S2I Application
 
-- Install the project
+## Download the project
+
+- Install the project within your `$GOPATH`'s workspace
   ```bash
   cd $GOPATH/src
   go get github.com/cmoulliard/k8s-supervisor
   cd k8s-supervisor && dep ensure
   ```   
 
-- Create the `k8s-supervisord` project on OpenShift
+- Create the `k8s-supervisord` namespace on OpenShift
   ```bash
   oc new-project k8s-supervisord
   ```  
 
-- Execute the go program locally to enhance the `DeploymentConfig`
-
-  **REMARK**: Rename $HOME with the full path to access your `.kube/config` folder
+- Execute the `go` program locally to deploy the `Java S2I - Supervisord` pod
 
   ```bash
   go run create.go -kubeconfig=$HOME/.kube/config
-  Fetching about DC to be injected
-  Listing deployments in namespace k8s-supervisord: 
-  spring-boot-supervisord
-  Updated deployment...
+  INFO[0000] [Step 1] - Create Kube Client & Clientset    
+  INFO[0000] [Step 2] - Create ImageStreams for Supervisord and Java S2I Image of SpringBoot 
+  INFO[0000] [Step 3] - Create DeploymentConfig using Supervisord and Java S2I Image of SpringBoot 
   ```
 
 - Verify if the `initContainer` has been injected within the `DeploymentConfig`
@@ -55,7 +54,7 @@
   ...
   ```
   
-- Check status of the pod created and next start a command
+- Check the status of the supervisord to verify the programs which are available
   ```bash
   SB_POD=$(oc get pods -l app=spring-boot-supervisord -o name)
 
@@ -63,17 +62,9 @@
   echo                             STOPPED   
   run-java                         STOPPED   
   compile-java                     STOPPED   
-
-  oc rsh $SB_POD /var/lib/supervisord/bin/supervisord ctl start run-java
-  run-java: started
-  
-  oc rsh $SB_POD /var/lib/supervisord/bin/supervisord ctl status          
-  echo                             STOPPED   
-  run-java                         RUNNING   pid 35, uptime 0:00:04
-  compile-java                     STOPPED   
   ```  
 
-- Let's now compile the project after pushing the project (pom, src)
+- Push the code source (pom.xml, ./src)
   ```bash
   SB_POD=$(oc get pods -l app=spring-boot-supervisord -o name)
   SB_POD_NAME=${SB_POD:5:${#SB_POD}}
@@ -81,8 +72,11 @@
   oc cp ./src $SB_POD_NAME:/tmp/src/ -c spring-boot-supervisord
   oc rsh $SB_POD ls -la /tmp/src/
   
+- Compile it within the pod  
+  ```bash
   oc rsh $SB_POD /var/lib/supervisord/bin/supervisord ctl start compile-java 
   oc logs $SB_POD -f 
+  ```
   
 - Start the java application compiled
   ```bash
@@ -90,14 +84,15 @@
   oc logs $SB_POD -f 
   ```
   
-- Create an odo application and then push the project
+- Access the endpoint of the Spring Boot application 
   ```bash
-  cd spring-boot
-  odo app create springbootapp
-  go run ../
-  // TODO -> Change our code to create an application using new supervisord's approach
-  odo push
-  ```
+  curl 
+  ``` 
+  
+- Cleanup
+  ```bash
+  oc delete all --all
+  ```  
     
 ## Developer section
 
