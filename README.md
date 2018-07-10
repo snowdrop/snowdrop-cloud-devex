@@ -97,7 +97,6 @@
 - Check status of the pod created and next start a command
   ```bash
   SB_POD=$(oc get pods -l app=spring-boot-supervisord -o name)
-  SERVICE_IP=$(minishift ip)
 
   oc rsh $SB_POD /var/lib/supervisord/bin/supervisord ctl status
   echo                             STOPPED   
@@ -115,8 +114,10 @@
 
 - Let's now compile the project after pushing the project (pom, src)
   ```bash
-  oc cp ./pom.xml k8s-supervisord/spring-boot-supervisord-2-bghfj:/tmp/src/ -c spring-boot-supervisord
-  oc cp ./src k8s-supervisord/spring-boot-supervisord-2-bghfj:/tmp/src/ -c spring-boot-supervisord
+  SB_POD=$(oc get pods -l app=spring-boot-supervisord -o name)
+  SB_POD_NAME=${SB_POD:5:${#SB_POD}}
+  oc cp ./pom.xml $SB_POD_NAME:/tmp/src/ -c spring-boot-supervisord
+  oc cp ./src $SB_POD_NAME:/tmp/src/ -c spring-boot-supervisord
   oc rsh $SB_POD ls -la /tmp/src/
   
   oc rsh $SB_POD /var/lib/supervisord/bin/supervisord ctl start compile-java 
