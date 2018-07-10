@@ -24,6 +24,10 @@
   ```bash
   cd supervisord
   imagebuilder -t $(minishift openshift registry)/k8s-supervisord/copy-supervisord:1.0 .
+
+  imagebuilder -t cmoulliard/copy-supervisord:1.0 .
+  docker tag b74c32ba6bd8 quay.io/snowdrop/supervisord
+  docker push quay.io/snowdrop/supervisord
   ```
 
 - Next, compile the spring Boot application using maven's tool to package the application as a `uberjar` file
