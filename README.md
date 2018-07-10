@@ -86,7 +86,9 @@
   
 - Access the endpoint of the Spring Boot application 
   ```bash
-  curl 
+  URL="http://$(oc get routes/spring-boot-supervisord -o jsonpath='{.spec.host}')"
+  curl $URL/api/greeting
+  {"content":"Hello, World!"}% 
   ``` 
   
 - Cleanup

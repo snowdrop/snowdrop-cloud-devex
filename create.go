@@ -16,10 +16,15 @@ import (
 	restclient "k8s.io/client-go/rest"
 	appsocpv1 "github.com/openshift/client-go/apps/clientset/versioned/typed/apps/v1"
 	imageclientsetv1 "github.com/openshift/client-go/image/clientset/versioned/typed/image/v1"
+	routeclientset "github.com/openshift/client-go/route/clientset/versioned/typed/route/v1"
+
 	appsv1 "github.com/openshift/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	imagev1 "github.com/openshift/api/image/v1"
+	routev1 "github.com/openshift/api/route/v1"
+
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 var (
@@ -51,16 +56,20 @@ func main() {
 		glog.Fatalf("Error building kubeconfig: %s", err.Error())
 	}
 
-	_, err = kubernetes.NewForConfig(cfg)
-	if err != nil {
-		glog.Fatalf("Error building kubernetes clientset: %s", err.Error())
+	clientset, errclientset := kubernetes.NewForConfig(cfg)
+	if errclientset != nil {
+		glog.Fatalf("Error building kubernetes clientset: %s", errclientset.Error())
 	}
 
 	log.Info("[Step 2] - Create ImageStreams for Supervisord and Java S2I Image of SpringBoot")
 	createImageStreams(cfg)
 
 	log.Info("[Step 3] - Create DeploymentConfig using Supervisord and Java S2I Image of SpringBoot")
-	createDeploymentConfig(cfg)
+	dc := createDeploymentConfig(cfg)
+
+	log.Info("[Step $] - Create Service and route")
+	createService(clientset, dc)
+	createRoute(cfg)
 }
 
 func init() {
@@ -69,18 +78,19 @@ func init() {
 }
 
 func createImageStreams(config *restclient.Config) {
-
 	imageClient, err := imageclientsetv1.NewForConfig(config)
-	if err != nil { }
+	if err != nil {
+	}
 
 	for _, v := range *imageStreams() {
 		_, errImages := imageClient.ImageStreams(namespace).Create(&v)
-		if errImages != nil {}
+		if errImages != nil {
+		}
 	}
 
 }
 
-func imageStreams() *[]imagev1.ImageStream{
+func imageStreams() *[]imagev1.ImageStream {
 	return &[]imagev1.ImageStream{
 		{
 			ObjectMeta: metav1.ObjectMeta{
@@ -129,16 +139,82 @@ func imageStreams() *[]imagev1.ImageStream{
 	}
 }
 
-func createDeploymentConfig(config *restclient.Config) {
+func createService(clientset *kubernetes.Clientset, dc *appsv1.DeploymentConfig) {
+	// generate and create Service
+	var svcPorts []corev1.ServicePort
+	for _, containerPort := range dc.Spec.Template.Spec.Containers[0].Ports {
+		svcPort := corev1.ServicePort{
+
+			Name:       containerPort.Name,
+			Port:       containerPort.ContainerPort,
+			Protocol:   containerPort.Protocol,
+			TargetPort: intstr.FromInt(int(containerPort.ContainerPort)),
+		}
+		svcPorts = append(svcPorts, svcPort)
+	}
+	svc := corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: appname,
+			Labels: map[string]string{
+				"app": appname,
+			},
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: svcPorts,
+			Selector: map[string]string{
+				"app":              appname,
+				"deploymentconfig": appname,
+			},
+		},
+	}
+
+	_, errService := clientset.CoreV1().Services(namespace).Create(&svc)
+	if errService != nil {
+		glog.Fatal("unable to create Service for %s", appname)
+	}
+}
+
+// CreateRoute creates a route object for the given service and with the given
+// labels
+func createRoute(config *restclient.Config) {
+	routeclientset, errrouteclientset := routeclientset.NewForConfig(config)
+	if errrouteclientset != nil {
+		glog.Fatal("error creating routeclientset", errrouteclientset.Error())
+	}
+	route := &routev1.Route{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:   appname,
+			Labels: map[string]string{
+				"app": appname,
+			},
+
+		},
+		Spec: routev1.RouteSpec{
+			To: routev1.RouteTargetReference{
+				Kind: "Service",
+				Name: appname,
+			},
+		},
+	}
+	_, errRoute := routeclientset.Routes(namespace).Create(route)
+	if errRoute != nil {
+		glog.Fatal("error creating route", errRoute.Error())
+	}
+
+}
+
+func createDeploymentConfig(config *restclient.Config) *appsv1.DeploymentConfig {
 	deploymentConfigV1client, err := appsocpv1.NewForConfig(config)
 	if err != nil {
 		glog.Fatalf("Can't get DeploymentConfig Clientset: %s", err.Error())
 	}
 
-	_, errCreate := deploymentConfigV1client.DeploymentConfigs(namespace).Create(javaDeploymentConfig())
+	dc, errCreate := deploymentConfigV1client.DeploymentConfigs(namespace).Create(javaDeploymentConfig())
 	if errCreate != nil {
 		glog.Fatalf("DeploymentConfig not created: %s", errCreate.Error())
 	}
+
+	return dc
 }
 
 func javaDeploymentConfig() *appsv1.DeploymentConfig {
