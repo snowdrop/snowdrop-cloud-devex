@@ -1,5 +1,12 @@
-#FROM registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift
-FROM fabric8/s2i-java:latest
+FROM registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift
+
 ENV JAVA_APP_DIR=/deployments
+ENV JAVA_APP_JAR=*-exec.jar
+
 EXPOSE 8080
-COPY target /deployments/
+
+USER root
+RUN mkdir -p /tmp/src/target
+
+RUN chgrp -R 0 /tmp/src/ && \
+    chmod -R g+rw /tmp/src/

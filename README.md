@@ -38,7 +38,6 @@
  
   ```bash
   docker build -t $(minishift openshift registry)/k8s-supervisord/spring-boot-http:1.0 . -f Dockerfile
-  docker build -t $(minishift openshift registry)/k8s-supervisord/spring-boot-http:1.0 . -f Dockerfile-src
   ```   
   
 - Deploy the `SpringBoot` application without the `initContainer`, shared volume, ...
@@ -113,42 +112,17 @@
   run-java                         RUNNING   pid 35, uptime 0:00:04
   compile-java                     STOPPED   
   ```  
+
+- Let's now compile the project after pushing the project (pom, src)
+  ```bash
+  oc cp ./pom.xml k8s-supervisord/spring-boot-supervisord-2-bghfj:/tmp/src/ -c spring-boot-supervisord
+  oc cp ./src k8s-supervisord/spring-boot-supervisord-2-bghfj:/tmp/src/ -c spring-boot-supervisord
+  oc rsh $SB_POD ls -la /tmp/src/
   
-docker build -t $(minishift openshift registry)/k8s-supervisord/spring-boot-http:1.0 . -f Dockerfile-src
-docker push $(minishift openshift registry)/k8s-supervisord/spring-boot-http:1.0
+  oc rsh $SB_POD /var/lib/supervisord/bin/supervisord ctl start compile-java 
+  oc logs $SB_POD -f 
   
-SB_POD=$(oc get pods -l app=spring-boot-supervisord -o name)
-SERVICE_IP=$(minishift ip) 
-oc rsh $SB_POD /var/lib/supervisord/bin/supervisord ctl status
-oc rsh $SB_POD /var/lib/supervisord/bin/supervisord ctl start compile-java 
-oc rsh $SB_POD /var/lib/supervisord/bin/supervisord ctl status
+  oc rsh $SB_POD /var/lib/supervisord/bin/supervisord ctl start run-java
+  oc logs $SB_POD -f 
+  ```
 
-oc rsh $SB_POD /var/lib/supervisord/bin/supervisord ctl start run-java
-
-GOOD
-
-exec java -javaagent:/opt/jolokia/jolokia.jar=config=/opt/jolokia/etc/jolokia.properties 
-         -XX:+UnlockExperimentalVMOptions 
-         -XX:+UseCGroupMemoryLimitForHeap
-         -XX:+UseParallelOldGC
-         -XX:MinHeapFreeRatio=10
-         -XX:MaxHeapFreeRatio=20
-         -XX:GCTimeRatio=4
-         -XX:AdaptiveSizePolicyWeight=90
-         -XX:MaxMetaspaceSize=100m
-         -XX:+ExitOnOutOfMemoryError
-         -cp . -jar /deployments/ocp-docker-build-install-1.0-exec.jar
-
-BAD
-
-exec java -javaagent:/opt/jolokia/jolokia.jar=config=/opt/jolokia/etc/jolokia.properties 
-          -XX:+UnlockExperimentalVMOptions
-          -XX:+UseCGroupMemoryLimitForHeap
-          -XX:+UseParallelOldGC
-          -XX:MinHeapFreeRatio=10
-          -XX:MaxHeapFreeRatio=20
-          -XX:GCTimeRatio=4
-          -XX:AdaptiveSizePolicyWeight=90
-          -XX:MaxMetaspaceSize=100m
-          -XX:+ExitOnOutOfMemoryError
-          -cp . -jar
