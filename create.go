@@ -23,6 +23,9 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"io/ioutil"
 	"os"
+	"fmt"
+	"text/template"
+	"bytes"
 )
 
 var (
@@ -157,6 +160,35 @@ func imageStreams() *[]imagev1.ImageStream {
 				},
 			},
 		},
+	}
+}
+
+func createServiceTmpl(clientset *kubernetes.Clientset, dc *appsv1.DeploymentConfig) {
+	// Create Template and parse it
+	tmpl, errFile := ioutil.ReadFile("/Users/dabou/Code/go-workspace/src/github.com/cmoulliard/k8s-supervisor/builder/java/service_tmpl")
+	if errFile != nil {
+		fmt.Println("Err is ",errFile.Error())
+	}
+
+	var b bytes.Buffer
+	t := template.New("service_tmpl")
+	t, _ = t.Parse(string(tmpl))
+	err := t.Execute(&b, &appConfig)
+	if err != nil {
+		fmt.Println("There was an error:", err.Error())
+	}
+	//s := b.String()
+	//fmt.Println("Result : ", s)
+
+	svc := corev1.Service{}
+	errYamlParsing := yaml.Unmarshal(b.Bytes(), &svc)
+	if errYamlParsing != nil {
+		panic(errYamlParsing)
+	}
+
+	_, errService := clientset.CoreV1().Services(namespace).Create(&svc)
+	if errService != nil {
+		glog.Fatal("unable to create Service for %s", appConfig.Name)
 	}
 }
 
