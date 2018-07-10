@@ -15,8 +15,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o bootstrap main.go
 FROM busybox
 
 ARG VERSION=0.5
-
-ENV SUPERVISORD_DIR /opt/supervisord
+ARG SUPERVISORD_DIR=/opt/supervisord
 
 RUN mkdir -p ${SUPERVISORD_DIR}/conf ${SUPERVISORD_DIR}/bin
 
@@ -35,5 +34,5 @@ RUN chgrp -R 0 ${SUPERVISORD_DIR} && \
     chmod 775 ${SUPERVISORD_DIR}/bin/bootstrap && \
     chmod 775 ${SUPERVISORD_DIR}/conf/echo.sh
 
-WORKDIR $SUPERVISORD_DIR
+WORKDIR ${SUPERVISORD_DIR}
 ENTRYPOINT ["/opt/supervisord/bin/bootstrap"]
