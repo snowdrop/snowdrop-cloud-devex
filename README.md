@@ -2,11 +2,11 @@
 
 The prototype developed within this projects aims to resolve the following user's stories.
 
-"As a user, I want to install a pod running my runtime Java Application (Spring Boot, Vert.x, Thorntail), where I can instruct the devtool (= odo) to start or stop a command such as "compile", "run java", ..." within the pod"
+"As a user, I want to install a pod running my runtime Java Application (Spring Boot, Vert.x, Swarm), where I can instruct the tool to start or stop a command such as "compile", "run java", ..." within the pod"
 
 "As a user, I want to customize the application deployed using a MANIFEST yaml file where I can specify, the name of the application, s2i image to be used, maven tool, port of the service, cpu, memory, ...."
 
-"As a user, I would like to know according to the OpenShift platform, which version of the template and which resources are processed when it will be installed/deployed"
+"As a user, I would like to know according to the OpenShift platform, which version of the template/builder and which resources are processed when it will be installed/deployed"
 
 List of technical features implemented are :
 
@@ -51,7 +51,7 @@ List of technical features implemented are :
   oc new-project k8s-supervisord
   ```  
 
-## Create the deploymentConfig for the local spring Boot project
+## Create the deploymentConfig using a local spring Boot project
 
 - Execute the `go` program locally to deploy the `Java S2I - Supervisord` pod and pass as parameters :
   - `-kubeconfig=PATH_TO_KUBE_CONFIG` 
@@ -97,7 +97,7 @@ List of technical features implemented are :
   
 ## Push the code  
   
-- Check the status of the supervisord to verify the programs which are available
+- Check the status of the `supervisord` to verify the programs which are available
   ```bash
   SB_POD=$(oc get pods -l app=spring-boot-supervisord -o name)
 
