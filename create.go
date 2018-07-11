@@ -40,10 +40,8 @@ var (
 const (
 	namespace            = "k8s-supervisord"
 
-	supervisordimage     = "172.30.1.1:5000/k8s-supervisord/copy-supervisord:1.0"
 	appImagename         = "spring-boot-http"
-
-	supervisordImageName = "copy-supervisord"
+	supervisordimagename = "copy-supervisord"
 
 	builderpath          = "/builder/java/"
 )
@@ -147,7 +145,7 @@ func imageStreams() *[]imagev1.ImageStream {
 		},
 		{
 			ObjectMeta: metav1.ObjectMeta{
-				Name: supervisordImageName,
+				Name: supervisordimagename,
 				Labels: map[string]string{
 					"app": appConfig.Name,
 				},
@@ -320,7 +318,17 @@ func javaDeploymentConfig() *appsv1.DeploymentConfig {
 			},
 			Triggers: []appsv1.DeploymentTriggerPolicy{
 				{
-					Type: "ConfigChange",
+					Type: "ImageChange",
+					ImageChangeParams: &appsv1.DeploymentTriggerImageChangeParams{
+						Automatic: true,
+						ContainerNames: []string{
+							supervisordimagename,
+						},
+						From: corev1.ObjectReference{
+							Kind: "ImageStreamTag",
+							Name: supervisordimagename + ":latest",
+						},
+					},
 				},
 				{
 					Type: "ImageChange",
@@ -343,7 +351,7 @@ func javaDeploymentConfig() *appsv1.DeploymentConfig {
 func supervisordInitContainer() *corev1.Container {
 	return &corev1.Container{
 		Name:    "copy-supervisord",
-		Image:   supervisordimage,
+		Image:   supervisordimagename + ":latest",
 		Command: []string{"/bin/busybox"},
 		Args:    []string{"/usr/bin/cp", "-r", "/opt/supervisord", "/var/lib/"},
 		VolumeMounts: []corev1.VolumeMount{
