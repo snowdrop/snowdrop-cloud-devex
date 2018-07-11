@@ -8,7 +8,9 @@ The prototype developed within this projects aims to resolve the following user'
 
 "As a user, I would like to know according to the OpenShift platform, which version of the template/builder and which resources are processed when it will be installed/deployed"
 
-List of technical features implemented are :
+# Technical's idea
+
+The following chapter describes how we have technically implemented such user's story :
 
 - pod of the application/component (created by odo) defined with a :
   - initContainer : supervisord [2] where different commands are registered from ENV vars. E.g. start/stop the java runtime, debug or compile (= maven), ... 
@@ -26,10 +28,11 @@ List of technical features implemented are :
 # Table of Contents
 
    * [Cloud Native Developer's experience - Prototype](#cloud-native-developers-experience---prototype)
+   * [Technical's idea](#technicals-idea)
    * [Table of Contents](#table-of-contents)
    * [Instructions](#instructions)
       * [Download the project and install it](#download-the-project-and-install-it)
-      * [Create the deploymentConfig for the local spring Boot project](#create-the-deploymentconfig-for-the-local-spring-boot-project)
+      * [Create the deploymentConfig using a local spring Boot project](#create-the-deploymentconfig-using-a-local-spring-boot-project)
       * [Push the code](#push-the-code)
       * [Compile and start the Spring Boot Java App](#compile-and-start-the-spring-boot-java-app)
       * [Clean up](#clean-up)
