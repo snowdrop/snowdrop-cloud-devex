@@ -49,6 +49,12 @@ const (
 type Application struct {
 	Name string
 	Port int
+	Image Image
+}
+
+type Image struct {
+	Name string
+	Repo string
 }
 
 var appConfig = Application{}
@@ -81,20 +87,22 @@ func main() {
 		glog.Fatalf("Error building kubeconfig: %s", err.Error())
 	}
 
-	clientset, errclientset := kubernetes.NewForConfig(cfg)
-	if errclientset != nil {
-		glog.Fatalf("Error building kubernetes clientset: %s", errclientset.Error())
-	}
 
 	log.Info("[Step 2] - Create ImageStreams for Supervisord and Java S2I Image of SpringBoot")
-	createImageStreams(cfg)
+	//createImageStreams(cfg)
+	createImageStreamTemplate(cfg)
 
-	log.Info("[Step 3] - Create DeploymentConfig using Supervisord and Java S2I Image of SpringBoot")
+    log.Info("[Step 3] - Create DeploymentConfig using Supervisord and Java S2I Image of SpringBoot")
 	dc := createDeploymentConfig(cfg)
 
 	// log.Info("[Step 4] - Create Service and route")
 	// createService(clientset, dc)
 	// createRoute(cfg)
+
+	clientset, errclientset := kubernetes.NewForConfig(cfg)
+	if errclientset != nil {
+		glog.Fatalf("Error building kubernetes clientset: %s", errclientset.Error())
+	}
 
 	log.Info("[Step 4] - Create Service and route using Templates")
 	createServiceTemplate(clientset, dc)
@@ -106,71 +114,48 @@ func init() {
 	flag.StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 }
 
-func createImageStreams(config *restclient.Config) {
+func createImageStreamTemplate(config *restclient.Config) {
 	imageClient, err := imageclientsetv1.NewForConfig(config)
 	if err != nil {
 	}
 
-	for _, v := range *imageStreams() {
-		_, errImages := imageClient.ImageStreams(namespace).Create(&v)
+	images := []Image{
+		{
+			Name: appImagename,
+			Repo: "quay.io/snowdrop/spring-boot-s2i",
+		},
+		{
+			Name: supervisordimagename,
+			Repo: "quay.io/snowdrop/supervisord",
+		},
+	}
+
+	for _, img := range images {
+
+		cfg := &appConfig
+		cfg.Image = img
+
+		// Parse ImageStream Template
+		var b = parseTemplate("imagestream_tmpl", cfg)
+
+		// Create ImageStream struct using the generated ImageStream string
+		img := imagev1.ImageStream{}
+		errYamlParsing := yaml.Unmarshal(b.Bytes(), &img)
+		if errYamlParsing != nil {
+			panic(errYamlParsing)
+		}
+
+		_, errImages := imageClient.ImageStreams(namespace).Create(&img)
 		if errImages != nil {
+			glog.Fatal("Unable to create ImageStream for %s", errImages.Error())
 		}
 	}
 
 }
 
-func imageStreams() *[]imagev1.ImageStream {
-	return &[]imagev1.ImageStream{
-		{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: appImagename,
-				Labels: map[string]string{
-					"app": appConfig.Name,
-				},
-			},
-			Spec: imagev1.ImageStreamSpec{
-				LookupPolicy: imagev1.ImageLookupPolicy{
-					Local: false,
-				},
-				Tags: []imagev1.TagReference{
-					{
-						Name: "latest",
-						From: &corev1.ObjectReference{
-							Name: "quay.io/snowdrop/spring-boot-s2i",
-							Kind: "DockerImage",
-						},
-					},
-				},
-			},
-		},
-		{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: supervisordimagename,
-				Labels: map[string]string{
-					"app": appConfig.Name,
-				},
-			},
-			Spec: imagev1.ImageStreamSpec{
-				LookupPolicy: imagev1.ImageLookupPolicy{
-					Local: false,
-				},
-				Tags: []imagev1.TagReference{
-					{
-						Name: "latest",
-						From: &corev1.ObjectReference{
-							Name: "quay.io/snowdrop/supervisord",
-							Kind: "DockerImage",
-						},
-					},
-				},
-			},
-		},
-	}
-}
-
 func createServiceTemplate(clientset *kubernetes.Clientset, dc *appsv1.DeploymentConfig) {
 	// Parse Service Template
-	var b = parseTemplate("service_tmpl")
+	var b = parseTemplate("service_tmpl", &appConfig)
 
 	// Create Service struct using the generated Service string
 	svc := corev1.Service{}
@@ -193,7 +178,7 @@ func createRouteTemplate(config *restclient.Config) {
 	}
 
 	// Parse Route Template
-	var b = parseTemplate("route_tmpl")
+	var b = parseTemplate("route_tmpl", &appConfig)
 
 	// Create Route struct using the generated Route string
 	route := routev1.Route{}
@@ -210,7 +195,7 @@ func createRouteTemplate(config *restclient.Config) {
 
 }
 
-func parseTemplate(tmpl string) bytes.Buffer {
+func parseTemplate(tmpl string, cfg *Application) bytes.Buffer {
 	// Create Template and parse it
 	pwd, _ := os.Getwd()
 	tfile, errFile := ioutil.ReadFile(pwd+builderpath+"/"+tmpl)
@@ -221,7 +206,7 @@ func parseTemplate(tmpl string) bytes.Buffer {
 	var b bytes.Buffer
 	t := template.New(tmpl)
 	t, _ = t.Parse(string(tfile))
-	err := t.Execute(&b, &appConfig)
+	err := t.Execute(&b, cfg)
 	if err != nil {
 		fmt.Println("There was an error:", err.Error())
 	}
@@ -365,6 +350,68 @@ func supervisordInitContainer() *corev1.Container {
 			{
 				Name:  "CMDS",
 				Value: "echo:/var/lib/supervisord/conf/echo.sh;run-java:/usr/local/s2i/run;compile-java:/usr/local/s2i/assemble",
+			},
+		},
+	}
+}
+
+func createImageStreams(config *restclient.Config) {
+	imageClient, err := imageclientsetv1.NewForConfig(config)
+	if err != nil {
+	}
+
+	for _, v := range *imageStreams() {
+		_, errImages := imageClient.ImageStreams(namespace).Create(&v)
+		if errImages != nil {
+		}
+	}
+
+}
+
+func imageStreams() *[]imagev1.ImageStream {
+	return &[]imagev1.ImageStream{
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: appImagename,
+				Labels: map[string]string{
+					"app": appConfig.Name,
+				},
+			},
+			Spec: imagev1.ImageStreamSpec{
+				LookupPolicy: imagev1.ImageLookupPolicy{
+					Local: false,
+				},
+				Tags: []imagev1.TagReference{
+					{
+						Name: "latest",
+						From: &corev1.ObjectReference{
+							Name: "quay.io/snowdrop/spring-boot-s2i",
+							Kind: "DockerImage",
+						},
+					},
+				},
+			},
+		},
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: supervisordimagename,
+				Labels: map[string]string{
+					"app": appConfig.Name,
+				},
+			},
+			Spec: imagev1.ImageStreamSpec{
+				LookupPolicy: imagev1.ImageLookupPolicy{
+					Local: false,
+				},
+				Tags: []imagev1.TagReference{
+					{
+						Name: "latest",
+						From: &corev1.ObjectReference{
+							Name: "quay.io/snowdrop/supervisord",
+							Kind: "DockerImage",
+						},
+					},
+				},
 			},
 		},
 	}
