@@ -35,6 +35,9 @@ var (
 	filter = metav1.ListOptions{
 		LabelSelector: "io.openshift.odo=inject-supervisord",
 	}
+
+	templateNames = []string{"imagestream","route","service"}
+	templateBuilders = make(map[string]template.Template)
 )
 
 const (
@@ -91,6 +94,7 @@ func main() {
 	log.Info("[Step 2] - Create ImageStreams for Supervisord and Java S2I Image of SpringBoot")
 	//createImageStreams(cfg)
 	createImageStreamTemplate(cfg)
+	//panic("WE STOP")
 
     log.Info("[Step 3] - Create DeploymentConfig using Supervisord and Java S2I Image of SpringBoot")
 	dc := createDeploymentConfig(cfg)
@@ -112,6 +116,20 @@ func main() {
 func init() {
 	flag.StringVar(&kubeconfig, "kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
 	flag.StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
+
+	// Fill an array with our Builder's text/template
+	for tmpl := range templateNames {
+		pwd, _ := os.Getwd()
+		// Create Template and parse it
+		tfile, errFile := ioutil.ReadFile(pwd+builderpath+"/"+templateNames[tmpl])
+		if errFile != nil {
+			fmt.Println("Err is ",errFile.Error())
+		}
+
+		t := template.New(templateNames[tmpl])
+		t, _ = t.Parse(string(tfile))
+		templateBuilders[templateNames[tmpl]] = *t
+	}
 }
 
 func createImageStreamTemplate(config *restclient.Config) {
@@ -136,7 +154,7 @@ func createImageStreamTemplate(config *restclient.Config) {
 		cfg.Image = img
 
 		// Parse ImageStream Template
-		var b = parseTemplate("imagestream_tmpl", cfg)
+		var b = parseTemplate("imagestream",&appConfig)
 
 		// Create ImageStream struct using the generated ImageStream string
 		img := imagev1.ImageStream{}
@@ -155,7 +173,7 @@ func createImageStreamTemplate(config *restclient.Config) {
 
 func createServiceTemplate(clientset *kubernetes.Clientset, dc *appsv1.DeploymentConfig) {
 	// Parse Service Template
-	var b = parseTemplate("service_tmpl", &appConfig)
+	var b = parseTemplate("service",&appConfig)
 
 	// Create Service struct using the generated Service string
 	svc := corev1.Service{}
@@ -178,7 +196,7 @@ func createRouteTemplate(config *restclient.Config) {
 	}
 
 	// Parse Route Template
-	var b = parseTemplate("route_tmpl", &appConfig)
+	var b = parseTemplate("route", &appConfig)
 
 	// Create Route struct using the generated Route string
 	route := routev1.Route{}
@@ -195,22 +213,16 @@ func createRouteTemplate(config *restclient.Config) {
 
 }
 
+// Parse the file's template using the Application struct
 func parseTemplate(tmpl string, cfg *Application) bytes.Buffer {
 	// Create Template and parse it
-	pwd, _ := os.Getwd()
-	tfile, errFile := ioutil.ReadFile(pwd+builderpath+"/"+tmpl)
-	if errFile != nil {
-		fmt.Println("Err is ",errFile.Error())
-	}
-
 	var b bytes.Buffer
-	t := template.New(tmpl)
-	t, _ = t.Parse(string(tfile))
+	t := templateBuilders[tmpl]
 	err := t.Execute(&b, cfg)
 	if err != nil {
 		fmt.Println("There was an error:", err.Error())
 	}
-	log.Debug("Generated from ",tmpl,":",b.String())
+	log.Debug("Generated :",b.String())
 	return b
 }
 
