@@ -59,7 +59,8 @@ func main() {
 	log.Info("[Step 0] - Parse Application's Config")
 	filename := os.Args[2]
 
-	source, err := ioutil.ReadFile(filename)
+	pwd, _ := os.Getwd()
+	source, err := ioutil.ReadFile(pwd+"/"+filename)
 	if err != nil {
 		panic(err)
 	}
@@ -166,7 +167,8 @@ func imageStreams() *[]imagev1.ImageStream {
 
 func createServiceTmpl(clientset *kubernetes.Clientset, dc *appsv1.DeploymentConfig) {
 	// Create Template and parse it
-	tmpl, errFile := ioutil.ReadFile("/Users/dabou/Code/go-workspace/src/github.com/cmoulliard/k8s-supervisor/builder/java/service_tmpl")
+	pwd, _ := os.Getwd()
+	tmpl, errFile := ioutil.ReadFile(pwd+"/builder/java/service_tmpl")
 	if errFile != nil {
 		fmt.Println("Err is ",errFile.Error())
 	}
