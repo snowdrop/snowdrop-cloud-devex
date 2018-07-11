@@ -1,13 +1,39 @@
-# Instructions to inject a Supervisord's initcontainer and enrich the Deployment of a Spring Boot S2I Application
+# Cloud Native Developer's experience - Prototype
 
-## Table of Contents
+The prototype developed within this projects aims to resolve the following user's stories.
 
- * [Download the project and install it](#download-the-project-and-install-it)
- * [Create the deploymentConfig for the local spring Boot project](#create-the-deploymentconfig-for-the-local-spring-boot-project)
- * [Push the code](#push-the-code)
- * [Compile and start the Spring Boot Java App](#compile-and-start-the-spring-boot-java-app)
- * [Clean up](#clean-up)
- * [Developer section](#developer-section)
+"As a user, I want to install a pod running my runtime Java Application (Spring Boot, Vert.x, Thorntail), where I can instruct the devtool (= odo) to start or stop a command such as "compile", "run java", ..." within the pod"
+"As a user, I want to customize the application deployed using a MANIFEST yaml file where I can specify, the name of the application, s2i image to be used, maven tool, port of the service, cpu, memory, ...."
+"As a user, I would like to know according to the OpenShift platform, which version of the template and which resources are processed when it will be installed/deployed"
+
+List of technical features implemented are :
+
+- pod of the application/component (created by odo) defined with a :
+  - initContainer : supervisord [2] where different commands are registered from ENV vars. E.g. start/stop the java runtime, debug or compile (= maven), ... 
+  - container : created using Java S2I image
+  - shared volume 
+- commands can be executed remotely to trigger and action within the developer's pod -> supervisord ctl start|stop program1,....,programN
+- OpenShift Template -> converted into individual yaml files (= builder concept) and containing "{{.key}} to be processed by the go template engine
+- Developer's user preferences are stored into a MANIFEST yaml (as Cloudfoundry proposes too) which is parsed at bootstrap [3] to create an "Application" struct object used next to process the template and replace the keys with their values [4]
+
+[1] https://github.com/cmoulliard/k8s-supervisor#create-the-deploymentconfig-for-the-local-spring-boot-project
+[2] https://github.com/redhat-developer/odo/issues/556
+[3] https://goo.gl/J1bQ4x
+[4] https://goo.gl/hmKdnh
+
+# Table of Contents
+
+    * [Cloud Native Developer's experience - Prototype](#cloud-native-developers-experience---prototype)
+    * [Table of Contents](#table-of-contents)
+    * [Instructions](#instructions)
+       * [Download the project and install it](#download-the-project-and-install-it)
+       * [Create the deploymentConfig for the local spring Boot project](#create-the-deploymentconfig-for-the-local-spring-boot-project)
+       * [Push the code](#push-the-code)
+       * [Compile and start the Spring Boot Java App](#compile-and-start-the-spring-boot-java-app)
+       * [Clean up](#clean-up)
+       * [Developer section](#developer-section)
+ 
+# Instructions
 
 ## Download the project and install it
 
