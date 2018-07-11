@@ -20,7 +20,6 @@ import (
 	imagev1 "github.com/openshift/api/image/v1"
 	routev1 "github.com/openshift/api/route/v1"
 
-	"k8s.io/apimachinery/pkg/util/intstr"
 	"io/ioutil"
 	"os"
 	"fmt"
@@ -92,10 +91,13 @@ func main() {
 	log.Info("[Step 3] - Create DeploymentConfig using Supervisord and Java S2I Image of SpringBoot")
 	dc := createDeploymentConfig(cfg)
 
-	log.Info("[Step $] - Create Service and route")
-	//createService(clientset, dc)
-	createServiceTmpl(clientset, dc)
-	createRoute(cfg)
+	// log.Info("[Step 4] - Create Service and route")
+	// createService(clientset, dc)
+	// createRoute(cfg)
+
+	log.Info("[Step 4] - Create Service and route using Templates")
+	createServiceTemplate(clientset, dc)
+	createRouteTemplate(cfg)
 }
 
 func init() {
@@ -165,7 +167,7 @@ func imageStreams() *[]imagev1.ImageStream {
 	}
 }
 
-func createServiceTmpl(clientset *kubernetes.Clientset, dc *appsv1.DeploymentConfig) {
+func createServiceTemplate(clientset *kubernetes.Clientset, dc *appsv1.DeploymentConfig) {
 	// Create Template and parse it
 	pwd, _ := os.Getwd()
 	tmpl, errFile := ioutil.ReadFile(pwd+"/builder/java/service_tmpl")
@@ -195,64 +197,35 @@ func createServiceTmpl(clientset *kubernetes.Clientset, dc *appsv1.DeploymentCon
 	}
 }
 
-func createService(clientset *kubernetes.Clientset, dc *appsv1.DeploymentConfig) {
-	// generate and create Service
-	var svcPorts []corev1.ServicePort
-	for _, containerPort := range dc.Spec.Template.Spec.Containers[0].Ports {
-		svcPort := corev1.ServicePort{
-
-			Name:       containerPort.Name,
-			Port:       containerPort.ContainerPort,
-			Protocol:   containerPort.Protocol,
-			TargetPort: intstr.FromInt(int(containerPort.ContainerPort)),
-		}
-		svcPorts = append(svcPorts, svcPort)
-	}
-	svc := corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: appConfig.Name,
-			Labels: map[string]string{
-				"app": appConfig.Name,
-			},
-		},
-		Spec: corev1.ServiceSpec{
-			Ports: svcPorts,
-			Selector: map[string]string{
-				"app":              appConfig.Name,
-				"deploymentconfig": appConfig.Name,
-			},
-		},
-	}
-
-	_, errService := clientset.CoreV1().Services(namespace).Create(&svc)
-	if errService != nil {
-		glog.Fatal("unable to create Service for %s", appConfig.Name)
-	}
-}
-
-// CreateRoute creates a route object for the given service and with the given
-// labels
-func createRoute(config *restclient.Config) {
+func createRouteTemplate(config *restclient.Config) {
 	routeclientset, errrouteclientset := routeclientset.NewForConfig(config)
 	if errrouteclientset != nil {
 		glog.Fatal("error creating routeclientset", errrouteclientset.Error())
 	}
-	route := &routev1.Route{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   appConfig.Name,
-			Labels: map[string]string{
-				"app": appConfig.Name,
-			},
 
-		},
-		Spec: routev1.RouteSpec{
-			To: routev1.RouteTargetReference{
-				Kind: "Service",
-				Name: appConfig.Name,
-			},
-		},
+	// Create Template and parse it
+	pwd, _ := os.Getwd()
+	tmpl, errFile := ioutil.ReadFile(pwd+"/builder/java/route_tmpl")
+	if errFile != nil {
+		fmt.Println("Err is ",errFile.Error())
 	}
-	_, errRoute := routeclientset.Routes(namespace).Create(route)
+
+	var b bytes.Buffer
+	t := template.New("route_tmpl")
+	t, _ = t.Parse(string(tmpl))
+	err := t.Execute(&b, &appConfig)
+	if err != nil {
+		fmt.Println("There was an error:", err.Error())
+	}
+	r := b.String()
+	log.Debug("Route :", r)
+
+	route := routev1.Route{}
+	errYamlParsing := yaml.Unmarshal(b.Bytes(), &route)
+	if errYamlParsing != nil {
+		panic(errYamlParsing)
+	}
+	_, errRoute := routeclientset.Routes(namespace).Create(&route)
 	if errRoute != nil {
 		glog.Fatal("error creating route", errRoute.Error())
 	}
@@ -388,4 +361,68 @@ func supervisordInitContainer() *corev1.Container {
 			},
 		},
 	}
+}
+
+func createService(clientset *kubernetes.Clientset, dc *appsv1.DeploymentConfig) {
+	// generate and create Service
+	var svcPorts []corev1.ServicePort
+	for _, containerPort := range dc.Spec.Template.Spec.Containers[0].Ports {
+		svcPort := corev1.ServicePort{
+
+			Name:       containerPort.Name,
+			Port:       containerPort.ContainerPort,
+			Protocol:   containerPort.Protocol,
+			TargetPort: intstr.FromInt(int(containerPort.ContainerPort)),
+		}
+		svcPorts = append(svcPorts, svcPort)
+	}
+	svc := corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: appConfig.Name,
+			Labels: map[string]string{
+				"app": appConfig.Name,
+			},
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: svcPorts,
+			Selector: map[string]string{
+				"app":              appConfig.Name,
+				"deploymentconfig": appConfig.Name,
+			},
+		},
+	}
+
+	_, errService := clientset.CoreV1().Services(namespace).Create(&svc)
+	if errService != nil {
+		glog.Fatal("unable to create Service for %s", appConfig.Name)
+	}
+}
+
+// CreateRoute creates a route object for the given service and with the given
+// labels
+func createRoute(config *restclient.Config) {
+	routeclientset, errrouteclientset := routeclientset.NewForConfig(config)
+	if errrouteclientset != nil {
+		glog.Fatal("error creating routeclientset", errrouteclientset.Error())
+	}
+	route := &routev1.Route{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:   appConfig.Name,
+			Labels: map[string]string{
+				"app": appConfig.Name,
+			},
+
+		},
+		Spec: routev1.RouteSpec{
+			To: routev1.RouteTargetReference{
+				Kind: "Service",
+				Name: appConfig.Name,
+			},
+		},
+	}
+	_, errRoute := routeclientset.Routes(namespace).Create(route)
+	if errRoute != nil {
+		glog.Fatal("error creating route", errRoute.Error())
+	}
+
 }
