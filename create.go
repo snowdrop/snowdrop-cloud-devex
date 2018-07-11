@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"github.com/golang/glog"
-	"gopkg.in/yaml.v2"
+	"github.com/ghodss/yaml"
 	log "github.com/sirupsen/logrus"
 
 	"k8s.io/client-go/kubernetes"
@@ -92,7 +92,8 @@ func main() {
 	dc := createDeploymentConfig(cfg)
 
 	log.Info("[Step $] - Create Service and route")
-	createService(clientset, dc)
+	//createService(clientset, dc)
+	createServiceTmpl(clientset, dc)
 	createRoute(cfg)
 }
 
@@ -177,8 +178,8 @@ func createServiceTmpl(clientset *kubernetes.Clientset, dc *appsv1.DeploymentCon
 	if err != nil {
 		fmt.Println("There was an error:", err.Error())
 	}
-	//s := b.String()
-	//fmt.Println("Result : ", s)
+	s := b.String()
+	log.Debug("Service :", s)
 
 	svc := corev1.Service{}
 	errYamlParsing := yaml.Unmarshal(b.Bytes(), &svc)
@@ -188,7 +189,7 @@ func createServiceTmpl(clientset *kubernetes.Clientset, dc *appsv1.DeploymentCon
 
 	_, errService := clientset.CoreV1().Services(namespace).Create(&svc)
 	if errService != nil {
-		glog.Fatal("unable to create Service for %s", appConfig.Name)
+		glog.Fatal("Unable to create Service for %s", errService.Error())
 	}
 }
 
