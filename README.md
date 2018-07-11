@@ -25,15 +25,15 @@ List of technical features implemented are :
 
 # Table of Contents
 
-    * [Cloud Native Developer's experience - Prototype](#cloud-native-developers-experience---prototype)
-    * [Table of Contents](#table-of-contents)
-    * [Instructions](#instructions)
-       * [Download the project and install it](#download-the-project-and-install-it)
-       * [Create the deploymentConfig for the local spring Boot project](#create-the-deploymentconfig-for-the-local-spring-boot-project)
-       * [Push the code](#push-the-code)
-       * [Compile and start the Spring Boot Java App](#compile-and-start-the-spring-boot-java-app)
-       * [Clean up](#clean-up)
-       * [Developer section](#developer-section)
+   * [Cloud Native Developer's experience - Prototype](#cloud-native-developers-experience---prototype)
+   * [Table of Contents](#table-of-contents)
+   * [Instructions](#instructions)
+      * [Download the project and install it](#download-the-project-and-install-it)
+      * [Create the deploymentConfig for the local spring Boot project](#create-the-deploymentconfig-for-the-local-spring-boot-project)
+      * [Push the code](#push-the-code)
+      * [Compile and start the Spring Boot Java App](#compile-and-start-the-spring-boot-java-app)
+      * [Clean up](#clean-up)
+      * [Developer section](#developer-section)
  
 # Instructions
 
