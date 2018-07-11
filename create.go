@@ -20,6 +20,8 @@ import (
 	imagev1 "github.com/openshift/api/image/v1"
 	routev1 "github.com/openshift/api/route/v1"
 
+	resource "k8s.io/apimachinery/pkg/api/resource"
+
 	"io/ioutil"
 	"os"
 	"fmt"
@@ -38,6 +40,7 @@ var (
 
 	templateNames = []string{"imagestream","route","service"}
 	templateBuilders = make(map[string]template.Template)
+	appConfig Application
 )
 
 const (
@@ -50,9 +53,12 @@ const (
 )
 
 type Application struct {
-	Name string
-	Port int
-	Image Image
+	Name    string
+	Replica int
+	Cpu     string  `default:"100m"`
+	Memory  string  `default:"250Mi"`
+	Port    int32   `default:"8080"`
+	Image   Image
 }
 
 type Image struct {
@@ -60,7 +66,15 @@ type Image struct {
 	Repo string
 }
 
-var appConfig = Application{}
+
+func NewApplication() Application{
+	return Application{
+		Cpu: "100m",
+		Memory: "250Mi",
+		Replica: 1,
+		Port: 8080,
+	}
+}
 
 func main() {
 	flag.Parse()
@@ -73,6 +87,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	// Create an Application with default values
+	appConfig = NewApplication()
+
 	err = yaml.Unmarshal(source, &appConfig)
 	if err != nil {
 		panic(err)
@@ -148,13 +166,13 @@ func createImageStreamTemplate(config *restclient.Config) {
 		},
 	}
 
+	appCfg := &appConfig
 	for _, img := range images {
 
-		cfg := &appConfig
-		cfg.Image = img
+		appCfg.Image = img
 
 		// Parse ImageStream Template
-		var b = parseTemplate("imagestream",&appConfig)
+		var b = parseTemplate("imagestream",appCfg)
 
 		// Create ImageStream struct using the generated ImageStream string
 		img := imagev1.ImageStream{}
@@ -274,7 +292,7 @@ func javaDeploymentConfig() *appsv1.DeploymentConfig {
 							Name:  appConfig.Name,
 							Ports: []corev1.ContainerPort{
 								{
-									ContainerPort: 8080,
+									ContainerPort: appConfig.Port,
 									Protocol:      corev1.ProtocolTCP,
 								},
 							},
@@ -286,6 +304,12 @@ func javaDeploymentConfig() *appsv1.DeploymentConfig {
 								{
 									Name:  "JAVA_APP_JAR",
 									Value: appImagename + "-1.0-exec.jar",
+								},
+							},
+							Resources: corev1.ResourceRequirements{
+								Limits: corev1.ResourceList{
+									corev1.ResourceCPU: resource.MustParse(appConfig.Cpu),
+									corev1.ResourceMemory: resource.MustParse(appConfig.Memory),
 								},
 							},
 							VolumeMounts: []corev1.VolumeMount{

@@ -1,2 +1,3 @@
 name: spring-boot-supervisord
 port: 8080
+memory: 500Mi
