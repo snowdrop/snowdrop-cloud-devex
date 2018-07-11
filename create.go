@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"text/template"
 	"bytes"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 var (
@@ -43,6 +44,8 @@ const (
 	appImagename         = "spring-boot-http"
 
 	supervisordImageName = "copy-supervisord"
+
+	builderpath          = "/builder/java/"
 )
 
 type Application struct {
@@ -168,29 +171,17 @@ func imageStreams() *[]imagev1.ImageStream {
 }
 
 func createServiceTemplate(clientset *kubernetes.Clientset, dc *appsv1.DeploymentConfig) {
-	// Create Template and parse it
-	pwd, _ := os.Getwd()
-	tmpl, errFile := ioutil.ReadFile(pwd+"/builder/java/service_tmpl")
-	if errFile != nil {
-		fmt.Println("Err is ",errFile.Error())
-	}
+	// Parse Service Template
+	var b = parseTemplate("service_tmpl")
 
-	var b bytes.Buffer
-	t := template.New("service_tmpl")
-	t, _ = t.Parse(string(tmpl))
-	err := t.Execute(&b, &appConfig)
-	if err != nil {
-		fmt.Println("There was an error:", err.Error())
-	}
-	s := b.String()
-	log.Debug("Service :", s)
-
+	// Create Service struct using the generated Service string
 	svc := corev1.Service{}
 	errYamlParsing := yaml.Unmarshal(b.Bytes(), &svc)
 	if errYamlParsing != nil {
 		panic(errYamlParsing)
 	}
 
+	// Create the Service
 	_, errService := clientset.CoreV1().Services(namespace).Create(&svc)
 	if errService != nil {
 		glog.Fatal("Unable to create Service for %s", errService.Error())
@@ -203,33 +194,41 @@ func createRouteTemplate(config *restclient.Config) {
 		glog.Fatal("error creating routeclientset", errrouteclientset.Error())
 	}
 
-	// Create Template and parse it
-	pwd, _ := os.Getwd()
-	tmpl, errFile := ioutil.ReadFile(pwd+"/builder/java/route_tmpl")
-	if errFile != nil {
-		fmt.Println("Err is ",errFile.Error())
-	}
+	// Parse Route Template
+	var b = parseTemplate("route_tmpl")
 
-	var b bytes.Buffer
-	t := template.New("route_tmpl")
-	t, _ = t.Parse(string(tmpl))
-	err := t.Execute(&b, &appConfig)
-	if err != nil {
-		fmt.Println("There was an error:", err.Error())
-	}
-	r := b.String()
-	log.Debug("Route :", r)
-
+	// Create Route struct using the generated Route string
 	route := routev1.Route{}
 	errYamlParsing := yaml.Unmarshal(b.Bytes(), &route)
 	if errYamlParsing != nil {
 		panic(errYamlParsing)
 	}
+
+	// Create the route ...
 	_, errRoute := routeclientset.Routes(namespace).Create(&route)
 	if errRoute != nil {
 		glog.Fatal("error creating route", errRoute.Error())
 	}
 
+}
+
+func parseTemplate(tmpl string) bytes.Buffer {
+	// Create Template and parse it
+	pwd, _ := os.Getwd()
+	tfile, errFile := ioutil.ReadFile(pwd+builderpath+"/"+tmpl)
+	if errFile != nil {
+		fmt.Println("Err is ",errFile.Error())
+	}
+
+	var b bytes.Buffer
+	t := template.New(tmpl)
+	t, _ = t.Parse(string(tfile))
+	err := t.Execute(&b, &appConfig)
+	if err != nil {
+		fmt.Println("There was an error:", err.Error())
+	}
+	log.Debug("Generated from ",tmpl,":",b.String())
+	return b
 }
 
 func createDeploymentConfig(config *restclient.Config) *appsv1.DeploymentConfig {
