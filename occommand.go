@@ -33,9 +33,7 @@ func init() {
 
 func ExecOcCommand(command OcCommand) {
 	cmd := exec.Command(client.ocpath, command.args...)
-	output, errCmd := cmd.CombinedOutput()
-	if errCmd != nil {
-		log.Debug("Error running command")
-	}
-	log.Info(string(output))
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Run()
 }

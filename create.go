@@ -140,7 +140,6 @@ func main() {
 
 	log.Info("[Step 7] - Start compilation")
 	ExecOcCommand(OcCommand{args: []string{"rsh",podName,"/var/lib/supervisord/bin/supervisord","ctl","start","compile-java"}})
-	// TODO HOW TO GET LOG
 	ExecOcCommand(OcCommand{args: []string{"logs",podName,"-f"}})
 
 }
