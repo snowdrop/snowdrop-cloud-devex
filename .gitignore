@@ -2,7 +2,4 @@
 .vscode/
 .DS_Store
 
-
-Gopkg.lock
-vendor/
 */target
