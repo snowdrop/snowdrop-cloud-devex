@@ -45,6 +45,7 @@ const (
 	namespace            = "k8s-supervisord"
 
 	appImagename         = "spring-boot-http"
+	version              = "1.0"
 	supervisordimagename = "copy-supervisord"
 
 	builderpath          = "/builder/java/"
@@ -300,7 +301,7 @@ func javaDeploymentConfig() *appsv1.DeploymentConfig {
 								},
 								{
 									Name:  "JAVA_APP_JAR",
-									Value: appImagename + "-1.0-exec.jar",
+									Value: appImagename + "-" + version + ".jar",
 								},
 							},
 /*							Resources: corev1.ResourceRequirements{
