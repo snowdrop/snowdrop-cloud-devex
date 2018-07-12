@@ -6,6 +6,7 @@ ENV GOPATH /go
 #copy the source file
 WORKDIR /supervisord/
 COPY conf/ conf/
+COPY execute.sh .
 COPY main.go .
 
 #compile the project to generate bootstrap
@@ -20,9 +21,8 @@ ARG SUPERVISORD_DIR=/opt/supervisord
 RUN mkdir -p ${SUPERVISORD_DIR}/conf ${SUPERVISORD_DIR}/bin
 
 COPY --from=builder /supervisord/bootstrap ${SUPERVISORD_DIR}/bin/
+COPY --from=builder /supervisord/execute.sh ${SUPERVISORD_DIR}/bin/
 COPY --from=builder /supervisord/conf/ ${SUPERVISORD_DIR}/
-
-RUN echo "VERSION :" ${VERSION}
 
 #add the go supervisord application
 ADD https://github.com/ochinchina/supervisord/releases/download/v${VERSION}/supervisord_${VERSION}_linux_amd64 ${SUPERVISORD_DIR}/bin/supervisord
@@ -32,7 +32,8 @@ RUN chgrp -R 0 ${SUPERVISORD_DIR} && \
     chmod -R 666 ${SUPERVISORD_DIR}/conf/* && \
     chmod 775 ${SUPERVISORD_DIR}/bin/supervisord && \
     chmod 775 ${SUPERVISORD_DIR}/bin/bootstrap && \
+    chmod 775 ${SUPERVISORD_DIR}/bin/execute.sh && \
     chmod 775 ${SUPERVISORD_DIR}/conf/echo.sh
 
 WORKDIR ${SUPERVISORD_DIR}
-ENTRYPOINT ["/opt/supervisord/bin/bootstrap"]
+ENTRYPOINT ["/opt/supervisord/bin/execute.sh"]
