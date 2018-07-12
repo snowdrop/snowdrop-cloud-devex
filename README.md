@@ -69,34 +69,39 @@ The following chapter describes how we have technically implemented such user's 
 
 - Verify if the `initContainer` has been injected within the `DeploymentConfig`
 
-  ```bash
-  oc get dc/spring-boot-supervisord -o yaml | grep -A 25 initContainer
+ ```bash
+oc get dc/spring-boot-supervisord -o json | jq '.spec.template.spec.initContainers[0]'
   
-  initContainers:
-  - args:
-    - -r
-    - /opt/supervisord
-    - ' /var/lib/'
-    command:
-    - /usr/bin/cp
-    image: 172.30.1.1:5000/k8s-supervisord/copy-supervisord:1.0
-    imagePullPolicy: Always
-    name: copy-supervisord
-    resources: {}
-    terminationMessagePath: /dev/termination-log
-    terminationMessagePolicy: File
-    volumeMounts:
-    - mountPath: /var/lib/supervisord
-      name: shared-data
-  restartPolicy: Always
-  schedulerName: default-scheduler
-  securityContext: {}
-  terminationGracePeriodSeconds: 30
-  volumes:
-  - emptyDir: {}
-    name: shared-data
-  ...
-  ```
+{
+  "args": [
+    "/usr/bin/cp",
+    "-r",
+    "/opt/supervisord",
+    "/var/lib/"
+  ],
+  "command": [
+    "/bin/busybox"
+  ],
+  "env": [
+    {
+      "name": "CMDS",
+      "value": "echo:/var/lib/supervisord/conf/echo.sh;run-java:/usr/local/s2i/run;compile-java:/usr/local/s2i/assemble"
+    }
+  ],
+  "image": "quay.io/snowdrop/supervisord@sha256:2dcbb278ae2716442dc7cdf4e78b7854ae4bcfcec131d1bc05638af6679ad044",
+  "imagePullPolicy": "Always",
+  "name": "copy-supervisord",
+  "resources": {},
+  "terminationMessagePath": "/dev/termination-log",
+  "terminationMessagePolicy": "File",
+  "volumeMounts": [
+    {
+      "mountPath": "/var/lib/supervisord",
+      "name": "shared-data"
+    }
+  ]
+}
+```
   
 ## Push the code  
   
