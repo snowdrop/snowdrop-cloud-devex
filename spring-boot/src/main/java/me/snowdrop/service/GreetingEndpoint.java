@@ -13,23 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.openshift.booster.service;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+
 import org.springframework.stereotype.Component;
 
+@Path("/greeting")
 @Component
-@ConfigurationProperties("greeting")
-public class GreetingProperties {
-
-    private String message = "Hello, %s!";
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
+public class GreetingEndpoint {
+    @GET
+    @Produces("application/json")
+    public Greeting greeting(@QueryParam("name") @DefaultValue("World") String name) {
+        final String message = String.format(Greeting.FORMAT, name);
+        return new Greeting(message);
     }
 }
