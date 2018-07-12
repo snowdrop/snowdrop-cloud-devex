@@ -20,8 +20,6 @@ import (
 	imagev1 "github.com/openshift/api/image/v1"
 	routev1 "github.com/openshift/api/route/v1"
 
-	resource "k8s.io/apimachinery/pkg/api/resource"
-
 	"io/ioutil"
 	"os"
 	"fmt"
@@ -65,7 +63,6 @@ type Image struct {
 	Name string
 	Repo string
 }
-
 
 func NewApplication() Application{
 	return Application{
@@ -306,12 +303,12 @@ func javaDeploymentConfig() *appsv1.DeploymentConfig {
 									Value: appImagename + "-1.0-exec.jar",
 								},
 							},
-							Resources: corev1.ResourceRequirements{
+/*							Resources: corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU: resource.MustParse(appConfig.Cpu),
 									corev1.ResourceMemory: resource.MustParse(appConfig.Memory),
 								},
-							},
+							},*/
 							VolumeMounts: []corev1.VolumeMount{
 								{
 									Name:      "shared-data",
@@ -373,8 +370,6 @@ func supervisordInitContainer() *corev1.Container {
 	return &corev1.Container{
 		Name:    "copy-supervisord",
 		Image:   supervisordimagename + ":latest",
-		Command: []string{"/bin/busybox"},
-		Args:    []string{"/usr/bin/cp", "-r", "/opt/supervisord", "/var/lib/"},
 		VolumeMounts: []corev1.VolumeMount{
 			{
 				Name:      "shared-data",
@@ -385,7 +380,7 @@ func supervisordInitContainer() *corev1.Container {
 		Env: []corev1.EnvVar{
 			{
 				Name:  "CMDS",
-				Value: "echo:/var/lib/supervisord/conf/echo.sh;run-java:/usr/local/s2i/run;compile-java:/usr/local/s2i/assemble",
+				Value: "echo:/var/lib/supervisord/conf/echo.sh;run-java:/usr/local/s2i/run;compile-java:/usr/local/s2i/assemble;build:/deployments/buildapp",
 			},
 		},
 	}
