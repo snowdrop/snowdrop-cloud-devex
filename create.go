@@ -26,14 +26,15 @@ import (
 	"text/template"
 	"bytes"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"github.com/pkg/errors"
 )
 
 var (
 	masterURL  string
 	kubeconfig string
 
-	filter = metav1.ListOptions{
-		LabelSelector: "io.openshift.odo=inject-supervisord",
+	podSelector = metav1.ListOptions{
+		LabelSelector: "app=spring-boot-supervisord",
 	}
 
 	templateNames = []string{"imagestream","route","service"}
@@ -106,27 +107,42 @@ func main() {
 		glog.Fatalf("Error building kubeconfig: %s", err.Error())
 	}
 
-
-	log.Info("[Step 2] - Create ImageStreams for Supervisord and Java S2I Image of SpringBoot")
-	//createImageStreams(cfg)
-	createImageStreamTemplate(cfg)
-	//panic("WE STOP")
-
-    log.Info("[Step 3] - Create DeploymentConfig using Supervisord and Java S2I Image of SpringBoot")
-	dc := createDeploymentConfig(cfg)
-
-	// log.Info("[Step 4] - Create Service and route")
-	// createService(clientset, dc)
-	// createRoute(cfg)
-
 	clientset, errclientset := kubernetes.NewForConfig(cfg)
 	if errclientset != nil {
 		glog.Fatalf("Error building kubernetes clientset: %s", errclientset.Error())
 	}
 
+	log.Info("[Step 2] - Create ImageStreams for Supervisord and Java S2I Image of SpringBoot")
+	//createImageStreams(cfg)
+	createImageStreamTemplate(cfg)
+
+    log.Info("[Step 3] - Create DeploymentConfig using Supervisord and Java S2I Image of SpringBoot")
+	dc := createDeploymentConfig(cfg)
+
 	log.Info("[Step 4] - Create Service and route using Templates")
 	createServiceTemplate(clientset, dc)
 	createRouteTemplate(cfg)
+
+	log.Info("[Step 5] - Watch about Development's pod ...")
+	pod, err := WaitAndGetPod(clientset,podSelector)
+	if err != nil {
+		log.Error("Pod watch error",err)
+	}
+
+	podName := pod.Name
+
+	log.Info("[Step 6] - Copy files from Development projects to the pod")
+	ExecOcCommand(OcCommand{args: []string{"cp",client.pwd+"/spring-boot/"+"pom.xml",podName+":/tmp/src/","-c","spring-boot-supervisord"}})
+	ExecOcCommand(OcCommand{args: []string{"cp",client.pwd+"/spring-boot/"+"src",podName+":/tmp/src/","-c","spring-boot-supervisord"}})
+
+	log.Info("[Step 7] - Check status of the supervisord's daemon")
+	ExecOcCommand(OcCommand{args: []string{"rsh",podName,"/var/lib/supervisord/bin/supervisord","ctl","status"}})
+
+	log.Info("[Step 7] - Start compilation")
+	ExecOcCommand(OcCommand{args: []string{"rsh",podName,"/var/lib/supervisord/bin/supervisord","ctl","start","compile-java"}})
+	// TODO HOW TO GET LOG
+	ExecOcCommand(OcCommand{args: []string{"logs",podName,"-f"}})
+
 }
 
 func init() {
@@ -146,6 +162,34 @@ func init() {
 		t, _ = t.Parse(string(tfile))
 		templateBuilders[templateNames[tmpl]] = *t
 	}
+}
+
+// WaitAndGetPod block and waits until pod matching selector is in in Running state
+func WaitAndGetPod(c *kubernetes.Clientset, selector metav1.ListOptions) (*corev1.Pod, error) {
+	log.Debugf("Waiting for %s pod", selector)
+
+	w, err := c.CoreV1().Pods(namespace).Watch(selector)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to watch pod")
+	}
+	defer w.Stop()
+	for {
+		val, ok := <-w.ResultChan()
+		if !ok {
+			break
+		}
+		if e, ok := val.Object.(*corev1.Pod); ok {
+			log.Debugf("Status of %s pod is %s", e.Name, e.Status.Phase)
+			switch e.Status.Phase {
+			case corev1.PodRunning:
+				log.Debugf("Pod %s is running.", e.Name)
+				return e, nil
+			case corev1.PodFailed, corev1.PodUnknown:
+				return nil, errors.Errorf("pod %s status %s", e.Name, e.Status.Phase)
+			}
+		}
+	}
+	return nil, errors.Errorf("unknown error while waiting for pod matchin '%s' selector", selector)
 }
 
 func createImageStreamTemplate(config *restclient.Config) {

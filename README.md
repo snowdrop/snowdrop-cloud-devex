@@ -61,7 +61,7 @@ The following chapter describes how we have technically implemented such user's 
   - Path to access the `MANIFEST` file of the Application
 
   ```bash
-  go run create.go -kubeconfig=$HOME/.kube/config spring-boot/MANIFEST
+  go run *.go -kubeconfig=$HOME/.kube/config spring-boot/MANIFEST
   INFO[0000] [Step 1] - Create Kube Client & Clientset    
   INFO[0000] [Step 2] - Create ImageStreams for Supervisord and Java S2I Image of SpringBoot 
   INFO[0000] [Step 3] - Create DeploymentConfig using Supervisord and Java S2I Image of SpringBoot 
@@ -145,7 +145,7 @@ The following chapter describes how we have technically implemented such user's 
   oc delete all --all
   ```  
     
-## Developer section
+## Developer sectionoc logs $SB_POD -f 
 
 - Export Docker ENV var to access the docker daemon
   ```bash
