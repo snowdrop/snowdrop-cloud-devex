@@ -164,7 +164,8 @@ The following chapter describes how we have technically implemented such user's 
 - Tag the docker image and push it to `quay.io`
 
   ```bash
-  docker tag b74c32ba6bd8 quay.io/snowdrop/supervisord
+  TAG_ID=$(docker images -q cmoulliard/copy-supervisord:latest)
+  docker tag $TAG_ID quay.io/snowdrop/supervisord
   docker login quai.io
   docker push quay.io/snowdrop/supervisord
   ```
