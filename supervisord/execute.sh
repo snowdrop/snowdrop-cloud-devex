@@ -1,8 +1,9 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-# Execute the Bootstrap application generating the supervisord's conf file
+#set -x
+
 echo "Call the application generating the supervisord's conf file"
 /opt/supervisord/bin/bootstrap
 
-# Copy files to their target location
-/usr/bin/cp -r /opt/supervisord /var/lib/
+echo "Copy supervisord files to their target location"
+cp -r /opt/supervisord /var/lib/
