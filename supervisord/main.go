@@ -22,10 +22,11 @@ type Program struct {
 
 func main() {
 	// Read Supervisord.tmpl file
+	log.Println("Read Supervisord.tmpl file")
 	currentDir, err := os.Getwd()
 	f, err := os.Open(currentDir + "/" + templateFile)
 	if err != nil {
-		panic(err)
+		log.Fatal("Can't read template file",err.Error())
 	}
 	// Close file on exit
 	defer f.Close()
@@ -33,23 +34,26 @@ func main() {
 	// Read file content
 	data, err := ioutil.ReadAll(f)
 	if err != nil {
-		panic(err)
+		log.Fatal(err.Error())
 	}
 
 	// Recuperate ENV vars and split them / command
+	log.Println("Recuperate ENV vars and split them / command")
 	m := make(map[string][]Program)
 	if cmdsEnv := os.Getenv("CMDS"); cmdsEnv != "" {
 		cmds := strings.Split(cmdsEnv,";")
 		for i := range cmds {
 			cmd := strings.Split(cmds[i], ":")
+			log.Println("Command : ",cmd)
 			p := Program{cmd[0], cmd[1]}
 			m["cmd-" + string(i)] = append(m["cmd-" + string(i)],p)
 		}
 	} else {
-		panic("No commands provided !")
+		log.Fatal("No commands provided !")
 	}
 
-	// Create a template
+	// Create a template to parse supervisord file
+	log.Println("Create a template to parse supervisord file")
 	t := template.New("Supervisord template")
 	t, _ = t.Parse(string(data)) //parse it
 
@@ -65,6 +69,7 @@ func main() {
 	defer outFile.Close()
 
 	// Write template result to the supervisord.conf
+	log.Println("Parse template file and generate result")
 	error := t.Execute(outFile, m)
 	if error != nil {
 		log.Fatal(error)
