@@ -18,6 +18,7 @@ var initCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		log.Info("Init called")
+		log.Debug("Next action to be performed is ....")
 
 		// Retrieve stdout / io.Writer
 		//stdout := os.Stdout

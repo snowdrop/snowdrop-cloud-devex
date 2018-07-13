@@ -13,3 +13,12 @@ type Image struct {
 	Name string
 	Repo string
 }
+
+func NewApplication() Application {
+	return Application{
+		Cpu: "100m",
+		Memory: "250Mi",
+		Replica: 1,
+		Port: 8080,
+	}
+}

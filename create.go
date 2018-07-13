@@ -10,6 +10,7 @@ import (
 
 	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack/types"
 	"github.com/cmoulliard/k8s-supervisor/pkg/common/oc"
+	"github.com/cmoulliard/k8s-supervisor/pkg/common/logger"
 
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
@@ -29,6 +30,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	imagev1 "github.com/openshift/api/image/v1"
 	routev1 "github.com/openshift/api/route/v1"
+	"encoding/json"
 )
 
 var (
@@ -54,15 +56,6 @@ const (
 	builderpath          = "/builder/java/"
 )
 
-func NewApplication() types.Application {
-	return types.Application{
-		Cpu: "100m",
-		Memory: "250Mi",
-		Replica: 1,
-		Port: 8080,
-	}
-}
-
 func main() {
 	flag.Parse()
 
@@ -76,7 +69,7 @@ func main() {
 	}
 
 	// Create an Application with default values
-	appConfig = NewApplication()
+	appConfig = types.NewApplication()
 
 	err = yaml.Unmarshal(source, &appConfig)
 	if err != nil {
@@ -84,8 +77,8 @@ func main() {
 	}
 	log.Debug("Application's config")
 	log.Debug("--------------------")
-	log.Debug("Name : ", appConfig.Name)
-	log.Debug("Port : ", appConfig.Port)
+	appFormatted, _ := json.Marshal(appConfig)
+	log.Debug(string(appFormatted))
 
 	log.Info("[Step 1] - Create Kube Client & Clientset")
 
@@ -135,6 +128,9 @@ func main() {
 func init() {
 	flag.StringVar(&kubeconfig, "kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
 	flag.StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
+
+	// Enable Debug if env var is defined
+	logger.EnableLogLevelDebug()
 
 	// Fill an array with our Builder's text/template
 	for tmpl := range templateNames {
