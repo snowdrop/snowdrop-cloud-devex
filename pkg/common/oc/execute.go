@@ -1,6 +1,5 @@
 package oc
 
-import "C"
 import (
 	"os"
 	"os/exec"
@@ -18,7 +17,7 @@ type Command struct {
 	Format string
 }
 
-func getOcClient() string {
+func getClientPath() string {
 	// Search for oc client
 	ocpath, err := exec.LookPath("oc")
 	if err != nil {
@@ -28,12 +27,12 @@ func getOcClient() string {
 }
 
 func init() {
-	Client.Path   = getOcClient()
+	Client.Path   = getClientPath()
 	Client.Pwd, _ = os.Getwd()
 }
 
 func ExecCommand(command Command) {
-	cmd := exec.Command(client.ocpath, command.Args...)
+	cmd := exec.Command(Client.Path, command.Args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Run()

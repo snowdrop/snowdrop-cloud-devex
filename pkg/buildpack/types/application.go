@@ -2,6 +2,7 @@ package types
 
 type Application struct {
 	Name    string
+	Namespace string
 	Replica int
 	Cpu     string  `default:"100m"`
 	Memory  string  `default:"250Mi"`

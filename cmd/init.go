@@ -3,11 +3,15 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/cmoulliard/k8s-supervisor/pkg/common/config"
+	"github.com/cmoulliard/k8s-supervisor/pkg/common/oc"
+	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack/types"
+	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
-var (
-	Namespace string
-)
+var namespace string
 
 var initCmd = &cobra.Command{
 	Use:   "init [flags]",
@@ -17,39 +21,48 @@ var initCmd = &cobra.Command{
 	Args: cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 
-		log.Info("Init called")
-		log.Debug("Next action to be performed is ....")
+		log.Info("Init command called")
+		log.Debug("Namespace : ", namespace)
 
-		// Retrieve stdout / io.Writer
-		//stdout := os.Stdout
+		application := types.Application{
+			Namespace: namespace,
+			// TODO -> Remove hard coded value
+			Name: "spring-boot-http",
+		}
 
-		// Retrieve the client
-		// client := getOcClient()
+		// Get K8s' config file
+		var kubeCfg = config.NewKube()
+		if cmd.Flag("kubeconfig").Value.String() == "" {
+			kubeCfg.Config = config.HomeKubePath()
+		} else {
+			kubeCfg.Config = cmd.Flag("kubeconfig").Value.String()
+		}
+		log.Debug("Kubeconfig : ",kubeCfg)
 
-		// Application
-		// currentApplication, err := application.GetCurrent(client)
-		//checkError(err, "")
+		// Execute oc command to switch to the namespace defined
+		log.Info("[Step 1] - Get k8s default's namespace")
+		oc.ExecCommand(oc.Command{Args: []string{"project",application.Namespace}})
 
-		// Project
-		// currentProject := project.GetCurrent(client)
+		// Create Kube Rest's Config Client
+		log.Info("[Step 2] - Create kube Rest config client using config's file of the developer's machine")
+		kubeRestClient, err := clientcmd.BuildConfigFromFlags(kubeCfg.MasterURL, kubeCfg.Config)
+		if err != nil {
+			log.Fatalf("Error building kubeconfig: %s", err.Error())
+		}
 
-		//var argComponent string
+		// Create ImageStream
+		log.Info("[Step 3] - Create ImageStreams for Supervisord and Java S2I Image of SpringBoot")
+		buildpack.CreateImageStreamTemplate(kubeRestClient,application)
 
-		//if len(args) == 1 {
-		//	argComponent = args[0]
-		//}
-
-		// Retrieve and set the currentComponent
-		// currentComponent := getComponent(client, argComponent, currentApplication, currentProject)
-
-		// Retrieve the log
-		// err = component.GetLogs(client, currentComponent, currentApplication, logFollow, stdout)
-		//checkError(err, "Unable to retrieve logs, does your component exist?")
+		/*		clientset, errclientset := kubernetes.NewForConfig(kubeRestClient)
+		if errclientset != nil {
+			log.Fatalf("Error building kubernetes clientset: %s", errclientset.Error())
+		}*/
 	},
 }
 
 func init() {
-	initCmd.Flags().StringP("namespace", "n","",  "Namespace/project")
+	initCmd.Flags().StringVarP(&namespace,"namespace", "n","",  "Namespace/project")
 	initCmd.MarkFlagRequired("namespace")
 
 	// Add a defined annotation in order to appear in the help menu
