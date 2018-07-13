@@ -12,6 +12,7 @@ type Application struct {
 
 type Image struct {
 	Name string
+	AnnotationCmds bool
 	Repo string
 }
 

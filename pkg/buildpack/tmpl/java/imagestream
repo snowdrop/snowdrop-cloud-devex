@@ -8,7 +8,11 @@ spec:
   lookupPolicy:
     local: false
   tags:
-  - from:
+  - {{if .Image.AnnotationCmds}}
+    annotations:
+      cmds: "run-java:/usr/local/s2i/run;compile-java:/usr/local/s2i/assemble;build:/deployments/buildapp"
+    {{end}}
+    from:
       kind: DockerImage
       name: {{.Image.Repo}}
     importPolicy: {}

@@ -30,6 +30,7 @@ func CreateImageStreamTemplate(config *restclient.Config, appConfig types.Applic
 		{
 			Name: supervisordimagename,
 			Repo: "quay.io/snowdrop/supervisord",
+			AnnotationCmds: true,
 		},
 	}
 
