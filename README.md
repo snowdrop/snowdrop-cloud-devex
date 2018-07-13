@@ -32,11 +32,12 @@ The following chapter describes how we have technically implemented such user's 
    * [Table of Contents](#table-of-contents)
    * [Instructions](#instructions)
       * [Download the project and install it](#download-the-project-and-install-it)
-      * [Create the deploymentConfig using a local spring Boot project](#create-the-deploymentconfig-using-a-local-spring-boot-project)
+      * [Create the resources on OpenShift to compile/run your Spring Boot application](#create-the-resources-on-openshift-to-compilerun-your-spring-boot-application)
       * [Push the code](#push-the-code)
-      * [Compile and start the Spring Boot Java App](#compile-and-start-the-spring-boot-java-app)
+      * [Compile the Spring Boot Java App](#compile-the-spring-boot-java-app)
+      * [Start the java application and curl the endpoint](#start-the-java-application-and-curl-the-endpoint)
       * [Clean up](#clean-up)
-      * [Developer section](#developer-section)
+      * [Developer section to build the images](#developer-section-to-build-the-images)
  
 # Instructions
 
