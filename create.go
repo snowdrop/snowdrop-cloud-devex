@@ -1,32 +1,33 @@
 package main
 
 import (
+	"io/ioutil"
+	"os"
+	"fmt"
+	"text/template"
+	"bytes"
 	"flag"
-	"github.com/golang/glog"
+
+	"github.com/cmoulliard/k8s-supervisor/pkg/common/oc"
+
 	"github.com/ghodss/yaml"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
-
 	restclient "k8s.io/client-go/rest"
+	
 	appsocpv1 "github.com/openshift/client-go/apps/clientset/versioned/typed/apps/v1"
 	imageclientsetv1 "github.com/openshift/client-go/image/clientset/versioned/typed/image/v1"
-	routeclientset "github.com/openshift/client-go/route/clientset/versioned/typed/route/v1"
+	routeclientsetv1 "github.com/openshift/client-go/route/clientset/versioned/typed/route/v1"
 
 	appsv1 "github.com/openshift/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	imagev1 "github.com/openshift/api/image/v1"
 	routev1 "github.com/openshift/api/route/v1"
-
-	"io/ioutil"
-	"os"
-	"fmt"
-	"text/template"
-	"bytes"
-	"k8s.io/apimachinery/pkg/util/intstr"
-	"github.com/pkg/errors"
 )
 
 var (
@@ -104,12 +105,12 @@ func main() {
 	// Build kube config using kube config folder on the developer's machine
 	cfg, err := clientcmd.BuildConfigFromFlags(masterURL, kubeconfig)
 	if err != nil {
-		glog.Fatalf("Error building kubeconfig: %s", err.Error())
+		log.Fatalf("Error building kubeconfig: %s", err.Error())
 	}
 
 	clientset, errclientset := kubernetes.NewForConfig(cfg)
 	if errclientset != nil {
-		glog.Fatalf("Error building kubernetes clientset: %s", errclientset.Error())
+		log.Fatalf("Error building kubernetes clientset: %s", errclientset.Error())
 	}
 
 	log.Info("[Step 2] - Create ImageStreams for Supervisord and Java S2I Image of SpringBoot")
@@ -132,15 +133,15 @@ func main() {
 	podName := pod.Name
 
 	log.Info("[Step 6] - Copy files from Development projects to the pod")
-	ExecOcCommand(OcCommand{args: []string{"cp",client.pwd+"/spring-boot/"+"pom.xml",podName+":/tmp/src/","-c","spring-boot-supervisord"}})
-	ExecOcCommand(OcCommand{args: []string{"cp",client.pwd+"/spring-boot/"+"src",podName+":/tmp/src/","-c","spring-boot-supervisord"}})
+	oc.ExecCommand(oc.Command{Args: []string{"cp",oc.Client.Pwd+"/spring-boot/"+"pom.xml",podName+":/tmp/src/","-c","spring-boot-supervisord"}})
+	oc.ExecCommand(oc.Command{Args: []string{"cp",oc.Client.Pwd+"/spring-boot/"+"src",podName+":/tmp/src/","-c","spring-boot-supervisord"}})
 
 	log.Info("[Step 7] - Check status of the supervisord's daemon")
-	ExecOcCommand(OcCommand{args: []string{"rsh",podName,"/var/lib/supervisord/bin/supervisord","ctl","status"}})
+	oc.ExecCommand(oc.Command{Args: []string{"rsh",podName,"/var/lib/supervisord/bin/supervisord","ctl","status"}})
 
 	log.Info("[Step 7] - Start compilation")
-	ExecOcCommand(OcCommand{args: []string{"rsh",podName,"/var/lib/supervisord/bin/supervisord","ctl","start","compile-java"}})
-	ExecOcCommand(OcCommand{args: []string{"logs",podName,"-f"}})
+	oc.ExecCommand(oc.Command{Args: []string{"rsh",podName,"/var/lib/supervisord/bin/supervisord","ctl","start","compile-java"}})
+	oc.ExecCommand(oc.Command{Args: []string{"logs",podName,"-f"}})
 
 }
 
@@ -224,7 +225,7 @@ func createImageStreamTemplate(config *restclient.Config) {
 
 		_, errImages := imageClient.ImageStreams(namespace).Create(&img)
 		if errImages != nil {
-			glog.Fatal("Unable to create ImageStream for %s", errImages.Error())
+			log.Fatal("Unable to create ImageStream for %s", errImages.Error())
 		}
 	}
 
@@ -244,14 +245,14 @@ func createServiceTemplate(clientset *kubernetes.Clientset, dc *appsv1.Deploymen
 	// Create the Service
 	_, errService := clientset.CoreV1().Services(namespace).Create(&svc)
 	if errService != nil {
-		glog.Fatal("Unable to create Service for %s", errService.Error())
+		log.Fatal("Unable to create Service for %s", errService.Error())
 	}
 }
 
 func createRouteTemplate(config *restclient.Config) {
-	routeclientset, errrouteclientset := routeclientset.NewForConfig(config)
-	if errrouteclientset != nil {
-		glog.Fatal("error creating routeclientset", errrouteclientset.Error())
+	routeclientsetv1, errrouteclientsetv1 := routeclientsetv1.NewForConfig(config)
+	if errrouteclientsetv1 != nil {
+		log.Fatal("error creating routeclientsetv1", errrouteclientsetv1.Error())
 	}
 
 	// Parse Route Template
@@ -265,9 +266,9 @@ func createRouteTemplate(config *restclient.Config) {
 	}
 
 	// Create the route ...
-	_, errRoute := routeclientset.Routes(namespace).Create(&route)
+	_, errRoute := routeclientsetv1.Routes(namespace).Create(&route)
 	if errRoute != nil {
-		glog.Fatal("error creating route", errRoute.Error())
+		log.Fatal("error creating route", errRoute.Error())
 	}
 
 }
@@ -288,12 +289,12 @@ func parseTemplate(tmpl string, cfg *Application) bytes.Buffer {
 func createDeploymentConfig(config *restclient.Config) *appsv1.DeploymentConfig {
 	deploymentConfigV1client, err := appsocpv1.NewForConfig(config)
 	if err != nil {
-		glog.Fatalf("Can't get DeploymentConfig Clientset: %s", err.Error())
+		log.Fatalf("Can't get DeploymentConfig Clientset: %s", err.Error())
 	}
 
 	dc, errCreate := deploymentConfigV1client.DeploymentConfigs(namespace).Create(javaDeploymentConfig())
 	if errCreate != nil {
-		glog.Fatalf("DeploymentConfig not created: %s", errCreate.Error())
+		log.Fatalf("DeploymentConfig not created: %s", errCreate.Error())
 	}
 
 	return dc
@@ -523,16 +524,16 @@ func createService(clientset *kubernetes.Clientset, dc *appsv1.DeploymentConfig)
 
 	_, errService := clientset.CoreV1().Services(namespace).Create(&svc)
 	if errService != nil {
-		glog.Fatal("unable to create Service for %s", appConfig.Name)
+		log.Fatal("unable to create Service for %s", appConfig.Name)
 	}
 }
 
 // CreateRoute creates a route object for the given service and with the given
 // labels
 func createRoute(config *restclient.Config) {
-	routeclientset, errrouteclientset := routeclientset.NewForConfig(config)
-	if errrouteclientset != nil {
-		glog.Fatal("error creating routeclientset", errrouteclientset.Error())
+	routeclientsetv1, errrouteclientsetv1 := routeclientsetv1.NewForConfig(config)
+	if errrouteclientsetv1 != nil {
+		log.Fatal("error creating routeclientsetv1", errrouteclientsetv1.Error())
 	}
 	route := &routev1.Route{
 		ObjectMeta: metav1.ObjectMeta{
@@ -549,9 +550,9 @@ func createRoute(config *restclient.Config) {
 			},
 		},
 	}
-	_, errRoute := routeclientset.Routes(namespace).Create(route)
+	_, errRoute := routeclientsetv1.Routes(namespace).Create(route)
 	if errRoute != nil {
-		glog.Fatal("error creating route", errRoute.Error())
+		log.Fatal("error creating route", errRoute.Error())
 	}
 
 }
