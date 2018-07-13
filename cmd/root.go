@@ -9,6 +9,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	namespace string
+)
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "odo",
@@ -29,6 +33,9 @@ Find more information at https://github.com/redhat-developer/odo`,
 func init() {
 	rootCmd.PersistentFlags().StringP("kubeconfig", "k", "","Path to a kubeconfig ($HOME/.kube/config). Only required if out-of-cluster.")
 	rootCmd.PersistentFlags().StringP("masterurl", "m", "","The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
+	rootCmd.PersistentFlags().StringVarP(&namespace,"namespace", "n","",  "Namespace/project")
+	rootCmd.MarkFlagRequired("namespace")
+	pushCmd.MarkFlagRequired("namespace")
 }
 
 func Execute() {

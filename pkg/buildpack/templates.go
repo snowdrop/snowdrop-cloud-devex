@@ -3,12 +3,13 @@ package buildpack
 import (
 	"text/template"
 	"io/ioutil"
-	"os"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack/types"
 	"bytes"
 	"fmt"
+	"runtime"
+	"path"
 )
 
 var (
@@ -17,15 +18,15 @@ var (
 )
 
 const (
-	builderpath = "/builder/java/"
+	builderpath = "tmpl/java/"
 )
 
 func init() {
 	// Fill an array with our Builder's text/template
 	for tmpl := range templateNames {
-		pwd, _ := os.Getwd()
+		buildPackDir := packageDirectory()
 		// Create Template and parse it
-		tfile, errFile := ioutil.ReadFile(pwd+builderpath+"/"+templateNames[tmpl])
+		tfile, errFile := ioutil.ReadFile( buildPackDir + "/" + builderpath + templateNames[tmpl])
 		log.Debug("Template File :",tfile)
 		if errFile != nil {
 			log.Error("Err is ",errFile.Error())
@@ -48,5 +49,13 @@ func ParseTemplate(tmpl string, cfg types.Application) bytes.Buffer {
 	}
 	log.Debug("Generated :",b.String())
 	return b
+}
+
+func packageDirectory() string {
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		panic("No caller information")
+	}
+	return path.Dir(filename)
 }
 
