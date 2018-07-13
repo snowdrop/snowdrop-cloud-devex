@@ -15,7 +15,7 @@ import (
 
 var compileCmd = &cobra.Command{
 	Use:   "compile",
-	Short: "Compile local's project within the development's pod.",
+	Short: "Compile local's project within the development's pod",
 	Long:  `Compile local's project within the development's pod.`,
 	Example: ` sb compile`,
 	Args: cobra.RangeArgs(0, 1),

@@ -16,7 +16,7 @@ import (
 
 var initCmd = &cobra.Command{
 	Use:   "init [flags]",
-	Short: "Create a development's pod for the component.",
+	Short: "Create a development's pod for the component",
 	Long:  `Create a development's pod for the component.`,
 	Example: ` sb init -n bootapp`,
 	Args: cobra.RangeArgs(0, 1),

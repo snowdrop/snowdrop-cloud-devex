@@ -5,24 +5,28 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cmoulliard/k8s-supervisor/pkg/common/config"
-	"github.com/cmoulliard/k8s-supervisor/pkg/common/oc"
-
 	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack"
+
+	corev1 "k8s.io/api/core/v1"
 
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/kubernetes"
 	"os"
+	"github.com/cmoulliard/k8s-supervisor/pkg/common/oc"
 )
 
-var pushCmd = &cobra.Command{
-	Use:   "push",
-	Short: "Push local code to the development's pod",
-	Long:  `Push local code to the development's pod.`,
-	Example: ` sb push`,
+var (
+	ports string
+)
+var debugCmd = &cobra.Command{
+	Use:   "debug [flags]",
+	Short: "Debug your SpringBoot's application",
+	Long:  `Debug your SpringBoot's application.`,
+	Example: ` sb debug -p 5005:5005`,
 	Args: cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 
-		log.Info("sb Push command called")
+		log.Info("sb Run command called")
 
 		// Parse MANIFEST
 		log.Info("[Step 1] - Parse MANIFEST of the project if it exists")
@@ -62,14 +66,40 @@ var pushCmd = &cobra.Command{
 
 		podName := pod.Name
 
-		log.Info("[Step 5] - Copy files from Development projects to the pod")
-		oc.ExecCommand(oc.Command{Args: []string{"cp",oc.Client.Pwd + "/" + "pom.xml",podName+":/tmp/src/","-c","spring-boot-supervisord"}})
-		oc.ExecCommand(oc.Command{Args: []string{"cp",oc.Client.Pwd + "/" + "src",podName+":/tmp/src/","-c","spring-boot-supervisord"}})
+		// Append Debug Env Vars and update POD
+		//log.Info("[Step 5] - Add new ENV vars for remote Debugging")
+		//pod.Spec.Containers[0].Env = append(pod.Spec.Containers[0].Env,debugEnvVars()...)
+		//clientset.CoreV1().Pods(application.Namespace).Update(pod)
+
+		// Start Java Application
+		log.Info("[Step 5] - Restart Java Application")
+		oc.ExecCommand(oc.Command{Args: []string{"rsh",podName,"/var/lib/supervisord/bin/supervisord","ctl","stop","run-java"}})
+		oc.ExecCommand(oc.Command{Args: []string{"rsh",podName,"/var/lib/supervisord/bin/supervisord","ctl","start","run-java"}})
+
+		// Forward local to Remote port
+		log.Info("[Step 6] - Remote Debug the spring Boot Application ...")
+		oc.ExecCommand(oc.Command{Args: []string{"port-forward",podName,ports}})
 	},
 }
 
 func init() {
-	pushCmd.Annotations = map[string]string{"command": "push"}
-	rootCmd.AddCommand(pushCmd)
+	debugCmd.Flags().StringVarP(&ports,"ports","p","5005:5005","Local and remote ports to be used to forward trafic between the dpo and your machine.")
+	//debugCmd.MarkFlagRequired("ports")
+
+	debugCmd.Annotations = map[string]string{"command": "debug"}
+	rootCmd.AddCommand(debugCmd)
+}
+
+func debugEnvVars() []corev1.EnvVar {
+	return []corev1.EnvVar{
+		{
+			Name: "JAVA_DEBUG",
+			Value: "true",
+		},
+		{
+			Name: "JAVA_DEBUG_PORT",
+			Value: "5005",
+		},
+	}
 }
 

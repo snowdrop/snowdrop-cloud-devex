@@ -216,6 +216,21 @@ The following chapter describes how we have technically implemented such user's 
   {"content":"Hello, World!"}% 
   ``` 
   
+- You can also debug your application using the default port defined which is `5005` 
+  ```bash
+  sb debug OR sb debug -p 9009:9009
+  INFO[0000] sb Run command called                        
+  INFO[0000] [Step 1] - Parse MANIFEST of the project if it exists 
+  INFO[0000] [Step 2] - Get K8s config file               
+  INFO[0000] [Step 3] - Create kube Rest config client using config's file of the developer's machine 
+  INFO[0000] [Step 4] - Wait till the dev's pod is available 
+  INFO[0000] [Step 5] - Restart Java Application          
+  run-java: stopped
+  run-java: started
+  INFO[0003] [Step 6] - Remote Debug the spring Boot Application ... 
+  Forwarding from 127.0.0.1:5005 -> 5005
+  ```
+  
 ## Clean up
   
   ```bash

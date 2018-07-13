@@ -75,6 +75,14 @@ func javaDeploymentConfig(application types.Application) *appsv1.DeploymentConfi
 									Name:  "JAVA_APP_JAR",
 									Value: appImagename + "-" + version + ".jar",
 								},
+								{
+									Name: "JAVA_DEBUG",
+									Value: "true",
+								},
+								{
+									Name: "JAVA_DEBUG_PORT",
+									Value: "5005",
+								},
 							},
 							/*							Resources: corev1.ResourceRequirements{
 															Limits: corev1.ResourceList{
