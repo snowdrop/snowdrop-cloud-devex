@@ -10,10 +10,43 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 
 
 	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack/types"
+	"k8s.io/client-go/kubernetes"
 )
+
+func CreatePVC(clientset *kubernetes.Clientset, application types.Application, size string) {
+	quantity, err := resource.ParseQuantity(size)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	pvc := &corev1.PersistentVolumeClaim{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:   "m2-data",
+			Labels: map[string]string{
+				"app": application.Name,
+			},
+		},
+		Spec: corev1.PersistentVolumeClaimSpec{
+			Resources: corev1.ResourceRequirements{
+				Requests: corev1.ResourceList{
+					corev1.ResourceStorage: quantity,
+				},
+			},
+			AccessModes: []corev1.PersistentVolumeAccessMode{
+				corev1.ReadWriteOnce,
+			},
+		},
+	}
+
+	_, errPVC := clientset.CoreV1().PersistentVolumeClaims(application.Namespace).Create(pvc)
+	if errPVC != nil {
+		log.Fatal(errPVC.Error())
+	}
+}
 
 func CreateDeploymentConfig(config *restclient.Config, application types.Application) *appsv1.DeploymentConfig {
 	deploymentConfigV1client, err := appsocpv1.NewForConfig(config)
@@ -95,6 +128,10 @@ func javaDeploymentConfig(application types.Application) *appsv1.DeploymentConfi
 									Name:      "shared-data",
 									MountPath: "/var/lib/supervisord",
 								},
+								{
+									Name:      "m2-data",
+									MountPath: "/tmp/artifacts",
+								},
 							},
 							Command: []string{
 								"/var/lib/supervisord/bin/supervisord",
@@ -110,6 +147,14 @@ func javaDeploymentConfig(application types.Application) *appsv1.DeploymentConfi
 							Name: "shared-data",
 							VolumeSource: corev1.VolumeSource{
 								EmptyDir: &corev1.EmptyDirVolumeSource{},
+							},
+						},
+						{
+							Name: "m2-data",
+							VolumeSource: corev1.VolumeSource{
+								PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
+									ClaimName: "m2-data",
+								},
 							},
 						},
 					},

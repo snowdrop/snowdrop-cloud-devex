@@ -58,18 +58,22 @@ var initCmd = &cobra.Command{
 		log.Info("[Step 5] - Create ImageStreams for Supervisord and Java S2I Image of SpringBoot")
 		buildpack.CreateImageStreamTemplate(kubeRestClient,application)
 
-		log.Info("[Step 6] - Create DeploymentConfig using Supervisord and Java S2I Image of SpringBoot")
-		dc := buildpack.CreateDeploymentConfig(kubeRestClient,application)
-
 		clientset, errclientset := kubernetes.NewForConfig(kubeRestClient)
 		if errclientset != nil {
 			log.Fatalf("Error building kubernetes clientset: %s", errclientset.Error())
 		}
 
-		log.Info("[Step 7] - Create Service using Template")
+		// Create PVC
+		log.Info("[Step 6] - Create PVC to storage m2 repo")
+		buildpack.CreatePVC(clientset,application,"1Gi")
+
+		log.Info("[Step 7] - Create DeploymentConfig using Supervisord and Java S2I Image of SpringBoot")
+		dc := buildpack.CreateDeploymentConfig(kubeRestClient,application)
+
+		log.Info("[Step 8] - Create Service using Template")
 		buildpack.CreateServiceTemplate(clientset, dc, application)
 
-		log.Info("[Step 8] - Create Route using Template")
+		log.Info("[Step 9] - Create Route using Template")
 		buildpack.CreateRouteTemplate(kubeRestClient,application)
 	},
 }
