@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"flag"
 
+	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack/types"
 	"github.com/cmoulliard/k8s-supervisor/pkg/common/oc"
 
 	"github.com/ghodss/yaml"
@@ -40,7 +41,7 @@ var (
 
 	templateNames = []string{"imagestream","route","service"}
 	templateBuilders = make(map[string]template.Template)
-	appConfig Application
+	appConfig types.Application
 )
 
 const (
@@ -53,22 +54,8 @@ const (
 	builderpath          = "/builder/java/"
 )
 
-type Application struct {
-	Name    string
-	Replica int
-	Cpu     string  `default:"100m"`
-	Memory  string  `default:"250Mi"`
-	Port    int32   `default:"8080"`
-	Image   Image
-}
-
-type Image struct {
-	Name string
-	Repo string
-}
-
-func NewApplication() Application{
-	return Application{
+func NewApplication() types.Application {
+	return types.Application{
 		Cpu: "100m",
 		Memory: "250Mi",
 		Replica: 1,
@@ -197,7 +184,7 @@ func createImageStreamTemplate(config *restclient.Config) {
 	if err != nil {
 	}
 
-	images := []Image{
+	images := []types.Image{
 		{
 			Name: appImagename,
 			Repo: "quay.io/snowdrop/spring-boot-s2i",
@@ -274,7 +261,7 @@ func createRouteTemplate(config *restclient.Config) {
 }
 
 // Parse the file's template using the Application struct
-func parseTemplate(tmpl string, cfg *Application) bytes.Buffer {
+func parseTemplate(tmpl string, cfg *types.Application) bytes.Buffer {
 	// Create Template and parse it
 	var b bytes.Buffer
 	t := templateBuilders[tmpl]
