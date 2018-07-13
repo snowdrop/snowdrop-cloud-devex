@@ -15,19 +15,17 @@ var (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "odo",
-	Short: "Odo (Openshift Do)",
+	Use:   "sb",
+	Short: "sb (ODO's Spring Boot prototype)",
 
-	Long: `Odo (OpenShift Do) is a CLI tool for running OpenShift applications in a fast and automated matter.
-Odo reduces the complexity of deployment by adding iterative development without the worry of deploying your source code.
-Find more information at https://github.com/redhat-developer/odo`,
+	Long: `sb (ODO's Spring Boot prototype) is a prototype's project experimenting supervisord, MANIFEST's concepts`,
 
-	Example: `    # Creating and deploying a Node.js project
-    git clone https://github.com/openshift/nodejs-ex && cd nodejs-ex
-    odo init -p namespace
-    odo push -t maven
-    odo compile -t maven
-    odo run`,
+	Example: `    # Creating and deploying a spring Boot application
+    git clone github.com/cmoulliard/k8s-supervisor && cd k8s-supervisor/spring-boot
+    sb init -p namespace
+    sb push
+    sb compile
+    sb run`,
 }
 
 func init() {

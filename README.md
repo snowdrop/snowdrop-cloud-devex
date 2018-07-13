@@ -46,25 +46,33 @@ The following chapter describes how we have technically implemented such user's 
   ```bash
   cd $GOPATH/src
   go get github.com/cmoulliard/k8s-supervisor
-  cd k8s-supervisor && dep ensure
+  cd k8s-supervisor
   ```   
 
+- Build the project locally
+  ```bash
+  go build -o sb *.go
+  export PATH=$PATH:$(pwd)
+  ```
+  
 - Create the `k8s-supervisord` namespace on OpenShift
   ```bash
   oc new-project k8s-supervisord
   ```  
 
-## Create the deploymentConfig using a local spring Boot project
+## Create the resources on OpenShift to compile/run your Spring Boot application
 
-- Execute the `go` program locally to deploy the `Java S2I - Supervisord` pod and pass as parameters :
-  - `-kubeconfig=PATH_TO_KUBE_CONFIG` 
-  - Path to access the `MANIFEST` file of the Application
+- Move to the `spring-boot` folder
+  ```bash
+  cd spring-boot
+  ```
+- Execute the following `go` program locally and pass as parameter :
+  - `-k | --kubeconfig` : /PATH/TO/KUBE/CONFIG
+  - `-n | --namespace` : openshift's project
 
   ```bash
-  go run *.go -kubeconfig=$HOME/.kube/config spring-boot/MANIFEST
-  INFO[0000] [Step 1] - Create Kube Client & Clientset    
-  INFO[0000] [Step 2] - Create ImageStreams for Supervisord and Java S2I Image of SpringBoot 
-  INFO[0000] [Step 3] - Create DeploymentConfig using Supervisord and Java S2I Image of SpringBoot 
+  sb init -n k8s-supervisord
+  ... 
   ```
 
 - Verify if the `initContainer` has been injected within the `DeploymentConfig`

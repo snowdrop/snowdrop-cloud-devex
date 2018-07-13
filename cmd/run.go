@@ -17,11 +17,11 @@ var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "Run your SpringBoot's application.",
 	Long:  `Run your SpringBoot's application.`,
-	Example: ` odo run`,
+	Example: ` sb run`,
 	Args: cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 
-		log.Info("ODO Run command called")
+		log.Info("sb Run command called")
 
 		// Parse MANIFEST
 		log.Info("[Step 1] - Parse MANIFEST of the project if it exists")

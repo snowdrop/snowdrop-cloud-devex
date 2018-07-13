@@ -18,11 +18,11 @@ var initCmd = &cobra.Command{
 	Use:   "init [flags]",
 	Short: "Create a development's pod for the component.",
 	Long:  `Create a development's pod for the component.`,
-	Example: ` odo init -n bootapp`,
+	Example: ` sb init -n bootapp`,
 	Args: cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 
-		log.Info("ODO Init command called")
+		log.Info("sb Init command called")
 		log.Debug("Namespace : ", namespace)
 
 		// Parse MANIFEST

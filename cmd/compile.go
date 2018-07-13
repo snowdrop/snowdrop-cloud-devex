@@ -17,11 +17,11 @@ var compileCmd = &cobra.Command{
 	Use:   "compile",
 	Short: "Compile local's project within the development's pod.",
 	Long:  `Compile local's project within the development's pod.`,
-	Example: ` odo compile`,
+	Example: ` sb compile`,
 	Args: cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 
-		log.Info("ODO Compile command called")
+		log.Info("sb Compile command called")
 
 		// Parse MANIFEST
 		log.Info("[Step 1] - Parse MANIFEST of the project if it exists")
