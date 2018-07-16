@@ -10,6 +10,9 @@ import (
 	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack"
 	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack/types"
 	"github.com/cmoulliard/k8s-supervisor/pkg/common/config"
+	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/kubernetes"
+	restclient "k8s.io/client-go/rest"
 )
 
 var (
@@ -68,7 +71,7 @@ func parseManifest() types.Application {
 }
 
 func getK8Config(cmd cobra.Command) config.Kube {
-	log.Info("[Step 2] - Get K8s config file")
+	log.Info("Get K8s config file")
 	var kubeCfg = config.Kube{}
 	if cmd.Flag("kubeconfig").Value.String() == "" {
 		kubeCfg.Config = config.HomeKubePath()
@@ -77,4 +80,25 @@ func getK8Config(cmd cobra.Command) config.Kube {
 	}
 	log.Debug("Kubeconfig : ",kubeCfg)
 	return kubeCfg
+}
+
+// Create Kube ClientSet
+func createClientSet(kubeCfg config.Kube) *kubernetes.Clientset {
+	kubeRestClient := createKubeRestconfig(kubeCfg)
+	log.Info("Create Kube Clientset")
+	clientset, errclientset := kubernetes.NewForConfig(kubeRestClient)
+	if errclientset != nil {
+		log.Fatalf("Error building kubernetes clientset: %s", errclientset.Error())
+	}
+	return clientset
+}
+
+// Create Kube Rest's Config Client
+func createKubeRestconfig(kubeCfg config.Kube) *restclient.Config {
+	log.Info("Create kube Rest config client using config's file of the developer's machine")
+	kubeRestClient, err := clientcmd.BuildConfigFromFlags(kubeCfg.MasterURL, kubeCfg.Config)
+	if err != nil {
+		log.Fatalf("Error building kubeconfig: %s", err.Error())
+	}
+	return kubeRestClient
 }

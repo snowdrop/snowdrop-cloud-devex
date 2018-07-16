@@ -8,8 +8,6 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
-	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/kubernetes"
 	"github.com/cmoulliard/k8s-supervisor/pkg/common/oc"
 )
 
@@ -34,17 +32,8 @@ var debugCmd = &cobra.Command{
 		// Get K8s' config file - Step 2
 		kubeCfg := getK8Config(*cmd)
 
-		// Create Kube Rest's Config Client
-		log.Info("[Step 3] - Create kube Rest config client using config's file of the developer's machine")
-		kubeRestClient, err := clientcmd.BuildConfigFromFlags(kubeCfg.MasterURL, kubeCfg.Config)
-		if err != nil {
-			log.Fatalf("Error building kubeconfig: %s", err.Error())
-		}
-
-		clientset, errclientset := kubernetes.NewForConfig(kubeRestClient)
-		if errclientset != nil {
-			log.Fatalf("Error building kubernetes clientset: %s", errclientset.Error())
-		}
+		// Create Kube Rest's Config Client - Step 3
+		clientset := createClientSet(kubeCfg)
 
 		// Wait till the dev's pod is available
 		log.Info("[Step 4] - Wait till the dev's pod is available")

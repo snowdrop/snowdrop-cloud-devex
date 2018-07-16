@@ -7,9 +7,6 @@ import (
 	"github.com/cmoulliard/k8s-supervisor/pkg/common/oc"
 
 	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack"
-
-	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/kubernetes"
 )
 
 var initCmd = &cobra.Command{
@@ -36,34 +33,26 @@ var initCmd = &cobra.Command{
 		log.Info("[Step 3] - Get k8s default's namespace")
 		oc.ExecCommand(oc.Command{Args: []string{"project",application.Namespace}})
 
-		// Create Kube Rest's Config Client
-		log.Info("[Step 4] - Create kube Rest config client using config's file of the developer's machine")
-		kubeRestClient, err := clientcmd.BuildConfigFromFlags(kubeCfg.MasterURL, kubeCfg.Config)
-		if err != nil {
-			log.Fatalf("Error building kubeconfig: %s", err.Error())
-		}
+		// Create Kube Rest's Config Client - Step 3
+		restConfig := createKubeRestconfig(kubeCfg)
+		clientset := createClientSet(kubeCfg)
 
 		// Create ImageStream
-		log.Info("[Step 5] - Create ImageStreams for Supervisord and Java S2I Image of SpringBoot")
-		buildpack.CreateImageStreamTemplate(kubeRestClient,application)
-
-		clientset, errclientset := kubernetes.NewForConfig(kubeRestClient)
-		if errclientset != nil {
-			log.Fatalf("Error building kubernetes clientset: %s", errclientset.Error())
-		}
+		log.Info("[Step 4] - Create ImageStreams for Supervisord and Java S2I Image of SpringBoot")
+		buildpack.CreateImageStreamTemplate(restConfig,application)
 
 		// Create PVC
-		log.Info("[Step 6] - Create PVC to storage m2 repo")
+		log.Info("[Step 5] - Create PVC to storage m2 repo")
 		buildpack.CreatePVC(clientset,application,"1Gi")
 
-		log.Info("[Step 7] - Create DeploymentConfig using Supervisord and Java S2I Image of SpringBoot")
-		dc := buildpack.CreateDeploymentConfig(kubeRestClient,application)
+		log.Info("[Step 6] - Create DeploymentConfig using Supervisord and Java S2I Image of SpringBoot")
+		dc := buildpack.CreateDeploymentConfig(restConfig,application)
 
-		log.Info("[Step 8] - Create Service using Template")
+		log.Info("[Step 7] - Create Service using Template")
 		buildpack.CreateServiceTemplate(clientset, dc, application)
 
-		log.Info("[Step 9] - Create Route using Template")
-		buildpack.CreateRouteTemplate(kubeRestClient,application)
+		log.Info("[Step 8] - Create Route using Template")
+		buildpack.CreateRouteTemplate(restConfig,application)
 	},
 }
 
