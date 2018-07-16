@@ -2,7 +2,7 @@
 
 The prototype developed within this projects aims to resolve the following user's stories.
 
-"As a user, I want to install a pod running my runtime Java Application (Spring Boot, Vert.x, Swarm) by exposing my endpoint as a Service accessible as a route, where I can instruct the pod to start or stop a command such as "compile", "run java", ..." within the pod"
+"As a user, I want to install a pod running my runtime Java Application (Spring Boot, Vert.x, Swarm) where my endpoint is exposed as a Service accessible via a route, where I can instruct the pod to start or stop a command such as "compile", "run java", ..." within the pod"
 
 "As a user, I want to customize the application deployed using a MANIFEST yaml file where I can specify, the name of the application, s2i image to be used, maven tool, port of the service, cpu, memory, ...."
 
