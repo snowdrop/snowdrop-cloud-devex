@@ -87,7 +87,7 @@ go run ../main.go push --mode binary
 go run ../main.go debug
 ```
 
-## Test4 : source -> compile -> kill pod -> compile again
+## Test 4 : source -> compile -> kill pod -> compile again
 
 - Log on to an OpenShift cluster with an `admin` role
 - Open or create the following project : `k8s-supervisord`
