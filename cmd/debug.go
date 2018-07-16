@@ -50,9 +50,13 @@ var debugCmd = &cobra.Command{
 		//clientset.CoreV1().Pods(application.Namespace).Update(pod)
 
 		// Start Java Application
-		log.Info("[Step 5] - Restart Java Application")
-		oc.ExecCommand(oc.Command{Args: []string{"rsh",podName,"/var/lib/supervisord/bin/supervisord","ctl","stop","run-java"}})
-		oc.ExecCommand(oc.Command{Args: []string{"rsh",podName,"/var/lib/supervisord/bin/supervisord","ctl","start","run-java"}})
+		supervisordBin := "/var/lib/supervisord/bin/supervisord"
+		supervisordCtl := "ctl"
+		cmdName := "run-java"
+
+		log.Info("[Step 5] - Restart the Spring Boot application ...")
+		oc.ExecCommand(oc.Command{Args: []string{"rsh",podName,supervisordBin,supervisordCtl,"stop",cmdName}})
+		oc.ExecCommand(oc.Command{Args: []string{"rsh",podName,supervisordBin,supervisordCtl,"start",cmdName}})
 
 		// Forward local to Remote port
 		log.Info("[Step 6] - Remote Debug the spring Boot Application ...")
