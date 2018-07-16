@@ -2,6 +2,7 @@ package types
 
 type Application struct {
 	Name    string
+	Version string
 	Namespace string
 	Replica int
 	Cpu     string  `default:"100m"`
@@ -18,6 +19,7 @@ type Image struct {
 
 func NewApplication() Application {
 	return Application{
+		Version: "1.0",
 		Cpu: "100m",
 		Memory: "250Mi",
 		Replica: 1,

@@ -87,49 +87,42 @@ The following chapter describes how we have technically implemented such user's 
   ```bash
   oc get dc/spring-boot-supervisord -o json | jq '.spec.template.spec.initContainers[0]'
   
-  initContainers:
-      - env:
-        - name: CMDS
-          value: echo:/var/lib/supervisord/conf/echo.sh;run-java:/usr/local/s2i/run;compile-java:/usr/local/s2i/assemble;build:/deployments/buildapp
-        image: quay.io/snowdrop/supervisord@sha256:0c6ad373a3aa991edcb9b5806aecd0d57467f74018c96c6299adb9a10aaa86da
-        imagePullPolicy: Always
-        name: copy-supervisord
-        resources: {}
-        terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
-        volumeMounts:
-        - mountPath: /var/lib/supervisord
-          name: shared-data
-      restartPolicy: Always
-      schedulerName: default-scheduler
-      securityContext: {}
-      terminationGracePeriodSeconds: 30
-      volumes:
-      - emptyDir: {}
-        name: shared-data
-  triggers:
-  - imageChangeParams:
-      automatic: true
-      containerNames:
-      - copy-supervisord
-  ...
+  {
+    "env": [
+      {
+        "name": "CMDS",
+        "value": "echo:/var/lib/supervisord/conf/echo.sh;run-java:/usr/local/s2i/run;compile-java:/usr/local/s2i/assemble;build:/deployments/buildapp"
+      }
+    ],
+    "image": "quay.io/snowdrop/supervisord@sha256:0c6ad373a3aa991edcb9b5806aecd0d57467f74018c96c6299adb9a10aaa86da",
+    "imagePullPolicy": "Always",
+    "name": "copy-supervisord",
+    "resources": {},
+    "terminationMessagePath": "/dev/termination-log",
+    "terminationMessagePolicy": "File",
+    "volumeMounts": [
+      {
+        "mountPath": "/var/lib/supervisord",
+        "name": "shared-data"
+      }
+    ]
+  }
   ```
   
 ## Push the code  
   
 - As the Development's pod has been created and is running the `supervisord's application`, we will now push the local's code (pom.xml, src)
-  to the pod
+  to the pod using this command 
 
   ```bash
-  sb push
-  INFO[0000] sb Push command called                       
-  INFO[0000] [Step 1] - Parse MANIFEST of the project if it exists 
-  INFO[0000] [Step 2] - Get K8s config file               
-  INFO[0000] [Step 3] - Create kube Rest config client using config's file of the developer's machine 
-  INFO[0000] [Step 4] - Wait till the dev's pod is available 
-  INFO[0000] [Step 5] - Copy files from Development projects to the pod 
+  sb push --mode source
   ```
-   
+  
+  or the generated uberjar file located under `/target/application-name-version.jar`
+  
+  ```bash
+  sb push --mode binary
+  ```
   
 ## Compile the Spring Boot Java App
   
@@ -241,6 +234,7 @@ The following chapter describes how we have technically implemented such user's 
   
   ```bash
   oc delete all --all
+  oc delete pvc/m2-data
   ```  
     
 ## Developer section to build the images

@@ -1,17 +1,22 @@
 package cmd
 
 import (
+	"os"
+	"strings"
 	"github.com/spf13/cobra"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack"
 	"github.com/cmoulliard/k8s-supervisor/pkg/common/config"
 	"github.com/cmoulliard/k8s-supervisor/pkg/common/oc"
 
-	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack"
-
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/kubernetes"
-	"os"
+)
+
+var (
+	mode string
+	artefacts = []string{ "src", "pom.xml"}
 )
 
 var pushCmd = &cobra.Command{
@@ -21,6 +26,8 @@ var pushCmd = &cobra.Command{
 	Example: ` sb push`,
 	Args: cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
+
+		modeType := cmd.Flag("mode").Value.String();
 
 		log.Info("sb Push command called")
 
@@ -62,14 +69,29 @@ var pushCmd = &cobra.Command{
 
 		podName := pod.Name
 
-		log.Info("[Step 5] - Copy files from Development projects to the pod")
-		oc.ExecCommand(oc.Command{Args: []string{"cp",oc.Client.Pwd + "/" + "pom.xml",podName+":/tmp/src/","-c","spring-boot-supervisord"}})
-		oc.ExecCommand(oc.Command{Args: []string{"cp",oc.Client.Pwd + "/" + "src",podName+":/tmp/src/","-c","spring-boot-supervisord"}})
+		log.Info("[Step 5] - Copy files from the local developer's project to the pod")
+
+		switch modeType {
+		case "source":
+			for i := range artefacts {
+				log.Debug("Artefact : ",artefacts[i])
+				oc.ExecCommand(oc.Command{Args: []string{"cp",oc.Client.Pwd + "/" + artefacts[i],podName+":/tmp/src/","-c","spring-boot-supervisord"}})
+			}
+		case "binary":
+			uberjarName := strings.Join([]string{application.Name,application.Version},"-") +  ".jar"
+			log.WithField("uberjarname",uberjarName).Debug("Uber jar name : ")
+			oc.ExecCommand(oc.Command{Args: []string{"cp",oc.Client.Pwd + "/target/" + uberjarName,podName+":/deployments","-c","spring-boot-supervisord"}})
+		default:
+			log.WithField("mode",modeType).Fatal("The provided mode is not supported : ")
+		}
 	},
 }
 
 func init() {
+	pushCmd.Flags().StringVarP(&mode,"mode","","","Source code or Binary compiled as uberjar within target directory")
+	pushCmd.MarkFlagRequired("mode")
 	pushCmd.Annotations = map[string]string{"command": "push"}
+
 	rootCmd.AddCommand(pushCmd)
 }
 
