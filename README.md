@@ -33,7 +33,7 @@ The following chapter describes how we have technically implemented such user's 
    * [Instructions](#instructions)
       * [Prerequisites](#prerequisites)
       * [Download the project and install it](#download-the-project-and-install-it)
-      * [Create the resources on OpenShift to compile/run your Spring Boot application](#create-the-resources-on-openshift-to-compilerun-your-spring-boot-application)
+      * [Create the development's pod running the supervisord](#create-the-developments-pod-running-the-supervisord)
       * [Push the code](#push-the-code)
       * [Compile the Spring Boot Java App](#compile-the-spring-boot-java-app)
       * [Start the java application](#start-the-java-application)
@@ -70,7 +70,7 @@ The following chapter describes how we have technically implemented such user's 
   oc new-project k8s-supervisord
   ```  
 
-## Create the resources on OpenShift to compile/run your Spring Boot application
+## Create the development's pod running the supervisord
 
 - Move to the `spring-boot` folder
   ```bash
