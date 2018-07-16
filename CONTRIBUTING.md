@@ -1,5 +1,12 @@
 # Scenario to be validated
 
+   * [Test 0 : Build executable and test it](#test-0--build-executable-and-test-it)
+   * [Test 1 : source -&gt; compile -&gt; run](#test-1--source---compile---run)
+   * [Test 2 : binary -&gt; run](#test-2--binary---run)
+   * [Test 3 : debug](#test-3--debug)
+   * [Test4 : source -&gt; compile -&gt; kill pod -&gt; compile again](#test4--source---compile---kill-pod---compile-again)
+
+
 ## Test 0 : Build executable and test it
 
 - Log on to an OpenShift cluster with an `admin` role
