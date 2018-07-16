@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack"
 	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack/types"
+	"github.com/cmoulliard/k8s-supervisor/pkg/common/config"
 )
 
 var (
@@ -64,4 +65,17 @@ func parseManifest() types.Application {
 	log.Info("Parse MANIFEST of the project if it exists")
 	current, _ := os.Getwd()
 	return buildpack.ParseManifest(current + "/MANIFEST")
+}
+
+func getK8Config() *config.Kube {
+	log.Info("[Step 2] - Get K8s config file")
+	var cmd cobra.Command
+	var kubeCfg = config.NewKube()
+	if cmd.Flag("kubeconfig").Value.String() == "" {
+		kubeCfg.Config = config.HomeKubePath()
+	} else {
+		kubeCfg.Config = cmd.Flag("kubeconfig").Value.String()
+	}
+	log.Debug("Kubeconfig : ",kubeCfg)
+	return kubeCfg
 }

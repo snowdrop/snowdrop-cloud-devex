@@ -4,7 +4,6 @@ import (
 	"github.com/spf13/cobra"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cmoulliard/k8s-supervisor/pkg/common/config"
 	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack"
 
 	corev1 "k8s.io/api/core/v1"
@@ -32,15 +31,8 @@ var debugCmd = &cobra.Command{
 		// Add Namespace's value
 		application.Namespace = namespace
 
-		// Get K8s' config file
-		log.Info("[Step 2] - Get K8s config file")
-		var kubeCfg = config.NewKube()
-		if cmd.Flag("kubeconfig").Value.String() == "" {
-			kubeCfg.Config = config.HomeKubePath()
-		} else {
-			kubeCfg.Config = cmd.Flag("kubeconfig").Value.String()
-		}
-		log.Debug("Kubeconfig : ",kubeCfg)
+		// Get K8s' config file - Step 2
+		kubeCfg := getK8Config()
 
 		// Create Kube Rest's Config Client
 		log.Info("[Step 3] - Create kube Rest config client using config's file of the developer's machine")
