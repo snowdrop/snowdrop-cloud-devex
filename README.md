@@ -210,14 +210,14 @@ The following chapter describes how we have technically implemented such user's 
   
 - Access the endpoint of the Spring Boot application 
   ```bash
-  URL="http://$(oc get routes/spring-boot-supervisord -o jsonpath='{.spec.host}')"
+  URL="http://$(oc get routes/spring-boot-http -o jsonpath='{.spec.host}')"
   curl $URL/api/greeting
   {"content":"Hello, World!"}% 
   ``` 
   
 - You can also debug your application using the default port defined which is `5005` 
   ```bash
-  sb debug OR sb debug -p 9009:9009
+  sb debug
   INFO[0000] sb Run command called                        
   INFO[0000] [Step 1] - Parse MANIFEST of the project if it exists 
   INFO[0000] [Step 2] - Get K8s config file               
@@ -230,10 +230,12 @@ The following chapter describes how we have technically implemented such user's 
   Forwarding from 127.0.0.1:5005 -> 5005
   ```
   
+  **Remark** : You can change the local/remote ports to ne used by passing the parameter `-p`. E.g `sb debug -p 9009:9009`
+  
 ## Clean up
   
   ```bash
-  oc delete all --all
+  oc delete --force --grace-period=0 all --all
   oc delete pvc/m2-data
   ```  
     

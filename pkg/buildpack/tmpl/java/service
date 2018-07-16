@@ -11,5 +11,5 @@ spec:
     protocol: TCP
     targetPort: {{.Port}}
   selector:
-    app: spring-boot-supervisord
-    deploymentconfig: spring-boot-supervisord
+    app: {{.Name}}
+    deploymentconfig: {{.Name}}

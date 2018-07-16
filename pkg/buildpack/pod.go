@@ -12,17 +12,13 @@ import (
 	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack/types"
 )
 
-var (
-	podSelector = metav1.ListOptions{
-		LabelSelector: "app=spring-boot-supervisord",
-	}
-)
-
 // WaitAndGetPod block and waits until pod matching selector is in in Running state
 func WaitAndGetPod(c *kubernetes.Clientset, application types.Application) (*corev1.Pod, error) {
-	log.Debugf("Waiting for %s pod", podSelector)
 
-	w, err := c.CoreV1().Pods(application.Namespace).Watch(podSelector)
+	selector := podSelector(application)
+	log.Debugf("Waiting for %s pod", selector)
+
+	w, err := c.CoreV1().Pods(application.Namespace).Watch(selector)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to watch pod")
 	}
@@ -44,4 +40,10 @@ func WaitAndGetPod(c *kubernetes.Clientset, application types.Application) (*cor
 		}
 	}
 	return nil, errors.Errorf("unknown error while waiting for pod matchin '%s' selector", podSelector)
+}
+
+func podSelector(application types.Application) metav1.ListOptions {
+	return metav1.ListOptions{
+		LabelSelector: "app=" + application.Name,
+	}
 }
