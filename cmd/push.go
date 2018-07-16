@@ -76,11 +76,13 @@ var pushCmd = &cobra.Command{
 		case "source":
 			for i := range artefacts {
 				log.Debug("Artefact : ",artefacts[i])
+				log.Infof("Copy cmd : %s",[]string{"cp",oc.Client.Pwd + "/" + artefacts[i],podName+":/tmp/src/","-c",containerName})
 				oc.ExecCommand(oc.Command{Args: []string{"cp",oc.Client.Pwd + "/" + artefacts[i],podName+":/tmp/src/","-c",containerName}})
 			}
 		case "binary":
 			uberjarName := strings.Join([]string{application.Name,application.Version},"-") +  ".jar"
 			log.WithField("uberjarname",uberjarName).Debug("Uber jar name : ")
+			log.Infof("Copy cmd : %s",[]string{"cp",oc.Client.Pwd + "/target/" + uberjarName,podName+":/deployments","-c",containerName})
 			oc.ExecCommand(oc.Command{Args: []string{"cp",oc.Client.Pwd + "/target/" + uberjarName,podName+":/deployments","-c",containerName}})
 		default:
 			log.WithField("mode",modeType).Fatal("The provided mode is not supported : ")
