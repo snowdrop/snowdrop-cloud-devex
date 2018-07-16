@@ -30,7 +30,7 @@ var initCmd = &cobra.Command{
 		application.Namespace = namespace
 
 		// Get K8s' config file - Step 2
-		kubeCfg := getK8Config()
+		kubeCfg := getK8Config(*cmd)
 
 		// Execute oc command to switch to the namespace defined
 		log.Info("[Step 3] - Get k8s default's namespace")

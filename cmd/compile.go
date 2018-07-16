@@ -27,7 +27,7 @@ var compileCmd = &cobra.Command{
 		application.Namespace = namespace
 
 		// Get K8s' config file - Step 2
-		kubeCfg := getK8Config()
+		kubeCfg := getK8Config(*cmd)
 
 		// Create Kube Rest's Config Client
 		log.Info("[Step 3] - Create kube Rest config client using config's file of the developer's machine")

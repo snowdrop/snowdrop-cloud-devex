@@ -67,10 +67,9 @@ func parseManifest() types.Application {
 	return buildpack.ParseManifest(current + "/MANIFEST")
 }
 
-func getK8Config() *config.Kube {
+func getK8Config(cmd cobra.Command) config.Kube {
 	log.Info("[Step 2] - Get K8s config file")
-	var cmd cobra.Command
-	var kubeCfg = config.NewKube()
+	var kubeCfg = config.Kube{}
 	if cmd.Flag("kubeconfig").Value.String() == "" {
 		kubeCfg.Config = config.HomeKubePath()
 	} else {
