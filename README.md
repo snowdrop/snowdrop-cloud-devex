@@ -31,13 +31,16 @@ The following chapter describes how we have technically implemented such user's 
    * [Technical's idea](#technicals-idea)
    * [Table of Contents](#table-of-contents)
    * [Instructions](#instructions)
+      * [Prerequisites](#prerequisites)
       * [Download the project and install it](#download-the-project-and-install-it)
       * [Create the resources on OpenShift to compile/run your Spring Boot application](#create-the-resources-on-openshift-to-compilerun-your-spring-boot-application)
       * [Push the code](#push-the-code)
       * [Compile the Spring Boot Java App](#compile-the-spring-boot-java-app)
-      * [Start the java application and curl the endpoint](#start-the-java-application-and-curl-the-endpoint)
+      * [Start the java application](#start-the-java-application)
+      * [Remote debug the Java Application](#remote-debug-the-java-application)
       * [Clean up](#clean-up)
       * [Developer section to build the images](#developer-section-to-build-the-images)
+
  
 # Instructions
 
@@ -111,14 +114,16 @@ The following chapter describes how we have technically implemented such user's 
   
 ## Push the code  
   
-- As the Development's pod has been created and is running the `supervisord's application`, we will now push the local's code (pom.xml, src)
-  to the pod using this command 
+- As the Development's pod has been created and is running the `supervisord's server`, we will now push the code.
+ 
+- if we want to compile the project using maven within the pod, then we will copy the following resources within the pod : `pom.xml, src/ folder`
+  In this case, use the following command 
 
   ```bash
   sb push --mode source
   ```
   
-  or the generated uberjar file located under `/target/application-name-version.jar`
+- To use your generated `uberjar` file located under `/target/application-name-version.jar`, then run this command :
   
   ```bash
   sb push --mode binary
@@ -126,7 +131,7 @@ The following chapter describes how we have technically implemented such user's 
   
 ## Compile the Spring Boot Java App
   
-- Compile it within the pod  
+- Compile the code source pushed within the pod using this command 
     
   ```bash
   sb compile
@@ -180,7 +185,7 @@ The following chapter describes how we have technically implemented such user's 
   
   **Remark** Before to launch the compilation's command using supervisord, the program will wait till the development's pod is alive !
   
-## Start the java application and curl the endpoint
+## Start the java application
 
 - Launch the Spring Boot Application
 
@@ -208,14 +213,16 @@ The following chapter describes how we have technically implemented such user's 
   2018-07-13 11:06:34.436  INFO 222 --- [           main] io.openshift.booster.BoosterApplication  : Started BoosterApplication in 6.412 seconds (JVM running for 7.32) 
   ```
   
-- Access the endpoint of the Spring Boot application 
+- Access the endpoint of the Spring Boot application using curl
   ```bash
   URL="http://$(oc get routes/spring-boot-http -o jsonpath='{.spec.host}')"
   curl $URL/api/greeting
   {"content":"Hello, World!"}% 
   ``` 
   
-- You can also debug your application using the default port defined which is `5005` 
+## Remote debug the Java Application
+  
+- You can also debug your application by forwarding the traffic between the pod and your machine using the following command : 
   ```bash
   sb debug
   INFO[0000] sb Run command called                        
@@ -230,7 +237,7 @@ The following chapter describes how we have technically implemented such user's 
   Forwarding from 127.0.0.1:5005 -> 5005
   ```
   
-  **Remark** : You can change the local/remote ports to ne used by passing the parameter `-p`. E.g `sb debug -p 9009:9009`
+  **Remark** : You can change the local/remote ports to be used by passing the parameter `-p`. E.g `sb debug -p 9009:9009`
   
 ## Clean up
   
