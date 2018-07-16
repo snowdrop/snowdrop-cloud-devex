@@ -7,6 +7,8 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack"
+	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack/types"
 )
 
 var (
@@ -56,4 +58,10 @@ func checkError(err error, context string, a ...interface{}) {
 		}
 		os.Exit(1)
 	}
+}
+
+func parseManifest() types.Application {
+	log.Info("Parse MANIFEST of the project if it exists")
+	current, _ := os.Getwd()
+	return buildpack.ParseManifest(current + "/MANIFEST")
 }

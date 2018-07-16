@@ -9,7 +9,6 @@ import (
 
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/kubernetes"
-	"os"
 	"github.com/cmoulliard/k8s-supervisor/pkg/common/oc"
 )
 
@@ -21,12 +20,10 @@ var runCmd = &cobra.Command{
 	Args: cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 
-		log.Info("sb Run command called")
+		log.Info("Run command called")
 
-		// Parse MANIFEST
-		log.Info("[Step 1] - Parse MANIFEST of the project if it exists")
-		current, _ := os.Getwd()
-		application := buildpack.ParseManifest(current + "/MANIFEST")
+		// Parse MANIFEST - Step 1
+		application := parseManifest()
 		// Add Namespace's value
 		application.Namespace = namespace
 

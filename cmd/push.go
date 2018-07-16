@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"os"
 	"strings"
 	"github.com/spf13/cobra"
 	log "github.com/sirupsen/logrus"
@@ -29,12 +28,10 @@ var pushCmd = &cobra.Command{
 
 		modeType := cmd.Flag("mode").Value.String();
 
-		log.Info("sb Push command called")
+		log.Info("Push command called")
 
-		// Parse MANIFEST
-		log.Info("[Step 1] - Parse MANIFEST of the project if it exists")
-		current, _ := os.Getwd()
-		application := buildpack.ParseManifest(current + "/MANIFEST")
+		// Parse MANIFEST - Step 1
+		application := parseManifest()
 		// Add Namespace's value
 		application.Namespace = namespace
 
