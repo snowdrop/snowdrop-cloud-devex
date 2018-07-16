@@ -4,9 +4,7 @@
    * [Test 1 : source -&gt; compile -&gt; run](#test-1--source---compile---run)
    * [Test 2 : binary -&gt; run](#test-2--binary---run)
    * [Test 3 : debug](#test-3--debug)
-   * [Test 4 : source -&gt; compile -&gt; kill pod -&gt; compile again](#test-4--source---compile---kill-pod---compile-again)
-
-
+   * [Test 4 : source -&gt; compile -&gt; kill pod -&gt; compile again (m2 repo is back again)](#test-4--source---compile---kill-pod---compile-again-m2-repo-is-back-again)
 
 ## Test 0 : Build executable and test it
 
@@ -88,7 +86,7 @@ go run ../main.go push --mode binary
 go run ../main.go debug
 ```
 
-## Test 4 : source -> compile -> kill pod -> compile again
+## Test 4 : source -> compile -> kill pod -> compile again (m2 repo is back again)
 
 - Log on to an OpenShift cluster with an `admin` role
 - Open or create the following project : `k8s-supervisord`
