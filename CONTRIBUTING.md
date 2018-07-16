@@ -65,7 +65,7 @@ URL="http://$(oc get routes/spring-boot-http -o jsonpath='{.spec.host}')"
 curl $URL/api/greeting
 ```
 
-## Test 3 : Debug
+## Test 3 : debug
 
 - Log on to an OpenShift cluster with an `admin` role
 - Open or create the following project : `k8s-supervisord`
