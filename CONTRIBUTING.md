@@ -18,11 +18,14 @@ export PATH=$PATH:$(pwd)
 export CURRENT=$(pwd)
 
 cd spring-boot
+mvn clean package
 oc delete --force --grace-period=0 all --all
 oc delete pvc/m2-data
 
 sb init -n k8s-supervisord
-sb push --mode source
+sb push --mode binary
+sb exec start
+sb exec stop
 cd $CURRENT
 ```
 
@@ -40,7 +43,7 @@ cd spring-boot
 go run ../main.go init -n k8s-supervisord
 go run ../main.go push --mode source
 go run ../main.go compile
-go run ../main.go run
+go run ../main.go exec start
 cd ..
 ```
 
@@ -64,8 +67,8 @@ oc delete pvc/m2-data
 cd spring-boot
 go run ../main.go init -n k8s-supervisord
 go run ../main.go push --mode binary
-go run ../main.go runcd ..
-
+go run ../main.go exec start
+cd ..
 ```
 
 - Execute this command within another terminal
@@ -88,6 +91,7 @@ oc delete pvc/m2-data
 cd spring-boot
 go run ../main.go init -n k8s-supervisord
 go run ../main.go push --mode binary
+go run ../main.go exec stop
 go run ../main.go debug
 cd ..
 ```
@@ -109,6 +113,6 @@ go run ../main.go compile
 oc delete --grace-period=0 --force=true pod -l app=spring-boot-http 
 go run ../main.go push --mode source
 go run ../main.go compile
-go run ../main.go run
+go run ../main.go exec start
 cd ..
 ```

@@ -190,7 +190,7 @@ The following chapter describes how we have technically implemented such user's 
 - Launch the Spring Boot Application
 
   ```bash
-  sb run
+  sb exec start
   ime="2018-07-13T11:06:26Z" level=debug msg="succeed to find process:run-java"
   time="2018-07-13T11:06:26Z" level=info msg="try to start program" program=run-java
   time="2018-07-13T11:06:26Z" level=info msg="success to start program" program=run-java
@@ -225,7 +225,7 @@ The following chapter describes how we have technically implemented such user's 
 - You can also debug your application by forwarding the traffic between the pod and your machine using the following command : 
   ```bash
   sb debug
-  INFO[0000] sb Run command called                        
+  INFO[0000] sb exec start command called                        
   INFO[0000] [Step 1] - Parse MANIFEST of the project if it exists 
   INFO[0000] [Step 2] - Get K8s config file               
   INFO[0000] [Step 3] - Create kube Rest config client using config's file of the developer's machine 
@@ -238,6 +238,15 @@ The following chapter describes how we have technically implemented such user's 
   ```
   
   **Remark** : You can change the local/remote ports to be used by passing the parameter `-p`. E.g `sb debug -p 9009:9009`
+  
+## Stop/start or restart the spring boot application
+
+- The Spring Boot Application can be stopped, started or restarted using respectively these commands:
+  ```bash
+  sb exec stop
+  sb exec start
+  sb exec restart
+  ```  
   
 ## Clean up
   
