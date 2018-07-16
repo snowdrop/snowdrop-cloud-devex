@@ -60,10 +60,12 @@ var runCmd = &cobra.Command{
 		}
 
 		podName := pod.Name
+		supervisordCtl := "/var/lib/supervisord/bin/supervisord ctl"
+		cmdName := "run-java"
 
 		log.Info("[Step 5] - Launch the Spring Boot application ...")
-		oc.ExecCommand(oc.Command{Args: []string{"rsh",podName,"/var/lib/supervisord/bin/supervisord","ctl","stop","run-java"}})
-		oc.ExecCommand(oc.Command{Args: []string{"rsh",podName,"/var/lib/supervisord/bin/supervisord","ctl","start","run-java"}})
+		oc.ExecCommand(oc.Command{Args: []string{"rsh",podName,supervisordCtl,"stop",cmdName}})
+		oc.ExecCommand(oc.Command{Args: []string{"rsh",podName,supervisordCtl,"start",cmdName}})
 		oc.ExecCommand(oc.Command{Args: []string{"logs",podName,"-f"}})
 	},
 }
