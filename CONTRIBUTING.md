@@ -36,10 +36,12 @@ cd $CURRENT
 oc delete --force --grace-period=0 all --all
 oc delete pvc/m2-data
 
+cd spring-boot
 go run ../main.go init -n k8s-supervisord
 go run ../main.go push --mode source
 go run ../main.go compile
 go run ../main.go run
+cd ..
 ```
 
 - Execute this command within another terminal
@@ -59,9 +61,11 @@ curl $URL/api/greeting
 oc delete --force --grace-period=0 all --all
 oc delete pvc/m2-data
 
+cd spring-boot
 go run ../main.go init -n k8s-supervisord
 go run ../main.go push --mode binary
-go run ../main.go run
+go run ../main.go runcd ..
+
 ```
 
 - Execute this command within another terminal
@@ -81,9 +85,11 @@ curl $URL/api/greeting
 oc delete --force --grace-period=0 all --all
 oc delete pvc/m2-data
 
+cd spring-boot
 go run ../main.go init -n k8s-supervisord
 go run ../main.go push --mode binary
 go run ../main.go debug
+cd ..
 ```
 
 ## Test 4 : source -> compile -> kill pod -> compile again (m2 repo is back again)
@@ -96,6 +102,7 @@ go run ../main.go debug
 oc delete --force --grace-period=0 all --all
 oc delete pvc/m2-data
 
+cd spring-boot
 go run ../main.go init -n k8s-supervisord
 go run ../main.go push --mode source
 go run ../main.go compile
@@ -103,4 +110,5 @@ oc delete --grace-period=0 --force=true pod -l app=spring-boot-http
 go run ../main.go push --mode source
 go run ../main.go compile
 go run ../main.go run
+cd ..
 ```
