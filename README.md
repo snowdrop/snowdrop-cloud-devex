@@ -41,6 +41,12 @@ The following chapter describes how we have technically implemented such user's 
  
 # Instructions
 
+## Prerequisites
+
+- Go Lang : [>=1.9](https://golang.org/doc/install)
+- [GOWORKSPACE](https://golang.org/doc/code.html#Workspaces) variable defined
+- [jq](https://stedolan.github.io/jq/)
+
 ## Download the project and install it
 
 - Install the project within your `$GOPATH`'s workspace
@@ -79,7 +85,7 @@ The following chapter describes how we have technically implemented such user's 
 - Verify if the `initContainer` has been injected within the `DeploymentConfig`
 
   ```bash
-  oc get dc/spring-boot-supervisord -o yaml | grep -A 25 initContainer
+  oc get dc/spring-boot-supervisord -o json | jq '.spec.template.spec.initContainers[0]'
   
   initContainers:
       - env:
