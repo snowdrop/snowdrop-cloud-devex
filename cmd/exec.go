@@ -1,140 +1,63 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 
-	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack"
-
-	"github.com/cmoulliard/k8s-supervisor/pkg/common/oc"
 	"fmt"
-)
-
-var (
-	supervisordBin = "/var/lib/supervisord/bin/supervisord"
-	supervisordCtl = "ctl"
-	cmdName = "run-java"
+	"github.com/cmoulliard/k8s-supervisor/pkg/common/config"
+	"github.com/cmoulliard/k8s-supervisor/pkg/common/oc"
+	"strings"
 )
 
 var exeCmd = &cobra.Command{
 	Use:   "exec [options]",
-	Short: "Stop, start or restart your SpringBoot's application.",
-	Long:  `Stop, start or restart your SpringBoot's application.`,
+	Short: "Stop, start or restart your SpringBoot application.",
+	Long:  `Stop, start or restart your SpringBoot application.`,
 	Example: fmt.Sprintf("%s\n%s\n%s",
 		execStartCmd.Example,
 		execStopCmd.Example,
 		execRestartCmd.Example),
 }
 
-var execStartCmd = &cobra.Command{
-	Use:   "start",
-	Short: "Start your SpringBoot's application.",
-	Long:  `Start your SpringBoot's application.`,
-	Example: `  sb exec start`,
-	Args: cobra.RangeArgs(0, 1),
-	Run: func(cmd *cobra.Command, args []string) {
+var execStartCmd = newCommand("start")
+var execStopCmd = newCommand("stop")
+var execRestartCmd = newCommandWith("restart", func(podName string, action string) {
+	oc.ExecCommand(oc.Command{Args: []string{"rsh", podName, config.SupervisordBin, config.SupervisordCtl, "stop", config.RunCmdName}})
+	oc.ExecCommand(oc.Command{Args: []string{"rsh", podName, config.SupervisordBin, config.SupervisordCtl, "start", config.RunCmdName}})
+})
 
-		log.Info("Exec start command called")
-
-		// Parse MANIFEST - Step 1
-		application := parseManifest()
-		// Add Namespace's value
-		application.Namespace = namespace
-
-		// Get K8s' config file - Step 2
-		kubeCfg := getK8Config(*cmd)
-
-		// Create Kube Rest's Config Client - Step 3
-		clientset := createClientSet(kubeCfg)
-
-		// Wait till the dev's pod is available
-		log.Info("Wait till the dev's pod is available")
-		pod, err := buildpack.WaitAndGetPod(clientset,application)
-		if err != nil {
-			log.Error("Pod watch error",err)
-		}
-
-		podName := pod.Name
-		action := "start"
-
-		log.Info("Start the Spring Boot application ...")
-		log.Debug("Command :",[]string{"rsh",podName,supervisordBin,supervisordCtl,action,cmdName})
-		oc.ExecCommand(oc.Command{Args: []string{"rsh",podName,supervisordBin,supervisordCtl,action,cmdName}})
-		oc.ExecCommand(oc.Command{Args: []string{"logs",podName,"-f"}})
-	},
+func newCommand(action string) *cobra.Command {
+	return newCommandWith(action, execAction)
 }
-var execStopCmd = &cobra.Command{
-	Use:   "stop",
-	Short: "Stop your SpringBoot's application.",
-	Long:  `Stop your SpringBoot's application.`,
-	Example: `  sb exec stop`,
-	Args: cobra.RangeArgs(0, 1),
-	Run: func(cmd *cobra.Command, args []string) {
 
-		log.Info("Exec stop command called")
+func newCommandWith(action string, toExec func(podName string, action string)) *cobra.Command {
+	capitalizedAction := strings.Title(action)
 
-		// Parse MANIFEST - Step 1
-		application := parseManifest()
-		// Add Namespace's value
-		application.Namespace = namespace
+	return &cobra.Command{
+		Use:     action,
+		Short:   capitalizedAction + " your SpringBoot application.",
+		Long:    capitalizedAction + ` your SpringBoot application.`,
+		Example: `  sb exec ` + action,
+		Args:    cobra.RangeArgs(0, 1),
+		Run: func(cmd *cobra.Command, args []string) {
 
-		// Get K8s' config file - Step 2
-		kubeCfg := getK8Config(*cmd)
+			log.Infof("Exec %s command called", action)
 
-		// Create Kube Rest's Config Client - Step 3
-		clientset := createClientSet(kubeCfg)
+			_, pod := SetupAndWaitForPod()
+			podName := pod.Name
 
-		// Wait till the dev's pod is available
-		log.Info("Wait till the dev's pod is available")
-		pod, err := buildpack.WaitAndGetPod(clientset,application)
-		if err != nil {
-			log.Error("Pod watch error",err)
-		}
-
-		podName := pod.Name
-		action := "stop"
-
-		log.Info("Stop the Spring Boot application ...")
-		log.Debug("Command :",[]string{"rsh",podName,supervisordBin,supervisordCtl,action,cmdName})
-		oc.ExecCommand(oc.Command{Args: []string{"rsh",podName,supervisordBin,supervisordCtl,action,cmdName}})
-		oc.ExecCommand(oc.Command{Args: []string{"logs",podName,"-f"}})
-	},
+			log.Infof("%s the Spring Boot application ...", capitalizedAction)
+			toExec(podName, action)
+			oc.ExecCommand(oc.Command{Args: []string{"logs", podName, "-f"}})
+		},
+	}
 }
-var execRestartCmd = &cobra.Command{
-	Use:   "restart",
-	Short: "Restart your SpringBoot's application.",
-	Long:  `Restart your SpringBoot's application.`,
-	Example: `  sb exec restart`,
-	Args: cobra.RangeArgs(0, 1),
-	Run: func(cmd *cobra.Command, args []string) {
 
-		log.Info("Exec restart command called")
-
-		// Parse MANIFEST - Step 1
-		application := parseManifest()
-		// Add Namespace's value
-		application.Namespace = namespace
-
-		// Get K8s' config file - Step 2
-		kubeCfg := getK8Config(*cmd)
-
-		// Create Kube Rest's Config Client - Step 3
-		clientset := createClientSet(kubeCfg)
-
-		// Wait till the dev's pod is available
-		log.Info("Wait till the dev's pod is available")
-		pod, err := buildpack.WaitAndGetPod(clientset,application)
-		if err != nil {
-			log.Error("Pod watch error",err)
-		}
-
-		podName := pod.Name
-
-		log.Info("Restart the Spring Boot application ...")
-		oc.ExecCommand(oc.Command{Args: []string{"rsh",podName,supervisordBin,supervisordCtl,"stop",cmdName}})
-		oc.ExecCommand(oc.Command{Args: []string{"rsh",podName,supervisordBin,supervisordCtl,"start",cmdName}})
-		oc.ExecCommand(oc.Command{Args: []string{"logs",podName,"-f"}})
-	},
+func execAction(podName string, action string) {
+	cmdArgs := []string{"rsh", podName, config.SupervisordBin, config.SupervisordCtl, action, config.RunCmdName}
+	log.Debug("Command :", cmdArgs)
+	oc.ExecCommand(oc.Command{Args: cmdArgs})
 }
 
 func init() {
@@ -142,7 +65,6 @@ func init() {
 	exeCmd.AddCommand(execStopCmd)
 	exeCmd.AddCommand(execRestartCmd)
 
-	runCmd.Annotations = map[string]string{"command": "run"}
+	exeCmd.Annotations = map[string]string{"command": "exec"}
 	rootCmd.AddCommand(exeCmd)
 }
-
