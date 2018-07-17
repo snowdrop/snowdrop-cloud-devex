@@ -19,6 +19,7 @@ import (
 
 var (
 	namespace string
+	appName   string
 	tool      *config.Tool
 )
 
@@ -41,7 +42,8 @@ func init() {
 	rootCmd.PersistentFlags().StringP("kubeconfig", "k", "", "Path to a kubeconfig ($HOME/.kube/config). Only required if out-of-cluster.")
 	rootCmd.PersistentFlags().StringP("masterurl", "m", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 	// Global flag(s)
-	rootCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "", "Namespace/project")
+	rootCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "", "Namespace/project (defaults to current project)")
+	rootCmd.PersistentFlags().StringVarP(&appName, "application", "a", "", "Application name (defaults to current directory name)")
 	//rootCmd.MarkPersistentFlagRequired("namespace")
 }
 
@@ -109,7 +111,7 @@ func SetupAndWaitForPod() (config.Tool, *v1.Pod) {
 func parseManifest() types.Application {
 	log.Info("Parse MANIFEST of the project if it exists")
 	current, _ := os.Getwd()
-	return buildpack.ParseManifest(current + "/MANIFEST")
+	return buildpack.ParseManifest(current+"/MANIFEST", appName)
 }
 
 func getK8Config(cmd cobra.Command) config.Kube {

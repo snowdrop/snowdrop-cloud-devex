@@ -16,6 +16,7 @@ var initCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		log.Info("Init command called")
+		log.Debugf("Namespace: %s", namespace)
 
 		setup := Setup()
 		// Create ImageStream
