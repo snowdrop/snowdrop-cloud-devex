@@ -35,7 +35,3 @@ version="0.0.3"
 [[override]]
 name="github.com/spf13/pflag"
 version="1.0.0"
-
-#[[override]]
-#name="github.com/redhat-developer/odo"
-#version="0.0.7"
