@@ -1,14 +1,16 @@
 package oc
 
 import (
+	"bytes"
+	log "github.com/sirupsen/logrus"
 	"os"
 	"os/exec"
-	log "github.com/sirupsen/logrus"
+	"strings"
 )
 
 var Client struct {
 	Path string
-	Pwd    string
+	Pwd  string
 }
 
 type Command struct {
@@ -27,13 +29,15 @@ func getClientPath() string {
 }
 
 func init() {
-	Client.Path   = getClientPath()
+	Client.Path = getClientPath()
 	Client.Pwd, _ = os.Getwd()
 }
 
-func ExecCommand(command Command) {
+func ExecCommand(command Command) (string, error) {
 	cmd := exec.Command(Client.Path, command.Args...)
-	cmd.Stdout = os.Stdout
+	var out bytes.Buffer
+	cmd.Stdout = &out
 	cmd.Stderr = os.Stderr
-	cmd.Run()
+	err := cmd.Run()
+	return strings.TrimSpace(out.String()), err
 }
