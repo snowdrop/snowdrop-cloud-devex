@@ -83,9 +83,14 @@ func getK8Config(cmd cobra.Command) config.Kube {
 }
 
 // Create Kube ClientSet
-func createClientSet(kubeCfg config.Kube) *kubernetes.Clientset {
-	kubeRestClient := createKubeRestconfig(kubeCfg)
-	log.Info("Create Kube Clientset")
+func createClientSet(kubeCfg config.Kube, optionalRestCfg ...*restclient.Config) *kubernetes.Clientset {
+	var kubeRestClient *restclient.Config
+	if len(optionalRestCfg) == 1 {
+		kubeRestClient = optionalRestCfg[0]
+	} else {
+		kubeRestClient = createKubeRestconfig(kubeCfg)
+	}
+	log.Info("Create k8s Clientset")
 	clientset, errclientset := kubernetes.NewForConfig(kubeRestClient)
 	if errclientset != nil {
 		log.Fatalf("Error building kubernetes clientset: %s", errclientset.Error())
