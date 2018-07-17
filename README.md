@@ -60,7 +60,7 @@ The following chapter describes how we have technically implemented such user st
 - Build the project locally
   ```bash
   go build -o sb *.go
-  export PATH=$PATH:$(pwd)
+  export PATH=$(pwd):$PATH
   ```
   
 - Create the `k8s-supervisord` namespace on OpenShift
