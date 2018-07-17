@@ -48,7 +48,7 @@ var execStartCmd = &cobra.Command{
 		clientset := createClientSet(kubeCfg)
 
 		// Wait till the dev's pod is available
-		log.Info("[Step 4] - Wait till the dev's pod is available")
+		log.Info("Wait till the dev's pod is available")
 		pod, err := buildpack.WaitAndGetPod(clientset,application)
 		if err != nil {
 			log.Error("Pod watch error",err)
@@ -57,7 +57,7 @@ var execStartCmd = &cobra.Command{
 		podName := pod.Name
 		action := "start"
 
-		log.Info("[Step 5] - Start the Spring Boot application ...")
+		log.Info("Start the Spring Boot application ...")
 		log.Debug("Command :",[]string{"rsh",podName,supervisordBin,supervisordCtl,action,cmdName})
 		oc.ExecCommand(oc.Command{Args: []string{"rsh",podName,supervisordBin,supervisordCtl,action,cmdName}})
 		oc.ExecCommand(oc.Command{Args: []string{"logs",podName,"-f"}})
@@ -85,7 +85,7 @@ var execStopCmd = &cobra.Command{
 		clientset := createClientSet(kubeCfg)
 
 		// Wait till the dev's pod is available
-		log.Info("[Step 4] - Wait till the dev's pod is available")
+		log.Info("Wait till the dev's pod is available")
 		pod, err := buildpack.WaitAndGetPod(clientset,application)
 		if err != nil {
 			log.Error("Pod watch error",err)
@@ -94,7 +94,7 @@ var execStopCmd = &cobra.Command{
 		podName := pod.Name
 		action := "stop"
 
-		log.Info("[Step 5] - Start the Spring Boot application ...")
+		log.Info("Stop the Spring Boot application ...")
 		log.Debug("Command :",[]string{"rsh",podName,supervisordBin,supervisordCtl,action,cmdName})
 		oc.ExecCommand(oc.Command{Args: []string{"rsh",podName,supervisordBin,supervisordCtl,action,cmdName}})
 		oc.ExecCommand(oc.Command{Args: []string{"logs",podName,"-f"}})
@@ -122,7 +122,7 @@ var execRestartCmd = &cobra.Command{
 		clientset := createClientSet(kubeCfg)
 
 		// Wait till the dev's pod is available
-		log.Info("[Step 4] - Wait till the dev's pod is available")
+		log.Info("Wait till the dev's pod is available")
 		pod, err := buildpack.WaitAndGetPod(clientset,application)
 		if err != nil {
 			log.Error("Pod watch error",err)
@@ -130,7 +130,7 @@ var execRestartCmd = &cobra.Command{
 
 		podName := pod.Name
 
-		log.Info("[Step 5] - Restart the Spring Boot application ...")
+		log.Info("Restart the Spring Boot application ...")
 		oc.ExecCommand(oc.Command{Args: []string{"rsh",podName,supervisordBin,supervisordCtl,"stop",cmdName}})
 		oc.ExecCommand(oc.Command{Args: []string{"rsh",podName,supervisordBin,supervisordCtl,"start",cmdName}})
 		oc.ExecCommand(oc.Command{Args: []string{"logs",podName,"-f"}})
