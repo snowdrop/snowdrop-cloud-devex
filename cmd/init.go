@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 
 	"github.com/cmoulliard/k8s-supervisor/pkg/common/oc"
 
@@ -29,9 +29,13 @@ var initCmd = &cobra.Command{
 		// Get K8s' config file - Step 2
 		kubeCfg := getK8Config(*cmd)
 
-		// Execute oc command to switch to the namespace defined
-		log.Info("[Step 3] - Get k8s default's namespace")
-		oc.ExecCommand(oc.Command{Args: []string{"project",application.Namespace}})
+		// Switch to namespace if specified or retrieve the current one if not
+		currentNs, err := oc.ExecCommand(oc.Command{Args: []string{"project", "-q", namespace}})
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Infof("Using '%s' namespace", currentNs)
+		application.Namespace = currentNs
 
 		// Create Kube Rest's Config Client - Step 3
 		restConfig := createKubeRestconfig(kubeCfg)
