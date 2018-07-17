@@ -253,38 +253,5 @@ The following chapter describes how we have technically implemented such user's 
   ```bash
   oc delete --force --grace-period=0 all --all
   oc delete pvc/m2-data
-  ```  
-    
-## Developer section to build the images
-
-- Export Docker ENV var to access the docker daemon
-  ```bash
-  eval $(minishift docker-env)
-  ```
-
-- To build the `copy-supervisord` docker image containing the `go supervisord` application, then follow these instructions
-
-  **WARNING**: In order to build a multi-stages docker image, it is required to install [imagebuilder](https://github.com/openshift/imagebuilder) 
-
-  ```bash
-  cd supervisord
-  imagebuilder -t <username>/copy-supervisord:latest .
-  ```
-  
-- Tag the docker image and push it to `quay.io`
-
-  ```bash
-  TAG_ID=$(docker images -q cmoulliard/copy-supervisord:latest)
-  docker tag $TAG_ID quay.io/snowdrop/supervisord
-  docker login quai.io
-  docker push quay.io/snowdrop/supervisord
-  ```
-  
-- Build the docker image of `Spring Boot S2I`
- 
-  ```bash
-  docker build -t <username>/spring-boot-http:latest .
-  docker tag 00c6b955c3e1 quay.io/snowdrop/spring-boot-s2i
-  docker push quay.io/snowdrop/spring-boot-s2i
-  ```    
+  ``` 
 
