@@ -138,7 +138,7 @@ eval $(minishift docker-env)
 To build the `copy-supervisord` docker image containing the `go supervisord` application, then follow these instructions
 
 **WARNING**: In order to build a multi-stages docker image, it is required to install [imagebuilder](https://github.com/openshift/imagebuilder) 
-as docker version packaged with minishift is too old and doesn't support such multi-stage option !
+as the docker version packaged with minishift is too old and doesn't support such multi-stage option !
 
 ```bash
 cd supervisord
