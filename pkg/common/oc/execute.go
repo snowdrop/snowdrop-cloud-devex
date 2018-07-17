@@ -33,11 +33,18 @@ func init() {
 	Client.Pwd, _ = os.Getwd()
 }
 
-func ExecCommand(command Command) (string, error) {
+func ExecCommandAndReturn(command Command) (string, error) {
 	cmd := exec.Command(Client.Path, command.Args...)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	return strings.TrimSpace(out.String()), err
+}
+
+func ExecCommand(command Command) {
+	cmd := exec.Command(Client.Path, command.Args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Run()
 }
