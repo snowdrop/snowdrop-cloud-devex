@@ -111,7 +111,7 @@ The following chapter describes how we have technically implemented such user st
   
 ## Push the code  
   
-- As the Development's pod has been created and is running the `supervisord's server`, we will now push the code.
+- As the Development's pod has been created and is running the `supervisord` server, we will now push the code.
  
 - if we want to compile the project using maven within the pod, then we will copy the following resources within the pod : `pom.xml, src/ folder`
   In this case, use the following command 

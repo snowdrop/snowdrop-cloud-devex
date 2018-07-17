@@ -22,26 +22,9 @@ var debugCmd = &cobra.Command{
 	Args: cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 
-		log.Info("Run command called")
+		log.Info("Debug command called")
 
-		// Parse MANIFEST - Step 1
-		application := parseManifest()
-		// Add Namespace's value
-		application.Namespace = namespace
-
-		// Get K8s' config file - Step 2
-		kubeCfg := getK8Config(*cmd)
-
-		// Create Kube Rest's Config Client - Step 3
-		clientset := createClientSet(kubeCfg)
-
-		// Wait till the dev's pod is available
-		log.Info("[Step 4] - Wait till the dev's pod is available")
-		pod, err := buildpack.WaitAndGetPod(clientset,application)
-		if err != nil {
-			log.Error("Pod watch error",err)
-		}
-
+		_, pod := SetupAndWaitForPod()
 		podName := pod.Name
 
 		// Append Debug Env Vars and update POD
