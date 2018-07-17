@@ -1,20 +1,19 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 
-	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack"
-
+	"github.com/cmoulliard/k8s-supervisor/pkg/common/config"
 	"github.com/cmoulliard/k8s-supervisor/pkg/common/oc"
 )
 
 var compileCmd = &cobra.Command{
-	Use:   "compile",
-	Short: "Compile local's project within the development's pod",
-	Long:  `Compile local's project within the development's pod.`,
+	Use:     "compile",
+	Short:   "Compile local project within the development pod",
+	Long:    `Compile local project within the development pod.`,
 	Example: ` sb compile`,
-	Args: cobra.RangeArgs(0, 1),
+	Args:    cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 
 		log.Info("Compile command called")
@@ -22,9 +21,9 @@ var compileCmd = &cobra.Command{
 		_, pod := SetupAndWaitForPod()
 		podName := pod.Name
 
-		log.Info("[Step 5] - Compile ...")
-		oc.ExecCommand(oc.Command{Args: []string{"rsh",podName,"/var/lib/supervisord/bin/supervisord","ctl","start","compile-java"}})
-		oc.ExecCommand(oc.Command{Args: []string{"logs",podName,"-f"}})
+		log.Info("Compile ...")
+		oc.ExecCommand(oc.Command{Args: []string{"rsh", podName, config.SupervisordBin, config.SupervisordCtl, "start", config.CompileCmdName}})
+		oc.ExecCommand(oc.Command{Args: []string{"logs", podName, "-f"}})
 	},
 }
 
@@ -32,4 +31,3 @@ func init() {
 	compileCmd.Annotations = map[string]string{"command": "compile"}
 	rootCmd.AddCommand(compileCmd)
 }
-
