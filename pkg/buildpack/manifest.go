@@ -4,31 +4,45 @@ import (
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 
+	"encoding/json"
 	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack/types"
 	"github.com/ghodss/yaml"
-	"encoding/json"
+	"os"
+	"path"
 )
 
-func ParseManifest(path string) types.Application {
-	log.Debug("Parse Application's Config : ", path)
-
-	source, err := ioutil.ReadFile(path)
-	if err != nil {
-		panic(err)
-	}
+func ParseManifest(manifestPath string) types.Application {
+	log.Debugf("Parsing Application Config at %s", manifestPath)
 
 	// Create an Application with default values
 	appConfig := types.NewApplication()
 
-	err = yaml.Unmarshal(source, &appConfig)
-	if err != nil {
-		log.Fatal(err)
+	// if we have a manifest file, use it to replace default values
+	if _, err := os.Stat(manifestPath); err == nil {
+		source, err := ioutil.ReadFile(manifestPath)
+		if err != nil {
+			panic(err)
+		}
+
+		err = yaml.Unmarshal(source, &appConfig)
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		log.Infof("No MANIFEST file detected, using default values")
+		// we need to set an application name, use the current directory name as default
+		dir, _ := path.Split(manifestPath)
+		appConfig.Name = path.Base(dir)
 	}
 
-	log.Debug("Application's config")
-	log.Debug("--------------------")
-	appFormatted, _ := json.Marshal(appConfig)
-	log.Debug(string(appFormatted))
+	log.Infof("Application '%s' configured", appConfig.Name)
+
+	if log.GetLevel() == log.DebugLevel {
+		log.Debug("Application's config")
+		log.Debug("--------------------")
+		appFormatted, _ := json.Marshal(appConfig)
+		log.Debug(string(appFormatted))
+	}
 
 	return appConfig
 }
