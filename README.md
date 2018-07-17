@@ -8,9 +8,9 @@ The prototype developed within this projects aims to resolve the following user'
 
 "As a user, I would like to know according to the OpenShift platform, which version of the template/builder and which resources are processed when it will be installed/deployed"
 
-# Technical's idea
+# Technical ideas
 
-The following chapter describes how we have technically implemented such user's story :
+The following chapter describes how we have technically implemented such user stories:
 
 - pod of the application/component (created by odo) defined with a :
   - initContainer : supervisord [2] where different commands are registered from ENV vars. E.g. start/stop the java runtime, debug or compile (= maven), ... 
@@ -18,17 +18,15 @@ The following chapter describes how we have technically implemented such user's 
   - shared volume 
 - commands can be executed remotely to trigger and action within the developer's pod -> supervisord ctl start|stop program1,....,programN
 - OpenShift Template -> converted into individual yaml files (= builder concept) and containing "{{.key}} to be processed by the go template engine
-- Developer's user preferences are stored into a MANIFEST yaml (as Cloudfoundry proposes too) which is parsed at bootstrap [3] to create an "Application" struct object used next to process the template and replace the keys with their values [4]
+- Developer's user preferences are stored into a MANIFEST yaml (as Cloudfoundry proposes too) which is parsed at bootstrap to create an "Application" struct object used next to process the template and replace the keys with their values
 
-[1] https://github.com/cmoulliard/k8s-supervisor#create-the-deploymentconfig-for-the-local-spring-boot-project
-[2] https://github.com/redhat-developer/odo/issues/556
-[3] https://goo.gl/J1bQ4x
-[4] https://goo.gl/hmKdnh
+- [1] https://github.com/cmoulliard/k8s-supervisor#create-the-deploymentconfig-for-the-local-spring-boot-project
+- [2] https://github.com/redhat-developer/odo/issues/556
 
 # Table of Contents
 
    * [Cloud Native Developer's experience - Prototype](#cloud-native-developers-experience---prototype)
-   * [Technical's idea](#technicals-idea)
+   * [Technical ideas](#technical-ideas)
    * [Table of Contents](#table-of-contents)
    * [Instructions](#instructions)
       * [Prerequisites](#prerequisites)
@@ -76,13 +74,12 @@ The following chapter describes how we have technically implemented such user's 
   ```bash
   cd spring-boot
   ```
-- Execute the following `go` program locally and pass as parameter :
+- Execute the following `go` program locally and optionally pass as parameters:
   - `-k | --kubeconfig` : /PATH/TO/KUBE/CONFIG
   - `-n | --namespace` : openshift's project
 
   ```bash
-  sb init -n k8s-supervisord
-  ... 
+  sb init
   ```
 
 - Verify if the `initContainer` has been injected within the `DeploymentConfig`

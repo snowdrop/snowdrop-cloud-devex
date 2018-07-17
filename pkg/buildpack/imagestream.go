@@ -1,12 +1,12 @@
 package buildpack
 
 import (
-	log "github.com/sirupsen/logrus"
 	"github.com/ghodss/yaml"
+	log "github.com/sirupsen/logrus"
 
-	restclient "k8s.io/client-go/rest"
-	imageclientsetv1 "github.com/openshift/client-go/image/clientset/versioned/typed/image/v1"
 	imagev1 "github.com/openshift/api/image/v1"
+	imageclientsetv1 "github.com/openshift/client-go/image/clientset/versioned/typed/image/v1"
+	restclient "k8s.io/client-go/rest"
 
 	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack/types"
 )
@@ -28,8 +28,8 @@ func CreateImageStreamTemplate(config *restclient.Config, appConfig types.Applic
 			Repo: "quay.io/snowdrop/spring-boot-s2i",
 		},
 		{
-			Name: supervisordimagename,
-			Repo: "quay.io/snowdrop/supervisord",
+			Name:           supervisordimagename,
+			Repo:           "quay.io/snowdrop/supervisord",
 			AnnotationCmds: true,
 		},
 	}
@@ -40,7 +40,7 @@ func CreateImageStreamTemplate(config *restclient.Config, appConfig types.Applic
 		appCfg.Image = img
 
 		// Parse ImageStream Template
-		var b = ParseTemplate("imagestream",appCfg)
+		var b = ParseTemplate("imagestream", appCfg)
 
 		// Create ImageStream struct using the generated ImageStream string
 		img := imagev1.ImageStream{}
@@ -51,7 +51,7 @@ func CreateImageStreamTemplate(config *restclient.Config, appConfig types.Applic
 
 		_, errImages := imageClient.ImageStreams(appConfig.Namespace).Create(&img)
 		if errImages != nil {
-			log.Fatal("Unable to create ImageStream for %s", errImages.Error())
+			log.Fatalf("Unable to create ImageStream: %s", errImages.Error())
 		}
 	}
 
