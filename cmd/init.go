@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 
 	"github.com/cmoulliard/k8s-supervisor/pkg/common/oc"
 
@@ -10,49 +10,50 @@ import (
 )
 
 var initCmd = &cobra.Command{
-	Use:   "init [flags]",
-	Short: "Create a development's pod for the component",
-	Long:  `Create a development's pod for the component.`,
+	Use:     "init [flags]",
+	Short:   "Create a development's pod for the component",
+	Long:    `Create a development's pod for the component.`,
 	Example: ` sb init -n bootapp`,
-	Args: cobra.RangeArgs(0, 1),
+	Args:    cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 
 		log.Info("Init command called")
-		log.Debug("Namespace : ", namespace)
+		log.Debugf("Namespace: %s", namespace)
 
-		// Parse MANIFEST - Step 1
+		// Parse MANIFEST
 		application := parseManifest()
 
-		// Add Namespace's value
-		application.Namespace = namespace
-
-		// Get K8s' config file - Step 2
+		// Get K8s' config file
 		kubeCfg := getK8Config(*cmd)
 
-		// Execute oc command to switch to the namespace defined
-		log.Info("[Step 3] - Get k8s default's namespace")
-		oc.ExecCommand(oc.Command{Args: []string{"project",application.Namespace}})
+		// Switch to namespace if specified or retrieve the current one if not
+		currentNs, err := oc.ExecCommand(oc.Command{Args: []string{"project", "-q", namespace}})
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Infof("Using '%s' namespace", currentNs)
+		application.Namespace = currentNs
 
-		// Create Kube Rest's Config Client - Step 3
+		// Create Kube Rest's Config Client
 		restConfig := createKubeRestconfig(kubeCfg)
-		clientset := createClientSet(kubeCfg)
+		clientset := createClientSet(kubeCfg, restConfig)
 
 		// Create ImageStream
-		log.Info("[Step 4] - Create ImageStreams for Supervisord and Java S2I Image of SpringBoot")
-		buildpack.CreateImageStreamTemplate(restConfig,application)
+		log.Info("Create ImageStreams for Supervisord and Java S2I Image of SpringBoot")
+		buildpack.CreateImageStreamTemplate(restConfig, application)
 
 		// Create PVC
-		log.Info("[Step 5] - Create PVC to storage m2 repo")
-		buildpack.CreatePVC(clientset,application,"1Gi")
+		log.Info("Create PVC to storage m2 repo")
+		buildpack.CreatePVC(clientset, application, "1Gi")
 
-		log.Info("[Step 6] - Create DeploymentConfig using Supervisord and Java S2I Image of SpringBoot")
-		dc := buildpack.CreateDeploymentConfig(restConfig,application)
+		log.Info("Create DeploymentConfig using Supervisord and Java S2I Image of SpringBoot")
+		dc := buildpack.CreateDeploymentConfig(restConfig, application)
 
-		log.Info("[Step 7] - Create Service using Template")
+		log.Info("Create Service using Template")
 		buildpack.CreateServiceTemplate(clientset, dc, application)
 
-		log.Info("[Step 8] - Create Route using Template")
-		buildpack.CreateRouteTemplate(restConfig,application)
+		log.Info("Create Route using Template")
+		buildpack.CreateRouteTemplate(restConfig, application)
 	},
 }
 
@@ -63,4 +64,3 @@ func init() {
 
 	rootCmd.AddCommand(initCmd)
 }
-
