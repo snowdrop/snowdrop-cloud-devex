@@ -45,13 +45,14 @@ cd $CURRENT
 ```bash
 oc delete --force --grace-period=0 all --all
 oc delete pvc/m2-data
+export CURRENT=$(pwd)
 
 cd spring-boot
 go run ../main.go init -n k8s-supervisord
 go run ../main.go push --mode source
 go run ../main.go compile
 go run ../main.go exec start
-cd ..
+cd $CURRENT
 ```
 
 - Execute this command within another terminal
@@ -71,11 +72,12 @@ curl $URL/api/greeting
 oc delete --force --grace-period=0 all --all
 oc delete pvc/m2-data
 
+export CURRENT=$(pwd)
 cd spring-boot
 go run ../main.go init -n k8s-supervisord
 go run ../main.go push --mode binary
 go run ../main.go exec start
-cd ..
+cd $CURRENT
 ```
 
 - Execute this command within another terminal
@@ -95,12 +97,13 @@ curl $URL/api/greeting
 oc delete --force --grace-period=0 all --all
 oc delete pvc/m2-data
 
+export CURRENT=$(pwd)
 cd spring-boot
 go run ../main.go init -n k8s-supervisord
 go run ../main.go push --mode binary
 go run ../main.go exec stop
 go run ../main.go debug
-cd ..
+cd $CURRENT
 ```
 
 ## Test 4 : source -> compile -> kill pod -> compile again (m2 repo is back again)
@@ -113,6 +116,7 @@ cd ..
 oc delete --force --grace-period=0 all --all
 oc delete pvc/m2-data
 
+export CURRENT=$(pwd)
 cd spring-boot
 go run ../main.go init -n k8s-supervisord
 go run ../main.go push --mode source
@@ -121,7 +125,7 @@ oc delete --grace-period=0 --force=true pod -l app=spring-boot-http
 go run ../main.go push --mode source
 go run ../main.go compile
 go run ../main.go exec start
-cd ..
+cd $CURRENT
 ```
 
 # Build the supervisor and java s2i images
