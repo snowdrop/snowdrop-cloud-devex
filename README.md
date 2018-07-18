@@ -46,7 +46,6 @@ The following chapter describes how we have technically implemented such user st
 
 - Go Lang : [>=1.9](https://golang.org/doc/install)
 - [GOWORKSPACE](https://golang.org/doc/code.html#Workspaces) variable defined
-- [jq](https://stedolan.github.io/jq/)
 - [oc Client Tools](https://www.openshift.org/download.html)
 
 ## Download the project and install it
@@ -75,44 +74,26 @@ The following chapter describes how we have technically implemented such user st
   ```bash
   cd spring-boot
   ```
-- Execute the following `go` program locally and optionally pass as parameters:
+- Initialize your application, optionally passing the following parameters:
   - `-k | --kubeconfig` : /PATH/TO/KUBE/CONFIG
-  - `-n | --namespace` : openshift's project
+  - `-n | --namespace` : OpenShift project
+  - `-a | --application` : application name
 
   ```bash
-  sb init
+  sb init -a spring-boot-http
   ```
+  Here, we initialized a `spring-boot-http` application. This name will be used to create OpenShift resources and set up the environment.
 
-- Verify if the `initContainer` has been injected within the `DeploymentConfig`
+- Verify if the `initContainer` has been injected within the `spring-boot-http` (the name you chose for your application) `DeploymentConfig`
 
   ```bash
-  oc get dc/spring-boot-supervisord -o json | jq '.spec.template.spec.initContainers[0]'
-  
-  {
-    "env": [
-      {
-        "name": "CMDS",
-        "value": "echo:/var/lib/supervisord/conf/echo.sh;run-java:/usr/local/s2i/run;compile-java:/usr/local/s2i/assemble;build:/deployments/buildapp"
-      }
-    ],
-    "image": "quay.io/snowdrop/supervisord@sha256:0c6ad373a3aa991edcb9b5806aecd0d57467f74018c96c6299adb9a10aaa86da",
-    "imagePullPolicy": "Always",
-    "name": "copy-supervisord",
-    "resources": {},
-    "terminationMessagePath": "/dev/termination-log",
-    "terminationMessagePolicy": "File",
-    "volumeMounts": [
-      {
-        "mountPath": "/var/lib/supervisord",
-        "name": "shared-data"
-      }
-    ]
-  }
+  oc get dc/spring-boot-http -o jsonpath='{.spec.template.spec.initContainers[0].name}{"\n"}'
   ```
+  This should yield `copy-supervisord` if everything is properly set up.
   
 ## Push the code  
   
-- As the Development's pod has been created and is running the `supervisord` server, we will now push the code.
+- As the development pod has been created and is running the `supervisord` server, we will now push the code.
  
 - if we want to compile the project using maven within the pod, then we will copy the following resources within the pod : `pom.xml, src/ folder`
   In this case, use the following command 

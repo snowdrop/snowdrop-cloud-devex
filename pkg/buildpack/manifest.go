@@ -11,7 +11,7 @@ import (
 	"path"
 )
 
-func ParseManifest(manifestPath string) types.Application {
+func ParseManifest(manifestPath string, appName string) types.Application {
 	log.Debugf("Parsing Application Config at %s", manifestPath)
 
 	// Create an Application with default values
@@ -30,9 +30,17 @@ func ParseManifest(manifestPath string) types.Application {
 		}
 	} else {
 		log.Infof("No MANIFEST file detected, using default values")
-		// we need to set an application name, use the current directory name as default
-		dir, _ := path.Split(manifestPath)
-		appConfig.Name = path.Base(dir)
+	}
+
+	// if we specified an application name, use it and override any set value
+	if len(appName) > 0 {
+		appConfig.Name = appName
+	} else {
+		if len(appConfig.Name) == 0 {
+			// we need to set an application name, use the current directory name as default
+			dir, _ := path.Split(manifestPath)
+			appConfig.Name = path.Base(dir)
+		}
 	}
 
 	log.Infof("Application '%s' configured", appConfig.Name)
