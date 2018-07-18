@@ -7,9 +7,11 @@ import (
 	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack"
 	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack/types"
 	"github.com/cmoulliard/k8s-supervisor/pkg/common/config"
+	"github.com/cmoulliard/k8s-supervisor/pkg/common/oc"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -17,6 +19,7 @@ import (
 
 var (
 	namespace string
+	tool      *config.Tool
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -62,6 +65,45 @@ func checkError(err error, context string, a ...interface{}) {
 		}
 		os.Exit(1)
 	}
+}
+
+func Setup() config.Tool {
+	if tool == nil {
+		tool = &config.Tool{}
+
+		// Parse MANIFEST
+		tool.Application = parseManifest()
+
+		// Get K8s' config file
+		tool.KubeConfig = getK8Config(*rootCmd)
+
+		// Switch to namespace if specified or retrieve the current one if not
+		currentNs, err := oc.ExecCommandAndReturn(oc.Command{Args: []string{"project", "-q", namespace}})
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Infof("Using '%s' namespace", currentNs)
+		tool.Application.Namespace = currentNs
+
+		// Create Kube Rest's Config Client
+		tool.RestConfig = createKubeRestconfig(tool.KubeConfig)
+		tool.Clientset = createClientSet(tool.KubeConfig, tool.RestConfig)
+	}
+
+	return *tool
+}
+
+func SetupAndWaitForPod() (config.Tool, *v1.Pod) {
+	setup := Setup()
+
+	// Wait till the dev pod is available
+	log.Info("Wait till the dev pod is available")
+	pod, err := buildpack.WaitAndGetPod(setup.Clientset, setup.Application)
+	if err != nil {
+		log.Error("Pod watch error", err)
+	}
+
+	return setup, pod
 }
 
 func parseManifest() types.Application {
