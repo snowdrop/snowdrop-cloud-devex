@@ -50,7 +50,8 @@ var pushCmd = &cobra.Command{
 				oc.ExecCommand(oc.Command{Args: args})
 			}
 		case "binary":
-			args := []string{"cp", oc.Client.Pwd + "/target/*.jar", podName + ":/deployments", "-c", containerName}
+			uberjarName := strings.Join([]string{setup.Application.Name, setup.Application.Version}, "-") + ".jar"
+			args := []string{"cp", oc.Client.Pwd + "/target/" + uberjarName, podName + ":/deployments", "-c", containerName}
 			log.Infof("Copy cmd : %s", args)
 			oc.ExecCommand(oc.Command{Args: args})
 		}
