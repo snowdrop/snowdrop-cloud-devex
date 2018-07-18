@@ -22,7 +22,7 @@ RUN mkdir -p ${SUPERVISORD_DIR}/conf ${SUPERVISORD_DIR}/bin
 
 COPY --from=builder /supervisord/bootstrap ${SUPERVISORD_DIR}/bin/
 COPY --from=builder /supervisord/execute.sh ${SUPERVISORD_DIR}/bin/
-COPY --from=builder /supervisord/conf/ ${SUPERVISORD_DIR}/
+COPY --from=builder /supervisord/conf/ ${SUPERVISORD_DIR}/conf/
 
 #add the go supervisord application
 ADD https://github.com/ochinchina/supervisord/releases/download/v${VERSION}/supervisord_${VERSION}_linux_amd64 ${SUPERVISORD_DIR}/bin/supervisord
