@@ -47,6 +47,7 @@ The following chapter describes how we have technically implemented such user st
 - Go Lang : [>=1.9](https://golang.org/doc/install)
 - [GOWORKSPACE](https://golang.org/doc/code.html#Workspaces) variable defined
 - [jq](https://stedolan.github.io/jq/)
+- [oc Client Tools](https://www.openshift.org/download.html)
 
 ## Download the project and install it
 
