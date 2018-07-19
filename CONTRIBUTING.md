@@ -20,14 +20,15 @@
 - Move under the `spring-boot` folder and run these commands
 
 ```bash
+oc delete --force --grace-period=0 all --all
+oc delete pvc/m2-data
+
 go build -o sb *.go
 export PATH=$PATH:$(pwd)
 export CURRENT=$(pwd)
 
 cd spring-boot
 mvn clean package
-oc delete --force --grace-period=0 all --all
-oc delete pvc/m2-data
 
 sb init -n k8s-supervisord
 sb push --mode binary
