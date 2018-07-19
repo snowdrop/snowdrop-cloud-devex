@@ -5,56 +5,68 @@ import (
 
 	restclient "k8s.io/client-go/rest"
 
-	appsocpv1 "github.com/openshift/client-go/apps/clientset/versioned/typed/apps/v1"
 	appsv1 "github.com/openshift/api/apps/v1"
+	appsocpv1 "github.com/openshift/client-go/apps/clientset/versioned/typed/apps/v1"
 
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
-
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack/types"
+	"github.com/cmoulliard/k8s-supervisor/pkg/common/oc"
 	"k8s.io/client-go/kubernetes"
 )
 
 func CreatePVC(clientset *kubernetes.Clientset, application types.Application, size string) {
-	quantity, err := resource.ParseQuantity(size)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	pvc := &corev1.PersistentVolumeClaim{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   "m2-data",
-			Labels: map[string]string{
-				"app": application.Name,
-			},
-		},
-		Spec: corev1.PersistentVolumeClaimSpec{
-			Resources: corev1.ResourceRequirements{
-				Requests: corev1.ResourceList{
-					corev1.ResourceStorage: quantity,
+	const pvcName = "m2-data"
+	if !oc.Exists("pvc", pvcName) {
+		quantity, err := resource.ParseQuantity(size)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		pvc := &corev1.PersistentVolumeClaim{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: pvcName,
+				Labels: map[string]string{
+					"app": application.Name,
 				},
 			},
-			AccessModes: []corev1.PersistentVolumeAccessMode{
-				corev1.ReadWriteOnce,
+			Spec: corev1.PersistentVolumeClaimSpec{
+				Resources: corev1.ResourceRequirements{
+					Requests: corev1.ResourceList{
+						corev1.ResourceStorage: quantity,
+					},
+				},
+				AccessModes: []corev1.PersistentVolumeAccessMode{
+					corev1.ReadWriteOnce,
+				},
 			},
-		},
-	}
-
-	_, errPVC := clientset.CoreV1().PersistentVolumeClaims(application.Namespace).Create(pvc)
-	if errPVC != nil {
-		log.Fatal(errPVC.Error())
+		}
+		_, errPVC := clientset.CoreV1().PersistentVolumeClaims(application.Namespace).Create(pvc)
+		if errPVC != nil {
+			log.Fatal(errPVC.Error())
+		}
+	} else {
+		log.Infof("'%s' PVC already exists, skipping", pvcName)
 	}
 }
 
-func CreateDeploymentConfig(config *restclient.Config, application types.Application) *appsv1.DeploymentConfig {
+func CreateOrRetrieveDeploymentConfig(config *restclient.Config, application types.Application) *appsv1.DeploymentConfig {
 	deploymentConfigV1client, err := appsocpv1.NewForConfig(config)
 	if err != nil {
 		log.Fatalf("Can't get DeploymentConfig Clientset: %s", err.Error())
 	}
 
-	dc, errCreate := deploymentConfigV1client.DeploymentConfigs(application.Namespace).Create(javaDeploymentConfig(application))
+	deploymentConfigs := deploymentConfigV1client.DeploymentConfigs(application.Namespace)
+
+	var dc *appsv1.DeploymentConfig
+	var errCreate error
+	if oc.Exists("dc", application.Name) {
+		dc, errCreate = deploymentConfigs.Get(application.Name, metav1.GetOptions{})
+		log.Infof("'%s' DeploymentConfig already exists, skipping", application.Name)
+	} else {
+		dc, errCreate = deploymentConfigs.Create(javaDeploymentConfig(application))
+	}
 	if errCreate != nil {
 		log.Fatalf("DeploymentConfig not created: %s", errCreate.Error())
 	}
@@ -109,20 +121,20 @@ func javaDeploymentConfig(application types.Application) *appsv1.DeploymentConfi
 									Value: application.Name + "-" + application.Version + ".jar",
 								},
 								{
-									Name: "JAVA_DEBUG",
+									Name:  "JAVA_DEBUG",
 									Value: "true",
 								},
 								{
-									Name: "JAVA_DEBUG_PORT",
+									Name:  "JAVA_DEBUG_PORT",
 									Value: "5005",
 								},
 							},
 							/*							Resources: corev1.ResourceRequirements{
-															Limits: corev1.ResourceList{
-																corev1.ResourceCPU: resource.MustParse(appConfig.Cpu),
-																corev1.ResourceMemory: resource.MustParse(appConfig.Memory),
-															},
-														},*/
+														Limits: corev1.ResourceList{
+															corev1.ResourceCPU: resource.MustParse(appConfig.Cpu),
+															corev1.ResourceMemory: resource.MustParse(appConfig.Memory),
+														},
+													},*/
 							VolumeMounts: []corev1.VolumeMount{
 								{
 									Name:      "shared-data",
@@ -194,8 +206,8 @@ func javaDeploymentConfig(application types.Application) *appsv1.DeploymentConfi
 
 func supervisordInitContainer(name string) *corev1.Container {
 	return &corev1.Container{
-		Name:    name,
-		Image:   name + ":latest",
+		Name:  name,
+		Image: name + ":latest",
 		VolumeMounts: []corev1.VolumeMount{
 			{
 				Name:      "shared-data",

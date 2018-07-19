@@ -9,6 +9,7 @@ import (
 	restclient "k8s.io/client-go/rest"
 
 	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack/types"
+	"github.com/cmoulliard/k8s-supervisor/pkg/common/oc"
 )
 
 
@@ -22,19 +23,24 @@ func CreateImageStreamTemplate(config *restclient.Config, appConfig types.Applic
 
 		appCfg.Image = img
 
-		// Parse ImageStream Template
-		var b = ParseTemplate("imagestream", appCfg)
+		// first check that the image stream hasn't already been created
+		if oc.Exists("imagestream", img.Name) {
+			log.Infof("'%s' ImageStream already exists, skipping", img.Name)
+		} else {
+			// Parse ImageStream Template
+			var b = ParseTemplate("imagestream", appCfg)
 
-		// Create ImageStream struct using the generated ImageStream string
-		img := imagev1.ImageStream{}
-		errYamlParsing := yaml.Unmarshal(b.Bytes(), &img)
-		if errYamlParsing != nil {
-			panic(errYamlParsing)
-		}
+			// Create ImageStream struct using the generated ImageStream string
+			img := imagev1.ImageStream{}
+			errYamlParsing := yaml.Unmarshal(b.Bytes(), &img)
+			if errYamlParsing != nil {
+				panic(errYamlParsing)
+			}
 
-		_, errImages := imageClient.ImageStreams(appConfig.Namespace).Create(&img)
-		if errImages != nil {
-			log.Fatalf("Unable to create ImageStream: %s", errImages.Error())
+			_, errImages := imageClient.ImageStreams(appConfig.Namespace).Create(&img)
+			if errImages != nil {
+				log.Fatalf("Unable to create ImageStream: %s", errImages.Error())
+			}
 		}
 	}
 }
