@@ -46,13 +46,17 @@ cd $CURRENT
 ```bash
 oc delete --force --grace-period=0 all --all
 oc delete pvc/m2-data
+
+go build -o sb *.go
+export PATH=$PATH:$(pwd)
 export CURRENT=$(pwd)
 
 cd spring-boot
-go run ../main.go init -n k8s-supervisord
-go run ../main.go push --mode source
-go run ../main.go compile
-go run ../main.go exec start
+rm .sb.state
+sb init -n k8s-supervisord
+sb push --mode source
+sb compile
+sb exec start
 cd $CURRENT
 ```
 
@@ -73,11 +77,14 @@ curl $URL/api/greeting
 oc delete --force --grace-period=0 all --all
 oc delete pvc/m2-data
 
+go build -o sb *.go
+export PATH=$PATH:$(pwd)
 export CURRENT=$(pwd)
 cd spring-boot
-go run ../main.go init -n k8s-supervisord
-go run ../main.go push --mode binary
-go run ../main.go exec start
+rm .sb.state
+sb init -n k8s-supervisord
+sb push --mode binary
+sb exec start
 cd $CURRENT
 ```
 
@@ -98,12 +105,16 @@ curl $URL/api/greeting
 oc delete --force --grace-period=0 all --all
 oc delete pvc/m2-data
 
+go build -o sb *.go
+export PATH=$PATH:$(pwd)
 export CURRENT=$(pwd)
+ 
 cd spring-boot
-go run ../main.go init -n k8s-supervisord
-go run ../main.go push --mode binary
-go run ../main.go exec stop
-go run ../main.go debug
+rm .sb.state
+sb init -n k8s-supervisord
+sb push --mode binary
+sb exec stop
+sb debug
 cd $CURRENT
 ```
 
@@ -117,15 +128,20 @@ cd $CURRENT
 oc delete --force --grace-period=0 all --all
 oc delete pvc/m2-data
 
+go build -o sb *.go
+export PATH=$PATH:$(pwd)
 export CURRENT=$(pwd)
+
 cd spring-boot
-go run ../main.go init -n k8s-supervisord
-go run ../main.go push --mode source
-go run ../main.go compile
+rm .sb.state
+
+sb init -n k8s-supervisord
+sb push --mode source
+sb compile
 oc delete --grace-period=0 --force=true pod -l app=spring-boot-http 
-go run ../main.go push --mode source
-go run ../main.go compile
-go run ../main.go exec start
+sb push --mode source
+sb compile
+sb exec start
 cd $CURRENT
 ```
 
