@@ -27,7 +27,16 @@ func CreateServiceTemplate(clientset *kubernetes.Clientset, dc *appsv1.Deploymen
 		}
 		_, errService := clientset.CoreV1().Services(application.Namespace).Create(&svc)
 		if errService != nil {
-			log.Fatal("Unable to create Service for %s", errService.Error())
+			log.Fatalf("Unable to create Service: %s", errService.Error())
+		}
+	}
+}
+
+func DeleteService(clientset *kubernetes.Clientset, application types.Application) {
+	if oc.Exists("svc", application.Name) {
+		errService := clientset.CoreV1().Services(application.Namespace).Delete(application.Name, deleteOptions)
+		if errService != nil {
+			log.Fatalf("Unable to delete Service: %s", errService.Error())
 		}
 	}
 }

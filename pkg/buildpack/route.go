@@ -17,10 +17,7 @@ func CreateRouteTemplate(config *restclient.Config, application types.Applicatio
 	if oc.Exists("route", application.Name) {
 		log.Infof("'%s' Route already exists, skipping", application.Name)
 	} else {
-		routeV1Client, errrouteclientsetv1 := routeclientsetv1.NewForConfig(config)
-		if errrouteclientsetv1 != nil {
-			log.Fatal("error creating route Clientset", errrouteclientsetv1.Error())
-		}
+		routeV1Client := getClient(config)
 
 		// Parse Route Template
 		var b = ParseTemplate("route", application)
@@ -36,6 +33,24 @@ func CreateRouteTemplate(config *restclient.Config, application types.Applicatio
 		_, errRoute := routeV1Client.Routes(application.Namespace).Create(&route)
 		if errRoute != nil {
 			log.Fatal("error creating route", errRoute.Error())
+		}
+	}
+}
+
+func getClient(config *restclient.Config) *routeclientsetv1.RouteV1Client {
+	routeV1Client, errrouteclientsetv1 := routeclientsetv1.NewForConfig(config)
+	if errrouteclientsetv1 != nil {
+		log.Fatal("error creating route Clientset", errrouteclientsetv1.Error())
+	}
+	return routeV1Client
+}
+
+func DeleteRoute(config *restclient.Config, application types.Application) {
+	if oc.Exists("route", application.Name) {
+		// Create the route ...
+		errRoute := getClient(config).Routes(application.Namespace).Delete(application.Name, deleteOptions)
+		if errRoute != nil {
+			log.Fatalf("Unable to delete Route: %s", errRoute.Error())
 		}
 	}
 }
