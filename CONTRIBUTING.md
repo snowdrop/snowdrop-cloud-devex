@@ -163,13 +163,13 @@ as the docker version packaged with minishift is too old and doesn't support suc
 
 ```bash
 cd supervisord
-imagebuilder -t <username>/copy-supervisord:latest .
+imagebuilder -t copy-supervisord:latest .
 ```
   
 Tag the docker image and push it to `quay.io`
 
 ```bash
-TAG_ID=$(docker images -q cmoulliard/copy-supervisord:latest)
+TAG_ID=$(docker images -q copy-supervisord:latest)
 docker tag $TAG_ID quay.io/snowdrop/supervisord
 docker login quai.io
 docker push quay.io/snowdrop/supervisord
@@ -189,10 +189,18 @@ RUN chgrp -R 0 /tmp/src/ && \
     chmod -R g+rw /tmp/src/
 ```
 
-Execute such commands to build the docker image of the `Java S2I` and pusblish it on `Quay.io`
+**IMPORTANT**: See this doc's [part](https://docs.openshift.org/latest/creating_images/guidelines.html#openshift-specific-guidelines) for more info about `Support Arbitrary User IDs`
+
+Execute such commands to build the docker image of the `Java S2I` and publish it on `Quay.io`
  
 ```bash
-docker build -t <username>/spring-boot-http:latest .
-docker tag 00c6b955c3e1 quay.io/snowdrop/spring-boot-s2i
+docker build -t spring-boot-http:latest .
+TAG_ID=$(docker images -q <username>/spring-boot-http:latest)
+docker tag $TAG_ID quay.io/snowdrop/spring-boot-s2i
 docker push quay.io/snowdrop/spring-boot-s2i
 ```   
+
+docker login -u="cmoulliard" -p="EfQulpeG3aM833zMctXfkNNeqVUFV75AEZ3jqU3R7ntPDpGDsGbDUNgLgGGgpziZ" quay.io
+TAG_ID=$(docker images -q spring-boot-http:latest)
+docker tag $TAG_ID  quay.io/snowdrop/spring-boot-s2i
+docker push quay.io/snowdrop/spring-boot-s2i
