@@ -100,7 +100,7 @@ func javaDeploymentConfig(application types.Application) *appsv1.DeploymentConfi
 					},
 				},
 				Spec: corev1.PodSpec{
-					InitContainers: []corev1.Container{*supervisordInitContainer(application.Name)},
+					InitContainers: []corev1.Container{*supervisordInitContainer(application.SupervisordName)},
 					Containers: []corev1.Container{
 						{
 							Image: application.Name + ":latest",
