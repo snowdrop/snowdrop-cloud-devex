@@ -8,5 +8,8 @@ EXPOSE 8080
 USER root
 RUN mkdir -p /tmp/src/target
 
-RUN chgrp -R 0 /tmp/src/ && \
+RUN chown -R 1001:0 /tmp/src/ && chown -R 1001:0 $HOME && \
+    chmod -R ug+rwX /tmp/src/ && \
     chmod -R g+rw /tmp/src/
+
+USER 1001
