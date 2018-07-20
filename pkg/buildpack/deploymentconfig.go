@@ -88,10 +88,10 @@ func javaDeploymentConfig(application types.Application) *appsv1.DeploymentConfi
 					},
 				},
 				Spec: corev1.PodSpec{
-					InitContainers: []corev1.Container{*supervisordInitContainer()},
+					InitContainers: []corev1.Container{*supervisordInitContainer(application.Name)},
 					Containers: []corev1.Container{
 						{
-							Image: appImagename + ":latest",
+							Image: application.Name + ":latest",
 							Name:  application.Name,
 							Ports: []corev1.ContainerPort{
 								{
@@ -106,7 +106,7 @@ func javaDeploymentConfig(application types.Application) *appsv1.DeploymentConfi
 								},
 								{
 									Name:  "JAVA_APP_JAR",
-									Value: appImagename + "-" + version + ".jar",
+									Value: application.Name + "-" + application.Version + ".jar",
 								},
 								{
 									Name: "JAVA_DEBUG",
@@ -166,11 +166,11 @@ func javaDeploymentConfig(application types.Application) *appsv1.DeploymentConfi
 					ImageChangeParams: &appsv1.DeploymentTriggerImageChangeParams{
 						Automatic: true,
 						ContainerNames: []string{
-							supervisordimagename,
+							application.SupervisordName,
 						},
 						From: corev1.ObjectReference{
 							Kind: "ImageStreamTag",
-							Name: supervisordimagename + ":latest",
+							Name: application.SupervisordName + ":latest",
 						},
 					},
 				},
@@ -183,7 +183,7 @@ func javaDeploymentConfig(application types.Application) *appsv1.DeploymentConfi
 						},
 						From: corev1.ObjectReference{
 							Kind: "ImageStreamTag",
-							Name: appImagename + ":latest",
+							Name: application.Name + ":latest",
 						},
 					},
 				},
@@ -192,10 +192,10 @@ func javaDeploymentConfig(application types.Application) *appsv1.DeploymentConfi
 	}
 }
 
-func supervisordInitContainer() *corev1.Container {
+func supervisordInitContainer(name string) *corev1.Container {
 	return &corev1.Container{
-		Name:    "copy-supervisord",
-		Image:   supervisordimagename + ":latest",
+		Name:    name,
+		Image:   name + ":latest",
 		VolumeMounts: []corev1.VolumeMount{
 			{
 				Name:      "shared-data",

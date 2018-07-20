@@ -9,6 +9,7 @@ type Application struct {
 	Memory  string  `default:"250Mi"`
 	Port    int32   `default:"8080"`
 	Image   Image
+	SupervisordName string
 }
 
 type Image struct {
@@ -24,5 +25,6 @@ func NewApplication() Application {
 		Memory: "250Mi",
 		Replica: 1,
 		Port: 8080,
+		SupervisordName: "copy-supervisord",
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack"
+	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack/types"
 )
 
 var initCmd = &cobra.Command{
@@ -21,7 +22,13 @@ var initCmd = &cobra.Command{
 		setup := Setup()
 		// Create ImageStream
 		log.Info("Create ImageStreams for Supervisord and Java S2I Image of SpringBoot")
-		buildpack.CreateImageStreamTemplate(setup.RestConfig, setup.Application)
+
+		images := []types.Image{
+			*buildpack.CreateTypeImage(setup.Application.Name, "quay.io/snowdrop/spring-boot-s2i", false),
+			*buildpack.CreateTypeImage("copy-supervisord", "quay.io/snowdrop/supervisord", true),
+		}
+
+		buildpack.CreateImageStreamTemplate(setup.RestConfig, setup.Application, images)
 
 		// Create PVC
 		log.Info("Create PVC to storage m2 repo")

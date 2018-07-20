@@ -11,27 +11,10 @@ import (
 	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack/types"
 )
 
-var (
-	appImagename         = "spring-boot-http"
-	version              = "1.0"
-	supervisordimagename = "copy-supervisord"
-)
 
-func CreateImageStreamTemplate(config *restclient.Config, appConfig types.Application) {
+func CreateImageStreamTemplate(config *restclient.Config, appConfig types.Application, images []types.Image) {
 	imageClient, err := imageclientsetv1.NewForConfig(config)
 	if err != nil {
-	}
-
-	images := []types.Image{
-		{
-			Name: appImagename,
-			Repo: "quay.io/snowdrop/spring-boot-s2i",
-		},
-		{
-			Name:           supervisordimagename,
-			Repo:           "quay.io/snowdrop/supervisord",
-			AnnotationCmds: true,
-		},
 	}
 
 	appCfg := appConfig
@@ -54,5 +37,12 @@ func CreateImageStreamTemplate(config *restclient.Config, appConfig types.Applic
 			log.Fatalf("Unable to create ImageStream: %s", errImages.Error())
 		}
 	}
+}
 
+func CreateTypeImage(name string, repo string, annotationCmd bool) *types.Image {
+	return &types.Image {
+			Name: name,
+			Repo: repo,
+			AnnotationCmds: annotationCmd,
+    }
 }
