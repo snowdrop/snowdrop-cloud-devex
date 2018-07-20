@@ -45,8 +45,9 @@ func CreateImageStreamTemplate(config *restclient.Config, appConfig types.Applic
 	}
 }
 
-func CreateTypeImage(name string, tag string, repo string, annotationCmd bool) *types.Image {
+func CreateTypeImage(dockerImage bool, name string, tag string, repo string, annotationCmd bool) *types.Image {
 	return &types.Image {
+		    DockerImage: dockerImage,
 			Name: name,
 			Repo: repo,
 			AnnotationCmds: annotationCmd,

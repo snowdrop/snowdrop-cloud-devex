@@ -7,6 +7,7 @@ metadata:
 spec:
   lookupPolicy:
     local: false
+  {{if .Image.DockerImage}}
   tags:
   - {{if .Image.AnnotationCmds}}
     annotations:
@@ -19,3 +20,4 @@ spec:
     name: latest
     referencePolicy:
       type: Source
+  {{end}}

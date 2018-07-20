@@ -19,7 +19,7 @@ func CreateBuild(config *restclient.Config, appConfig types.Application) {
 	}
 
 	//_, errbuild := buildClient.Builds(appConfig.Namespace).Create(devBuild(appConfig.Name))
-	_, errbuild := buildClient.BuildConfigs(appConfig.Namespace).Create(devBuildConfig(appConfig.Name))
+	_, errbuild := buildClient.BuildConfigs(appConfig.Namespace).Create(devBuildConfig("dev-s2i",appConfig.Name))
 	if errbuild != nil {
 		log.Fatalf("Unable to create Build: %s", errbuild.Error())
 	}
@@ -66,17 +66,17 @@ func devBuild(name string) *buildv1.Build {
 	}
 }
 
-func devBuildConfig(name string) *buildv1.BuildConfig {
+func devBuildConfig(fromName string, toName string) *buildv1.BuildConfig {
 	return &buildv1.BuildConfig{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
+			Name: toName,
 		},
 		Spec: buildv1.BuildConfigSpec{
 			CommonSpec: buildv1.CommonSpec{
 				Output:buildv1.BuildOutput{
 					To: &corev1.ObjectReference{
 						Kind: "ImageStreamTag",
-						Name: name + "2" + ":latest",
+						Name: toName + ":latest",
 					},
 				},
 				Source: buildv1.BuildSource{
@@ -86,7 +86,7 @@ func devBuildConfig(name string) *buildv1.BuildConfig {
 					SourceStrategy: &buildv1.SourceBuildStrategy{
 						From: corev1.ObjectReference{
 							Kind: "ImageStreamTag",
-							Name: name + ":latest",
+							Name: fromName + ":latest",
 						},
 					},
 				},

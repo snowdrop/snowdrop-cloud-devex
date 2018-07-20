@@ -17,6 +17,7 @@ type Image struct {
 	AnnotationCmds bool
 	Repo string
 	Tag string
+	DockerImage bool
 }
 
 func NewApplication() Application {

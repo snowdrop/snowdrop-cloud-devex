@@ -103,7 +103,7 @@ func javaDeploymentConfig(application types.Application) *appsv1.DeploymentConfi
 					InitContainers: []corev1.Container{*supervisordInitContainer(application.SupervisordName)},
 					Containers: []corev1.Container{
 						{
-							Image: application.Name + ":latest",
+							Image: "dev-s2i:latest",
 							Name:  application.Name,
 							Ports: []corev1.ContainerPort{
 								{
@@ -195,7 +195,7 @@ func javaDeploymentConfig(application types.Application) *appsv1.DeploymentConfi
 						},
 						From: corev1.ObjectReference{
 							Kind: "ImageStreamTag",
-							Name: application.Name + ":latest",
+							Name: "dev-s2i:latest",
 						},
 					},
 				},
