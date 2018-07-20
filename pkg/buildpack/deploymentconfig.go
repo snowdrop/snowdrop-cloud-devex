@@ -18,7 +18,6 @@ import (
 )
 
 func CreatePVC(clientset *kubernetes.Clientset, application types.Application, size string) {
-	const pvcName = "m2-data"
 	if !oc.Exists("pvc", pvcName) {
 		quantity, err := resource.ParseQuantity(size)
 		if err != nil {
@@ -51,11 +50,17 @@ func CreatePVC(clientset *kubernetes.Clientset, application types.Application, s
 	}
 }
 
-func CreateOrRetrieveDeploymentConfig(config *restclient.Config, application types.Application) *appsv1.DeploymentConfig {
-	deploymentConfigV1client, err := appsocpv1.NewForConfig(config)
-	if err != nil {
-		log.Fatalf("Can't get DeploymentConfig Clientset: %s", err.Error())
+func DeletePVC(clientset *kubernetes.Clientset, application types.Application) {
+	if oc.Exists("pvc", pvcName) {
+		errPVC := clientset.CoreV1().PersistentVolumeClaims(application.Namespace).Delete(pvcName, deleteOptions)
+		if errPVC != nil {
+			log.Fatal(errPVC.Error())
+		}
 	}
+}
+
+func CreateOrRetrieveDeploymentConfig(config *restclient.Config, application types.Application) *appsv1.DeploymentConfig {
+	deploymentConfigV1client := getAppsClient(config)
 
 	deploymentConfigs := deploymentConfigV1client.DeploymentConfigs(application.Namespace)
 
@@ -71,6 +76,23 @@ func CreateOrRetrieveDeploymentConfig(config *restclient.Config, application typ
 		log.Fatalf("DeploymentConfig not created: %s", errCreate.Error())
 	}
 	return dc
+}
+
+func getAppsClient(config *restclient.Config) *appsocpv1.AppsV1Client {
+	deploymentConfigV1client, err := appsocpv1.NewForConfig(config)
+	if err != nil {
+		log.Fatalf("Can't get DeploymentConfig Clientset: %s", err.Error())
+	}
+	return deploymentConfigV1client
+}
+
+func DeleteDeploymentConfig(config *restclient.Config, application types.Application) {
+	if oc.Exists("dc", application.Name) {
+		errPVC := getAppsClient(config).DeploymentConfigs(application.Namespace).Delete(application.Name, deleteOptions)
+		if errPVC != nil {
+			log.Fatal(errPVC.Error())
+		}
+	}
 }
 
 func javaDeploymentConfig(application types.Application) *appsv1.DeploymentConfig {

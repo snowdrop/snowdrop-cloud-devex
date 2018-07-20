@@ -12,11 +12,8 @@ import (
 	"github.com/cmoulliard/k8s-supervisor/pkg/common/oc"
 )
 
-
 func CreateImageStreamTemplate(config *restclient.Config, appConfig types.Application, images []types.Image) {
-	imageClient, err := imageclientsetv1.NewForConfig(config)
-	if err != nil {
-	}
+	imageClient := getImageClient(config)
 
 	appCfg := appConfig
 	for _, img := range images {
@@ -45,12 +42,33 @@ func CreateImageStreamTemplate(config *restclient.Config, appConfig types.Applic
 	}
 }
 
+func getImageClient(config *restclient.Config) *imageclientsetv1.ImageV1Client {
+	imageClient, err := imageclientsetv1.NewForConfig(config)
+	if err != nil {
+		log.Fatal("Couldn't get ImageV1Client: %s", err)
+	}
+	return imageClient
+}
+
+func DeleteImageStreams(config *restclient.Config, appConfig types.Application, images []types.Image) {
+	for _, img := range images {
+		// first check that the image stream hasn't already been created
+		if oc.Exists("imagestream", img.Name) {
+			client := getImageClient(config)
+			err := client.ImageStreams(appConfig.Namespace).Delete(img.Name, deleteOptions)
+			if err != nil {
+				log.Fatalf("Unable to delete ImageStream: %s", img.Name)
+			}
+		}
+	}
+}
+
 func CreateTypeImage(dockerImage bool, name string, tag string, repo string, annotationCmd bool) *types.Image {
-	return &types.Image {
-		    DockerImage: dockerImage,
-			Name: name,
-			Repo: repo,
-			AnnotationCmds: annotationCmd,
-			Tag: tag,
-    }
+	return &types.Image{
+		DockerImage:    dockerImage,
+		Name:           name,
+		Repo:           repo,
+		AnnotationCmds: annotationCmd,
+		Tag:            tag,
+	}
 }
