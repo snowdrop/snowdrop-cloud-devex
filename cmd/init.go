@@ -54,8 +54,8 @@ var initCmd = &cobra.Command{
 			if !state.Is {
 				// Create ImageStreams
 				images := []types.Image{
-					*buildpack.CreateTypeImage(setup.Application.Name, "quay.io/snowdrop/spring-boot-s2i", false),
-					*buildpack.CreateTypeImage("copy-supervisord", "quay.io/snowdrop/supervisord", true),
+					*buildpack.CreateTypeImage(setup.Application.Name, "latest", "quay.io/snowdrop/spring-boot-s2i", false),
+					*buildpack.CreateTypeImage("copy-supervisord", "latest", "quay.io/snowdrop/supervisord", true),
 				}
 
 				buildpack.CreateImageStreamTemplate(setup.RestConfig, setup.Application, images)

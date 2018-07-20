@@ -16,6 +16,7 @@ type Image struct {
 	Name string
 	AnnotationCmds bool
 	Repo string
+	Tag string
 }
 
 func NewApplication() Application {

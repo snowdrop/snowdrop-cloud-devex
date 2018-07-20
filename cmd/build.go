@@ -33,7 +33,7 @@ var buildCmd = &cobra.Command{
 
 		//Create target imageStream
 		images := []types.Image{
-			*buildpack.CreateTypeImage(setup.Application.Name + "2", "quay.io/snowdrop/spring-boot-s2i", false),
+			*buildpack.CreateTypeImage(setup.Application.Name, "latest:","quay.io/snowdrop/spring-boot-s2i", false),
 		}
 		buildpack.CreateImageStreamTemplate(setup.RestConfig,setup.Application,images)
 

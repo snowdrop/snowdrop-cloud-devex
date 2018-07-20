@@ -45,10 +45,11 @@ func CreateImageStreamTemplate(config *restclient.Config, appConfig types.Applic
 	}
 }
 
-func CreateTypeImage(name string, repo string, annotationCmd bool) *types.Image {
+func CreateTypeImage(name string, tag string, repo string, annotationCmd bool) *types.Image {
 	return &types.Image {
 			Name: name,
 			Repo: repo,
 			AnnotationCmds: annotationCmd,
+			Tag: tag,
     }
 }
