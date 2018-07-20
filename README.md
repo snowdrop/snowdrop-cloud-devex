@@ -164,6 +164,13 @@ The following chapter describes how we have technically implemented such user st
   
   **Remark** Before to launch the compilation's command using supervisord, the program will wait till the development's pod is alive !
   
+When the command finishes, you can verify the existence of the uberjar by executing:
+
+  ```bash
+  oc rsh $(oc get pod -o jsonpath='{.items[0].metadata.name}') ls -l /deployments
+  ```
+ 
+  
 ## Start the java application
 
 - Launch the Spring Boot Application
