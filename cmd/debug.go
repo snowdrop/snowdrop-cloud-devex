@@ -6,8 +6,8 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/cmoulliard/k8s-supervisor/pkg/common/config"
-	"github.com/cmoulliard/k8s-supervisor/pkg/common/oc"
+	"github.com/snowdrop/k8s-supervisor/pkg/common/config"
+	"github.com/snowdrop/k8s-supervisor/pkg/common/oc"
 )
 
 var (

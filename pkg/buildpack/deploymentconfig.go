@@ -12,8 +12,8 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack/types"
-	"github.com/cmoulliard/k8s-supervisor/pkg/common/oc"
+	"github.com/snowdrop/k8s-supervisor/pkg/buildpack/types"
+	"github.com/snowdrop/k8s-supervisor/pkg/common/oc"
 	"k8s.io/client-go/kubernetes"
 )
 

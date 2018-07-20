@@ -4,14 +4,14 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack"
-	"path/filepath"
-	"os"
-	"fmt"
-	"io/ioutil"
 	"archive/tar"
-	"github.com/cmoulliard/k8s-supervisor/pkg/common/oc"
-	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack/types"
+	"fmt"
+	"github.com/snowdrop/k8s-supervisor/pkg/buildpack"
+	"github.com/snowdrop/k8s-supervisor/pkg/buildpack/types"
+	"github.com/snowdrop/k8s-supervisor/pkg/common/oc"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 )
 
 var buildCmd = &cobra.Command{
@@ -29,13 +29,13 @@ var buildCmd = &cobra.Command{
 
 		// Create Build
 		log.Info("Create Build resource")
-		buildpack.CreateBuild(setup.RestConfig,setup.Application)
+		buildpack.CreateBuild(setup.RestConfig, setup.Application)
 
 		//Create target imageStream
 		images := []types.Image{
-			*buildpack.CreateTypeImage(false,setup.Application.Name, "latest","", false),
+			*buildpack.CreateTypeImage(false, setup.Application.Name, "latest", "", false),
 		}
-		buildpack.CreateImageStreamTemplate(setup.RestConfig,setup.Application,images)
+		buildpack.CreateImageStreamTemplate(setup.RestConfig, setup.Application, images)
 
 		// Generate tar and next start the build using it
 		//r := generateTar("")
@@ -43,12 +43,11 @@ var buildCmd = &cobra.Command{
 		// TODO - Add a watch to check if the build has been created
 
 		// Start the build
-		args = []string{"start-build",setup.Application.Name,"--from-dir="+oc.Client.Pwd,"--follow"}
+		args = []string{"start-build", setup.Application.Name, "--from-dir=" + oc.Client.Pwd, "--follow"}
 		log.Infof("Starr-build cmd : %s", args)
 		oc.ExecCommand(oc.Command{Args: args})
 	},
 }
-
 
 func init() {
 
@@ -61,7 +60,7 @@ func init() {
 func generateTar(dirToskip string) (f *os.File) {
 	// Create and add some files to the archive.
 	current, _ := os.Getwd()
-	dir := filepath.Join(current,"spring-boot")
+	dir := filepath.Join(current, "spring-boot")
 	files := walkTree(dir, dirToskip)
 
 	return createTar(current, files)
@@ -102,7 +101,7 @@ func walkTree(dir string, dirToskip string) []string {
 
 func createTar(current string, files []string) (f *os.File) {
 	// Open TAR file
-	f, err := os.OpenFile(current + "/touch.tar", os.O_RDWR, os.ModePerm)
+	f, err := os.OpenFile(current+"/touch.tar", os.O_RDWR, os.ModePerm)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -111,7 +110,7 @@ func createTar(current string, files []string) (f *os.File) {
 
 	// Iterate through the files of the dir
 	for _, file := range files {
-		if ! isDir(file) {
+		if !isDir(file) {
 			// Read file's content
 			content, err := ioutil.ReadFile(file)
 			if err != nil {
@@ -127,7 +126,7 @@ func createTar(current string, files []string) (f *os.File) {
 			}
 
 			if err := tw.WriteHeader(h); err != nil {
-				log.Fatal("Can't write header : ",h, " - ", err.Error())
+				log.Fatal("Can't write header : ", h, " - ", err.Error())
 			}
 
 			if _, err := tw.Write([]byte(content)); err != nil {

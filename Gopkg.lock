@@ -90,6 +90,7 @@
   name = "github.com/openshift/api"
   packages = [
     "apps/v1",
+    "build/v1",
     "image/docker10",
     "image/dockerpre012",
     "image/v1",
@@ -104,6 +105,8 @@
   packages = [
     "apps/clientset/versioned/scheme",
     "apps/clientset/versioned/typed/apps/v1",
+    "build/clientset/versioned/scheme",
+    "build/clientset/versioned/typed/build/v1",
     "image/clientset/versioned/scheme",
     "image/clientset/versioned/typed/image/v1",
     "route/clientset/versioned/scheme",
@@ -337,6 +340,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8014602ca4a74f8d9fed7eee71cc89b8dfedab707d215cd484dca21144c00149"
+  inputs-digest = "82c08d3cf1b250b50a5b15699e01866097a291268c239f614b4a751da72a69fa"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"fmt"
-	"github.com/cmoulliard/k8s-supervisor/pkg/common/oc"
+	"github.com/snowdrop/k8s-supervisor/pkg/common/oc"
 )
 
 var (

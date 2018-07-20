@@ -9,8 +9,8 @@ import (
 	routev1 "github.com/openshift/api/route/v1"
 	routeclientsetv1 "github.com/openshift/client-go/route/clientset/versioned/typed/route/v1"
 
-	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack/types"
-	"github.com/cmoulliard/k8s-supervisor/pkg/common/oc"
+	"github.com/snowdrop/k8s-supervisor/pkg/buildpack/types"
+	"github.com/snowdrop/k8s-supervisor/pkg/common/oc"
 )
 
 func CreateRouteTemplate(config *restclient.Config, application types.Application) {

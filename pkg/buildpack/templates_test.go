@@ -1,20 +1,19 @@
 package buildpack_test
 
 import (
-	"text/template"
+	"bytes"
+	"github.com/snowdrop/k8s-supervisor/pkg/buildpack/types"
 	"path"
 	"runtime"
 	"testing"
-	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack/types"
-	"bytes"
+	"text/template"
 )
 
 func TestServiceTemplate(t *testing.T) {
 
 	builderpath := "tmpl/java/"
 
-	const service =
-`apiVersion: v1
+	const service = `apiVersion: v1
 kind: Service
 metadata:
   name: service-test
@@ -40,13 +39,13 @@ spec:
 	templ, _ := template.New("service").ParseFiles(serviceFile)
 
 	var b bytes.Buffer
-	templ.Execute(&b,application)
+	templ.Execute(&b, application)
 	r := b.String()
 
 	if service != r {
-		t.Errorf("Result was incorrect, got: " +
-			"%s" +
-			", want: " +
+		t.Errorf("Result was incorrect, got: "+
+			"%s"+
+			", want: "+
 			"%s", r, service)
 	}
 }

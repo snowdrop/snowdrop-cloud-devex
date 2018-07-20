@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack/types"
+	"github.com/snowdrop/k8s-supervisor/pkg/buildpack/types"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )

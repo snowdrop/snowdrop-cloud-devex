@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack"
-	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack/types"
-	"github.com/cmoulliard/k8s-supervisor/pkg/common/config"
-	"github.com/cmoulliard/k8s-supervisor/pkg/common/oc"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/snowdrop/k8s-supervisor/pkg/buildpack"
+	"github.com/snowdrop/k8s-supervisor/pkg/buildpack/types"
+	"github.com/snowdrop/k8s-supervisor/pkg/common/config"
+	"github.com/snowdrop/k8s-supervisor/pkg/common/oc"
 	"github.com/spf13/cobra"
 	"k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
@@ -31,7 +31,7 @@ var rootCmd = &cobra.Command{
 	Long: `sb (ODO's Spring Boot prototype) is a prototype project experimenting supervisord and MANIFEST concepts`,
 
 	Example: `    # Creating and deploying a spring Boot application
-    git clone github.com/cmoulliard/k8s-supervisor && cd k8s-supervisor/spring-boot
+    git clone github.com/snowdrop/k8s-supervisor && cd k8s-supervisor/spring-boot
     sb init -n namespace
     sb push
     sb compile

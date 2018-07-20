@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/cmoulliard/k8s-supervisor/cmd"
-	"github.com/cmoulliard/k8s-supervisor/pkg/common/logger"
+	"github.com/snowdrop/k8s-supervisor/cmd"
+	"github.com/snowdrop/k8s-supervisor/pkg/common/logger"
 )
 
 func main() {
@@ -12,4 +12,3 @@ func main() {
 	// Call commands
 	cmd.Execute()
 }
-

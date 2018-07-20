@@ -8,8 +8,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-
-"github.com/cmoulliard/k8s-supervisor/pkg/buildpack/types"
+	"github.com/snowdrop/k8s-supervisor/pkg/buildpack/types"
 	"log"
 )
 
@@ -19,7 +18,7 @@ func CreateBuild(config *restclient.Config, appConfig types.Application) {
 	}
 
 	//_, errbuild := buildClient.Builds(appConfig.Namespace).Create(devBuild(appConfig.Name))
-	_, errbuild := buildClient.BuildConfigs(appConfig.Namespace).Create(devBuildConfig("dev-s2i",appConfig.Name))
+	_, errbuild := buildClient.BuildConfigs(appConfig.Namespace).Create(devBuildConfig("dev-s2i", appConfig.Name))
 	if errbuild != nil {
 		log.Fatalf("Unable to create Build: %s", errbuild.Error())
 	}
@@ -37,15 +36,15 @@ func devBuild(name string) *buildv1.Build {
 					Type: buildv1.BuildSourceBinary,
 				},
 				/*
-				Strategy: buildv1.BuildStrategy{
-					Type: buildv1.DockerBuildStrategyType,
-				},
-				Output:buildv1.BuildOutput{
-					To: &corev1.ObjectReference{
-						Kind: "ImageStreamTag",
-						Name: appConfig.Name + "2" + ":latest",
+					Strategy: buildv1.BuildStrategy{
+						Type: buildv1.DockerBuildStrategyType,
 					},
-				},
+					Output:buildv1.BuildOutput{
+						To: &corev1.ObjectReference{
+							Kind: "ImageStreamTag",
+							Name: appConfig.Name + "2" + ":latest",
+						},
+					},
 				*/
 				Strategy: buildv1.BuildStrategy{
 					SourceStrategy: &buildv1.SourceBuildStrategy{
@@ -55,7 +54,7 @@ func devBuild(name string) *buildv1.Build {
 						},
 					},
 				},
-				Output:buildv1.BuildOutput{
+				Output: buildv1.BuildOutput{
 					To: &corev1.ObjectReference{
 						Kind: "ImageStreamTag",
 						Name: name + "2" + ":latest",
@@ -73,7 +72,7 @@ func devBuildConfig(fromName string, toName string) *buildv1.BuildConfig {
 		},
 		Spec: buildv1.BuildConfigSpec{
 			CommonSpec: buildv1.CommonSpec{
-				Output:buildv1.BuildOutput{
+				Output: buildv1.BuildOutput{
 					To: &corev1.ObjectReference{
 						Kind: "ImageStreamTag",
 						Name: toName + ":latest",
@@ -94,6 +93,3 @@ func devBuildConfig(fromName string, toName string) *buildv1.BuildConfig {
 		},
 	}
 }
-
-
-

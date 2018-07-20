@@ -8,8 +8,8 @@ import (
 	imageclientsetv1 "github.com/openshift/client-go/image/clientset/versioned/typed/image/v1"
 	restclient "k8s.io/client-go/rest"
 
-	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack/types"
-	"github.com/cmoulliard/k8s-supervisor/pkg/common/oc"
+	"github.com/snowdrop/k8s-supervisor/pkg/buildpack/types"
+	"github.com/snowdrop/k8s-supervisor/pkg/common/oc"
 )
 
 func CreateImageStreamTemplate(config *restclient.Config, appConfig types.Application, images []types.Image) {

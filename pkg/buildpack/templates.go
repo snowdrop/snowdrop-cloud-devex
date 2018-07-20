@@ -1,19 +1,19 @@
 package buildpack
 
 import (
-	"text/template"
-	"io/ioutil"
 	log "github.com/sirupsen/logrus"
+	"io/ioutil"
+	"text/template"
 
-	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack/types"
 	"bytes"
 	"fmt"
-	"runtime"
+	"github.com/snowdrop/k8s-supervisor/pkg/buildpack/types"
 	"path"
+	"runtime"
 )
 
 var (
-	templateNames = []string{"imagestream","route","service"}
+	templateNames    = []string{"imagestream", "route", "service"}
 	templateBuilders = make(map[string]template.Template)
 )
 
@@ -26,10 +26,10 @@ func init() {
 	for tmpl := range templateNames {
 		buildPackDir := packageDirectory()
 		// Create Template and parse it
-		tfile, errFile := ioutil.ReadFile( buildPackDir + "/" + builderpath + templateNames[tmpl])
-		log.Debug("Template File :",tfile)
+		tfile, errFile := ioutil.ReadFile(buildPackDir + "/" + builderpath + templateNames[tmpl])
+		log.Debug("Template File :", tfile)
 		if errFile != nil {
-			log.Error("Err is ",errFile.Error())
+			log.Error("Err is ", errFile.Error())
 		}
 
 		t := template.New(templateNames[tmpl])
@@ -47,7 +47,7 @@ func ParseTemplate(tmpl string, cfg types.Application) bytes.Buffer {
 	if err != nil {
 		fmt.Println("There was an error:", err.Error())
 	}
-	log.Debug("Generated :",b.String())
+	log.Debug("Generated :", b.String())
 	return b
 }
 
@@ -58,4 +58,3 @@ func packageDirectory() string {
 	}
 	return path.Dir(filename)
 }
-

@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 
 	"encoding/json"
-	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack/types"
 	"github.com/ghodss/yaml"
+	"github.com/snowdrop/k8s-supervisor/pkg/buildpack/types"
 	"os"
 	"path"
 )

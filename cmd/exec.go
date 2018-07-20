@@ -5,8 +5,8 @@ import (
 	"github.com/spf13/cobra"
 
 	"fmt"
-	"github.com/cmoulliard/k8s-supervisor/pkg/common/config"
-	"github.com/cmoulliard/k8s-supervisor/pkg/common/oc"
+	"github.com/snowdrop/k8s-supervisor/pkg/common/config"
+	"github.com/snowdrop/k8s-supervisor/pkg/common/oc"
 	"strings"
 )
 

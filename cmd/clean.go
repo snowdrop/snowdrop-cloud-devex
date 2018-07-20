@@ -4,8 +4,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack"
-	"github.com/cmoulliard/k8s-supervisor/pkg/buildpack/types"
+	"github.com/snowdrop/k8s-supervisor/pkg/buildpack"
+	"github.com/snowdrop/k8s-supervisor/pkg/buildpack/types"
 )
 
 var cleanCmd = &cobra.Command{
