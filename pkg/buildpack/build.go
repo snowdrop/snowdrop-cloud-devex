@@ -25,6 +25,7 @@ func CreateBuild(config *restclient.Config, appConfig types.Application) {
 	}
 }
 
+// Using a Build resource doesn't work as we get as response when build is executed : Error from server (NotFound): buildconfigs.build.openshift.io "spring-boot-http" not found
 func devBuild(name string) *buildv1.Build {
 	return &buildv1.Build{
 		ObjectMeta: metav1.ObjectMeta{
