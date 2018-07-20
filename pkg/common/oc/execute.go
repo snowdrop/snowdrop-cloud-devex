@@ -48,3 +48,12 @@ func ExecCommand(command Command) {
 	cmd.Stderr = os.Stderr
 	cmd.Run()
 }
+
+func Exists(kind string, name string) bool {
+	s, err := ExecCommandAndReturn(Command{Args: []string{"get", kind + "/" + name, "-o", "jsonpath={.metadata.name}", "--ignore-not-found"}})
+	if err != nil {
+		return false
+	} else {
+		return name == s
+	}
+}
