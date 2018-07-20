@@ -28,6 +28,7 @@ export PATH=$PATH:$(pwd)
 export CURRENT=$(pwd)
 
 cd spring-boot
+rm .sb.state
 mvn clean package
 
 sb init -n k8s-supervisord
@@ -142,6 +143,28 @@ oc delete --grace-period=0 --force=true pod -l app=spring-boot-http
 sb push --mode source
 sb compile
 sb exec start
+cd $CURRENT
+```
+
+## Test 5 : build (code not yet finalized as image is build bit no deployment is available)
+
+- Log on to an OpenShift cluster with an `admin` role
+- Open or create the following project : `k8s-supervisord`
+- Move under the `spring-boot` folder and run these commands
+
+```bash
+oc delete --force --grace-period=0 all --all
+oc delete pvc/m2-data
+
+go build -o sb *.go
+export PATH=$PATH:$(pwd)
+export CURRENT=$(pwd)
+
+cd spring-boot
+rm .sb.state
+
+sb init -n k8s-supervisord
+sb build
 cd $CURRENT
 ```
 
