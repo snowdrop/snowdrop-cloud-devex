@@ -12,6 +12,15 @@ import (
 	"github.com/snowdrop/k8s-supervisor/pkg/common/oc"
 )
 
+var defaultImages = []types.Image{
+	*CreateTypeImage(true, "dev-s2i", "latest", "quay.io/snowdrop/spring-boot-s2i", false),
+	*CreateTypeImage(true, "copy-supervisord", "latest", "quay.io/snowdrop/supervisord", true),
+}
+
+func CreateDefaultImageStreams(config *restclient.Config, appConfig types.Application) {
+	CreateImageStreamTemplate(config, appConfig, defaultImages)
+}
+
 func CreateImageStreamTemplate(config *restclient.Config, appConfig types.Application, images []types.Image) {
 	imageClient := getImageClient(config)
 
@@ -50,8 +59,8 @@ func getImageClient(config *restclient.Config) *imageclientsetv1.ImageV1Client {
 	return imageClient
 }
 
-func DeleteImageStreams(config *restclient.Config, appConfig types.Application, images []types.Image) {
-	for _, img := range images {
+func DeleteDefaultImageStreams(config *restclient.Config, appConfig types.Application) {
+	for _, img := range defaultImages {
 		// first check that the image stream hasn't already been created
 		if oc.Exists("imagestream", img.Name) {
 			client := getImageClient(config)
