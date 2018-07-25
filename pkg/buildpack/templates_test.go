@@ -2,6 +2,7 @@ package buildpack_test
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/snowdrop/k8s-supervisor/pkg/buildpack/types"
 	"path"
 	"runtime"
@@ -26,8 +27,8 @@ spec:
     protocol: TCP
     targetPort: 8080
   selector:
-    app: spring-boot-supervisord
-    deploymentconfig: spring-boot-supervisord`
+    app: service-test
+    deploymentconfig: service-test`
 
 	application := types.Application{
 		Name: "service-test",
@@ -41,6 +42,10 @@ spec:
 	var b bytes.Buffer
 	templ.Execute(&b, application)
 	r := b.String()
+
+	fmt.Println(service)
+	fmt.Println("================")
+	fmt.Println(r)
 
 	if service != r {
 		t.Errorf("Result was incorrect, got: "+
