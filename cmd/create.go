@@ -7,14 +7,14 @@ import (
 	"github.com/snowdrop/k8s-supervisor/pkg/scaffold"
 )
 
-var generateCmd = &cobra.Command{
-	Use:     "generate [flags]",
-	Short:   "Generate a Spring Boot maven project",
-	Long:    `Generate a Spring Boot maven project".`,
-	Example: ` sb generate`,
+var createCmd = &cobra.Command{
+	Use:     "create [flags]",
+	Short:   "Create a Spring Boot maven project",
+	Long:    `Create a Spring Boot maven project".`,
+	Example: ` sb create`,
 	Args:    cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Info("Generate command called")
+		log.Info("Create command called")
 		p := scaffold.Project{
 			GroupId: "me.snowdrop",
 			ArtifactId: "cool",
@@ -29,7 +29,7 @@ var generateCmd = &cobra.Command{
 
 func init() {
 	// Add a defined annotation in order to appear in the help menu
-	generateCmd.Annotations = map[string]string{"command": "generate"}
+	createCmd.Annotations = map[string]string{"command": "create"}
 
-	rootCmd.AddCommand(generateCmd)
+	rootCmd.AddCommand(createCmd)
 }
