@@ -7,8 +7,8 @@
   <description>Spring Boot - HTTP Booster</description>
 
   <properties>
-    <spring-boot-bom.version>{{.SpringVersion}}</spring-boot-bom.version>
-    <spring-boot.version>{{.SnowdropBomVersion}}</spring-boot.version>
+    <spring-boot-bom.version>{{.SnowdropBomVersion}}</spring-boot-bom.version>
+    <spring-boot.version>{{.SpringVersion}}</spring-boot.version>
   </properties>
 
   <dependencyManagement>
