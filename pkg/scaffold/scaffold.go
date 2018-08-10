@@ -45,16 +45,12 @@ func GenerateProjectFiles(p Project) {
 		fmt.Println(err)
 	}
 
-	// Generate pom.xml
-	collectBoxTemplates()
-	parseTemplates(currentDir,"/",p)
-
-	//PopulateZip()
-
+	CollectBoxTemplates()
+	ParseTemplates(currentDir,"/",p)
 	fmt.Println("Done !!")
 }
 
-func collectBoxTemplates() {
+func CollectBoxTemplates() {
 	log.Infof("List of files :",box.List())
 	for _, tmpl:= range box.List() {
 		log.Debug("File : " + tmpl)
@@ -101,7 +97,7 @@ func visitFile(pattern string) filepath.WalkFunc {
 		return nil
 	}
 }
-func parseTemplates(dir string, outDir string, p Project) {
+func ParseTemplates(dir string, outDir string, p Project) {
 	for _, t := range templates {
 		log.Debug("##### Template : ", t.Name())
 		var b bytes.Buffer

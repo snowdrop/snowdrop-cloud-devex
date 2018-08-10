@@ -1,9 +1,7 @@
 package main
 
 import (
-	"archive/zip"
 	"compress/gzip"
-	"encoding/json"
 	"net/http"
 	"os"
 
@@ -12,15 +10,24 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"io/ioutil"
-	"io"
 	"fmt"
+	"path/filepath"
+	"archive/zip"
+	"io"
+	"strings"
+)
+
+var (
+	files           []string
+	currentDir, _ = os.Getwd()
 )
 
 func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/template/{id}", GetProject).Methods("GET")
-	//router.HandleFunc("/zip", GetZip).Methods("GET")
-	router.HandleFunc("/gzip", GetGZip).Methods("GET")
+	//router.HandleFunc("/gzip", GetGZip).Methods("GET")
+	//router.HandleFunc("/zip", GetGeneratedZip).Methods("GET")
+
 	log.Fatal(http.ListenAndServe(":8000", router))
 }
 
@@ -35,7 +42,130 @@ func GetProject(w http.ResponseWriter, r *http.Request) {
 		SpringVersion: "1.5.15.Release",
 	}
 	log.Infof("Params : ",params)
-	json.NewEncoder(w).Encode(p)
+
+	scaffold.CollectBoxTemplates()
+	scaffold.ParseTemplates(currentDir,"/_temp/",p)
+	log.Info("Project generated")
+
+	handleZip(w)
+	log.Info("Zip populated")
+}
+
+// Populate the files string with the files generated
+func findGeneratedFiles() error {
+	err := filepath.Walk( "_temp/", walk)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// Generate Zip file to ve returned as HTTP Response
+func handleZip(w http.ResponseWriter) {
+	zipFilename := "generated.zip"
+	w.Header().Set("Content-Type", "application/zip")
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", zipFilename))
+
+	errZip := zipFiles(w)
+	if errZip != nil {
+		log.Fatal(errZip)
+	}
+}
+
+// Get Files generated from templates under _temp directory and
+// them recursively to the file to be zipped
+func zipFiles(w http.ResponseWriter) error {
+	// Add  files recursively to the archive
+	err := recursiveZip(w,currentDir + "/_temp/")
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	return nil
+}
+
+func recursiveZip(w http.ResponseWriter, destinationPath string) error {
+	zipWriter := zip.NewWriter(w)
+	defer zipWriter.Close()
+
+	err := filepath.Walk(destinationPath, func(filePath string, info os.FileInfo, err error) error {
+		if info.IsDir() {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		relPath := strings.TrimPrefix(filePath, filepath.Dir(destinationPath))
+		log.Infof("relPath calculated : ",relPath)
+		zipFile, err := zipWriter.Create(relPath)
+		if err != nil {
+			return err
+		}
+		fsFile, err := os.Open(filePath)
+		if err != nil {
+			return err
+		}
+		_, err = io.Copy(zipFile, fsFile)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	err = zipWriter.Close()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func walk(path string, info os.FileInfo, err error) error {
+	if err != nil {
+		return err
+	}
+	files = append(files,path)
+	return nil
+}
+
+func readFile(filename string) ([]byte, error) {
+	f, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	fi, err := f.Stat()
+	if err != nil {
+		return nil, err
+	}
+	if fi.IsDir() {
+		// it's a directory then we skip
+		log.Infof("%s is a dir, we skip it",fi.Name())
+		return nil, err
+	} else {
+		// it's not a directory
+		log.Infof("Read : %s",fi.Name())
+		return ioutil.ReadAll(f)
+	}
+}
+
+func handleGZip(w http.ResponseWriter) {
+	zipFilename := "generated.zip"
+	w.Header().Set("Content-Encoding", "gzip")
+	w.Header().Set("Content-Type", "application/zip")
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", zipFilename))
+
+	// Files to Gzip
+	gz := gzip.NewWriter(w)
+	defer gz.Close()
+
+	// Add files to zip
+	for _, file := range files {
+		b, _ := readFile(file)
+		gz.Write(b)
+	}
 }
 
 func GetGZip(w http.ResponseWriter, r *http.Request) {
@@ -44,7 +174,13 @@ func GetGZip(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", zipFilename))
 
 	// Files to Gzip
-	files := []string{"data/example.csv", "data/data.csv"}
+	tmpDir := "_temp/"
+	files := []string{
+		tmpDir + "pom.xml",
+		tmpDir + "simple/RestApplication.java",
+		tmpDir + "simple/service/Greeting.java",
+		tmpDir + "simple/service/GreetingEndpoint.java",
+	}
 	gz := gzip.NewWriter(w)
 	defer gz.Close()
 
@@ -53,56 +189,4 @@ func GetGZip(w http.ResponseWriter, r *http.Request) {
 		b, _ := ioutil.ReadFile(file)
 		gz.Write(b)
 	}
-}
-
-func GetZip(w http.ResponseWriter, r *http.Request) {
-	zipFilename := "generated.zip"
-	w.Header().Set("Content-Type", "application/zip")
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", zipFilename))
-
-	// Files to Zip
-	files := []string{"data/example.csv", "data/data.csv"}
-
-	errZip := zipFiles(w,files)
-	if errZip != nil {
-		log.Fatal(errZip)
-	}
-}
-
-func zipFiles(w http.ResponseWriter, files []string) error {
-	zipWriter := zip.NewWriter(w)
-	defer zipWriter.Close()
-
-	// Add files to zip
-	for _, file := range files {
-
-		zipfile, err := os.Open(file)
-		if err != nil {
-			return err
-		}
-		defer zipfile.Close()
-
-		// Get the file information
-		info, err := zipfile.Stat()
-		if err != nil {
-			return err
-		}
-
-		header, err := zip.FileInfoHeader(info)
-		if err != nil {
-			return err
-		}
-
-		header.Method = zip.Deflate
-
-		writer, err := zipWriter.CreateHeader(header)
-		if err != nil {
-			return err
-		}
-		_, err = io.Copy(writer, zipfile)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
 }
