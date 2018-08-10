@@ -61,10 +61,12 @@ func ParseTemplates(dir string, outDir string, project Project) {
 
 		// Convert Path
 		tFileName := t.Name()
+		// TODO Use filepath.Join
 		path := dir + outDir + path.Dir(tFileName)
 		pathConverted := strings.Replace(path,dummyDir,convertPackageToPath(project.PackageName),-1)
 
 		// convert FileName
+		// TODO Use filepath.Join
 		fileName := dir + outDir + tFileName
 		fileNameConverted := strings.Replace(fileName,dummyDir,convertPackageToPath(project.PackageName),-1)
 
