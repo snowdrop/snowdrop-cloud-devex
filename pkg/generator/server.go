@@ -51,16 +51,7 @@ func GetProject(w http.ResponseWriter, r *http.Request) {
 	log.Info("Zip populated")
 }
 
-// Populate the files string with the files generated
-func findGeneratedFiles() error {
-	err := filepath.Walk( "_temp/", walk)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// Generate Zip file to ve returned as HTTP Response
+// Generate Zip file to be returned as HTTP Response
 func handleZip(w http.ResponseWriter) {
 	zipFilename := "generated.zip"
 	w.Header().Set("Content-Type", "application/zip")
@@ -118,14 +109,6 @@ func recursiveZip(w http.ResponseWriter, destinationPath string) error {
 	if err != nil {
 		return err
 	}
-	return nil
-}
-
-func walk(path string, info os.FileInfo, err error) error {
-	if err != nil {
-		return err
-	}
-	files = append(files,path)
 	return nil
 }
 
