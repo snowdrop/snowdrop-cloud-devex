@@ -1,19 +1,18 @@
 package scaffold
 
 import (
-	"text/template"
+	"bytes"
+	"fmt"
+	"io/ioutil"
 	"os"
 	"path"
-	"runtime"
-	"fmt"
 	"path/filepath"
-	"io/ioutil"
+	"runtime"
 	"strings"
-	log "github.com/sirupsen/logrus"
-	"bytes"
-	"archive/zip"
-	"io"
+	"text/template"
+
 	"github.com/gobuffalo/packr"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -115,72 +114,6 @@ func parseTemplates(dir string, outDir string, p Project) {
 		err = ioutil.WriteFile(dir + outDir + t.Name(), b.Bytes(),0644)
 		if err != nil {
 			fmt.Println("There was an error:", err.Error())
-		}
-	}
-}
-func PopulateZip() {
-	createExampleFiles()
-
-	zipFile, err := os.Create("generated.zip")
-	if err != nil {
-		//
-	}
-	defer zipFile.Close()
-
-	// Create a new zip archive.
-	w := zip.NewWriter(zipFile)
-	defer w.Close()
-
-
-	f, err := os.Open("readme.txt")
-	if err != nil {
-		//
-	}
-	defer f.Close()
-
-	// Get the file information
-	info, err := f.Stat()
-	if err != nil {
-		//
-	}
-
-	header, err := zip.FileInfoHeader(info)
-	if err != nil {
-		//
-	}
-
-	// Change to deflate to gain better compression
-	// see http://golang.org/pkg/archive/zip/#pkg-constants
-	header.Method = zip.Deflate
-
-	writer, err := w.CreateHeader(header)
-	if err != nil {
-		//
-	}
-	_, err = io.Copy(writer, f)
-	if err != nil {
-		//
-	}
-
-	// Make sure to check the error on Close.
-	errClose := w.Close()
-	if errClose != nil {
-		log.Fatal(err)
-	}
-}
-func createExampleFiles() {
-	// Add some files to the archive.
-	var files = []struct {
-		Name, Body string
-	}{
-		{"readme.txt", "This archive contains some text files."},
-		{"gopher.txt", "Gopher names:\nGeorge\nGeoffrey\nGonzo"},
-		{"todo.txt", "Get animal handling licence.\nWrite more examples."},
-	}
-	for _, file := range files {
-		err := ioutil.WriteFile(file.Name,[]byte(file.Body),0644)
-		if err != nil {
-			log.Fatal(err)
 		}
 	}
 }
