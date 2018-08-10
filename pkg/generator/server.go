@@ -66,7 +66,6 @@ func handleZip(w http.ResponseWriter) {
 // Get Files generated from templates under _temp directory and
 // them recursively to the file to be zipped
 func zipFiles(w http.ResponseWriter) error {
-	// Add  files recursively to the archive
 	err := recursiveZip(w,currentDir + "/_temp/")
 	if err != nil {
 		log.Error(err)
@@ -88,7 +87,8 @@ func recursiveZip(w http.ResponseWriter, destinationPath string) error {
 		}
 		relPath := strings.TrimPrefix(filePath, filepath.Dir(destinationPath))
 		relPath = strings.TrimPrefix(relPath,"/")
-		log.Infof("relPath calculated : ",relPath)
+		log.Debugf("relPath calculated : ",relPath)
+
 		zipFile, err := zipWriter.Create(relPath)
 		if err != nil {
 			return err
