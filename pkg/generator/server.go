@@ -87,6 +87,7 @@ func recursiveZip(w http.ResponseWriter, destinationPath string) error {
 			return err
 		}
 		relPath := strings.TrimPrefix(filePath, filepath.Dir(destinationPath))
+		relPath = strings.TrimPrefix(relPath,"/")
 		log.Infof("relPath calculated : ",relPath)
 		zipFile, err := zipWriter.Create(relPath)
 		if err != nil {
