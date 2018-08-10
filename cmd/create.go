@@ -12,6 +12,8 @@ import (
 	"archive/zip"
 	"io"
 	"fmt"
+	"net/url"
+	"github.com/snowdrop/k8s-supervisor/pkg/scaffold"
 )
 
 var (
@@ -27,7 +29,7 @@ var createCmd = &cobra.Command{
 	Args:    cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 		var valid bool
-		/*
+
 		p := scaffold.Project{
 			GroupId: "me.snowdrop",
 			ArtifactId: "cool",
@@ -35,8 +37,8 @@ var createCmd = &cobra.Command{
 			PackageName: "io.openshift",
 			SnowdropBomVersion: "1.5.15.Final",
 			SpringVersion: "1.5.15.Release",
+			OutDir: "/",
 		}
-		*/
 
 		for _, t := range templates {
 			if template == t {
@@ -52,7 +54,21 @@ var createCmd = &cobra.Command{
 
 		client := http.Client{}
 
-		u := "http://localhost:8000/template/simple"
+		form := url.Values{}
+		form.Add("groupId", p.GroupId)
+		form.Add("artifactId", p.ArtifactId)
+		form.Add("version", p.Version)
+		form.Add("packageName", p.PackageName)
+		form.Add("bomVersion", p.SnowdropBomVersion)
+		form.Add("springbootVersion",p.SpringVersion)
+		form.Add("outDir",p.OutDir)
+
+		parameters := form.Encode()
+		if parameters != "" {
+			parameters = "?" + parameters
+		}
+
+		u := "http://localhost:8000/template/simple" + parameters
 		req, err := http.NewRequest(http.MethodGet, u, strings.NewReader(""))
 
 		if err != nil {
@@ -70,7 +86,7 @@ var createCmd = &cobra.Command{
 		}
 
 		currentDir, _ := os.Getwd()
-		dir := filepath.Join(currentDir, "generated")
+		dir := filepath.Join(currentDir, p.OutDir)
 		zipFile := dir + ".zip"
 
 		err = ioutil.WriteFile(zipFile, body, 0644)

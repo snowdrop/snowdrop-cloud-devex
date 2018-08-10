@@ -25,13 +25,14 @@ var (
 )
 
 type Project struct {
-	GroupId string
-	ArtifactId string
-	Version string
-	PackageName string
+	GroupId            string
+	ArtifactId         string
+	Version            string
+	PackageName        string
+	OutDir             string
 
 	SnowdropBomVersion string
-	SpringVersion string
+	SpringVersion      string
 }
 
 func CollectBoxTemplates(t string) {

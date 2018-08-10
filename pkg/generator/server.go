@@ -29,20 +29,27 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8000", router))
 }
 
+func getUrlVal(r *http.Request, k string) string {
+	return r.URL.Query().Get(k)
+}
+
 func GetProject(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
+
 	p := scaffold.Project{
-		GroupId: "me.snowdrop",
-		ArtifactId: "cool",
-		Version: "1.0",
-		PackageName: "io.openshift",
-		SnowdropBomVersion: "1.5.15.Final",
-		SpringVersion: "1.5.15.Release",
+		GroupId: getUrlVal(r,"groupId"),
+		ArtifactId: getUrlVal(r,"artifactId"),
+		Version: getUrlVal(r,"version"),
+		PackageName: getUrlVal(r,"packageName"),
+		SnowdropBomVersion: getUrlVal(r,"bomVersion"),
+		SpringVersion: getUrlVal(r,"springbootVersion"),
+		OutDir: getUrlVal(r,"outDir"),
 	}
-	log.Infof("Params : ",params)
+	log.Info("Project : ",p)
+	log.Info("Params : ",params)
 
 	scaffold.CollectBoxTemplates(params["id"])
-	scaffold.ParseTemplates(currentDir,"/_temp/",p)
+	scaffold.ParseTemplates(currentDir,p.OutDir,p)
 	log.Info("Project generated")
 
 	handleZip(w)
