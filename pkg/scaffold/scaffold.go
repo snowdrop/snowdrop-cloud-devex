@@ -2,12 +2,10 @@ package scaffold
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
-	"path/filepath"
-	"runtime"
+
 	"strings"
 	"text/template"
 
@@ -16,17 +14,14 @@ import (
 )
 
 const (
-	trimPrefix   = "tmpl/"
 	templateDir  = "./tmpl/"
-	outDir       = "/generated/"
-	javaPattern  = "*.java"
-	pomPattern   = "pom.xml"
+	dummyDir     = "dummy"
 )
 
 var (
 	files       []string
 	templates   = make(map[string]template.Template)
-	box 		= packr.NewBox(templateDir)
+	box 		packr.Box
 )
 
 type Project struct {
@@ -39,19 +34,11 @@ type Project struct {
 	SpringVersion string
 }
 
-func GenerateProjectFiles(p Project) {
-	currentDir, err := os.Getwd()
-	if err != nil {
-		fmt.Println(err)
-	}
+func CollectBoxTemplates(t string) {
 
-	CollectBoxTemplates()
-	ParseTemplates(currentDir,"/",p)
-	fmt.Println("Done !!")
-}
-
-func CollectBoxTemplates() {
+	box = packr.NewBox(templateDir + "/" + t)
 	log.Infof("List of files :",box.List())
+
 	for _, tmpl:= range box.List() {
 		log.Debug("File : " + tmpl)
 
@@ -60,63 +47,41 @@ func CollectBoxTemplates() {
 		templates[tmpl] = *t
 	}
 }
-func collectTemplates(dir string, pattern string) {
-	filepath.Walk(dir, visitFile(pattern))
 
-	for _, f := range files {
-		fmt.Println("File : " + f)
-		b, err := ioutil.ReadFile(f)
-		if err != nil {
-			log.Fatal(err)
-		}
-		name := strings.TrimPrefix(f, trimPrefix)
-		log.Info("Template File Name :", name)
-
-		t := template.New(name)
-		t, _ = t.Parse(string(b))
-		templates[name] = *t
-	}
-}
-func visitFile(pattern string) filepath.WalkFunc {
-	return func(fp string, fi os.FileInfo, err error) error {
-		if err != nil {
-			fmt.Println(err) // can't walk here,
-			return nil   // but continue walking elsewhere
-		}
-		if fi.IsDir() {
-			return nil // not a file.  ignore.
-		}
-		matched, err := filepath.Match(pattern, fi.Name())
-		if err != nil {
-			fmt.Println(err) // malformed pattern
-			return err   // this is fatal.
-		}
-		if matched {
-			files = append(files,fp)
-		}
-		return nil
-	}
-}
-func ParseTemplates(dir string, outDir string, p Project) {
+func ParseTemplates(dir string, outDir string, project Project) {
 	for _, t := range templates {
-		log.Debug("##### Template : ", t.Name())
+
+		log.Debugf("Template : %s", t.Name())
 		var b bytes.Buffer
-		err := t.Execute(&b, p)
+		err := t.Execute(&b, project)
 		if err != nil {
-			fmt.Println("There was an error:", err.Error())
+			log.Error(err.Error())
 		}
-		log.Debug("##### Generated : ", b.String())
-		os.MkdirAll(dir + outDir + path.Dir(t.Name()), os.ModePerm);
-		err = ioutil.WriteFile(dir + outDir + t.Name(), b.Bytes(),0644)
+		log.Debugf("Generated : %s", b.String())
+
+		// Convert Path
+		tFileName := t.Name()
+		path := dir + outDir + path.Dir(tFileName)
+		pathConverted := strings.Replace(path,dummyDir,convertPackageToPath(project.PackageName),-1)
+
+		// convert FileName
+		fileName := dir + outDir + tFileName
+		fileNameConverted := strings.Replace(fileName,dummyDir,convertPackageToPath(project.PackageName),-1)
+
+		// Create missing folders
+		log.Infof("Path to generated file : ",pathConverted)
+		os.MkdirAll(pathConverted, os.ModePerm)
+
+		err = ioutil.WriteFile(fileNameConverted, b.Bytes(),0644)
 		if err != nil {
-			fmt.Println("There was an error:", err.Error())
+			log.Error(err.Error())
 		}
 	}
 }
-func packageDirectory() string {
-	_, filename, _, ok := runtime.Caller(1)
-	if !ok {
-		panic("No caller information")
-	}
-	return path.Dir(filename)
+
+func convertPackageToPath(p string) string {
+	c := strings.Replace(p,".","/",-1)
+	c = "src/main/java/" + c
+	log.Debugf("Converted path : ",c)
+	return c
 }

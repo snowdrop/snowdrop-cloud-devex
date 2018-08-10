@@ -25,8 +25,6 @@ var (
 func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/template/{id}", GetProject).Methods("GET")
-	//router.HandleFunc("/gzip", GetGZip).Methods("GET")
-	//router.HandleFunc("/zip", GetGeneratedZip).Methods("GET")
 
 	log.Fatal(http.ListenAndServe(":8000", router))
 }
@@ -43,7 +41,7 @@ func GetProject(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Infof("Params : ",params)
 
-	scaffold.CollectBoxTemplates()
+	scaffold.CollectBoxTemplates(params["id"])
 	scaffold.ParseTemplates(currentDir,"/_temp/",p)
 	log.Info("Project generated")
 
