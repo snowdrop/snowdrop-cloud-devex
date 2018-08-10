@@ -168,6 +168,20 @@ sb build
 cd $CURRENT
 ```
 
+## Test 6 : Scaffold a project
+
+```bash
+go build -o sb *.go
+export PATH=$PATH:$(pwd)
+export CURRENT=$(pwd)
+
+cd pkg/generator && go run server.go
+mkdir -p ~/Temp/springboot-simple && cd  ~/Temp/springboot-simple
+sb create -t simple
+ls -la
+cd $CURRENT
+```
+
 # Build the supervisor and java s2i images
 
 ## Common step
