@@ -6,6 +6,9 @@
     * [Test 2 : binary -&gt; run](#test-2--binary---run)
     * [Test 3 : debug](#test-3--debug)
     * [Test 4 : source -&gt; compile -&gt; kill pod -&gt; compile again (m2 repo is back again)](#test-4--source---compile---kill-pod---compile-again-m2-repo-is-back-again)
+    * [Test 5 : build (code not yet finalized as image is build bit no deployment is available)](#test-5--build-code-not-yet-finalized-as-image-is-build-bit-no-deployment-is-available)
+    * [Test 6 : Scaffold a project](#test-6--scaffold-a-project)
+
  * [Build the supervisor and java s2i images](#build-the-supervisor-and-java-s2i-images)
     * [Common step](#common-step)
     * [Supervisord image](#supervisord-image)
