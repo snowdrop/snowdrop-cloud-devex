@@ -108,7 +108,7 @@ func init() {
 	createCmd.Flags().StringVarP(&p.PackageName, "packageName", "p", "me.snowdrop", "Package Name")
 	createCmd.Flags().StringVarP(&p.SpringVersion, "springbootVersion", "s", "1.5.15.Release", "Spring Boot Version")
 	createCmd.Flags().StringVarP(&p.SnowdropBomVersion, "bomVersion", "b", "1.5.15.Final", "Snowdrop Bom Version")
-	 q
+
 	createCmd.MarkFlagRequired("template")
 	// Add a defined annotation in order to appear in the help menu
 	createCmd.Annotations = map[string]string{"command": "create"}
