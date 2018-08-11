@@ -19,7 +19,12 @@ import (
 var (
 	template   string
 	templates  = []string{"simple"}
+	p          = scaffold.Project{}
 )
+
+type SpringForm struct {
+	GroupId string
+}
 
 var createCmd = &cobra.Command{
 	Use:     "create [flags]",
@@ -29,17 +34,6 @@ var createCmd = &cobra.Command{
 	Args:    cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 		var valid bool
-
-		p := scaffold.Project{
-			GroupId: "me.snowdrop",
-			ArtifactId: "cool",
-			Version: "1.0",
-			PackageName: "io.openshift",
-			SnowdropBomVersion: "1.5.15.Final",
-			SpringVersion: "1.5.15.Release",
-			OutDir: "/",
-		}
-
 		for _, t := range templates {
 			if template == t {
 				valid = true
@@ -108,6 +102,13 @@ var createCmd = &cobra.Command{
 func init() {
 	createCmd.Flags().StringVarP(&template, "template", "t", "",
 		fmt.Sprintf("Template name used to select the project to be created. Supported templates are '%s'", strings.Join(templates, ",")))
+	createCmd.Flags().StringVarP(&p.GroupId, "groupId", "g", "org.acme", "Group ID")
+	createCmd.Flags().StringVarP(&p.ArtifactId, "artifactId", "i", "cool", "Artifact ID")
+	createCmd.Flags().StringVarP(&p.Version, "version", "v", "1.0", "Version")
+	createCmd.Flags().StringVarP(&p.PackageName, "packageName", "p", "me.snowdrop", "Package Name")
+	createCmd.Flags().StringVarP(&p.SpringVersion, "springbootVersion", "s", "1.5.15.Release", "Spring Boot Version")
+	createCmd.Flags().StringVarP(&p.SnowdropBomVersion, "bomVersion", "b", "1.5.15.Final", "Snowdrop Bom Version")
+	 q
 	createCmd.MarkFlagRequired("template")
 	// Add a defined annotation in order to appear in the help menu
 	createCmd.Annotations = map[string]string{"command": "create"}
