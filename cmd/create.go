@@ -18,7 +18,7 @@ import (
 
 var (
 	template   string
-	templates  = []string{"simple"}
+	templates  = []string{"simple","rest"}
 	p          = scaffold.Project{}
 )
 

@@ -95,7 +95,6 @@ func ParseTemplates(dir string, outDir string, project Project) {
 
 func convertPackageToPath(p string) string {
 	c := strings.Replace(p,".","/",-1)
-	c = "src/main/java/" + c
 	log.Debugf("Converted path : ",c)
 	return c
 }
