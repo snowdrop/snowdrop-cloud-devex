@@ -1,10 +1,8 @@
 package main
 
 import (
-	"compress/gzip"
 	"net/http"
 	"os"
-	"io/ioutil"
 	"fmt"
 	"path/filepath"
 	"archive/zip"
@@ -23,16 +21,22 @@ var (
 	unixTempDir     = os.TempDir()
 	currentDir, _   = os.Getwd()
 	port			= "8000"
+	pathTemplateDir = ""
 )
 
 func main() {
 	// Enable Debug if env var is defined
 	logger.EnableLogLevelDebug()
 
-	// Get PORT env var to override server port
-	serverPort := os.Getenv("SERVER_PORT")
-	if serverPort != "" {
-		port = serverPort
+	// Check env vars
+	s := os.Getenv("SERVER_PORT")
+	if s != "" {
+		port = s
+	}
+
+	t := os.Getenv("TEMPLATE_PATH")
+	if t != "" {
+	   pathTemplateDir = t
 	}
 
 	log.Debugf("Temp dir location : %s",unixTempDir)
@@ -63,7 +67,7 @@ func GetProject(w http.ResponseWriter, r *http.Request) {
 	log.Info("Project : ",p)
 	log.Info("Params : ",params)
 
-	scaffold.CollectBoxTemplates(params["id"])
+	scaffold.CollectBoxTemplates(params["id"],pathTemplateDir)
 	scaffold.ParseTemplates(currentDir,tmpdir,p)
 	log.Info("Project generated")
 
@@ -131,66 +135,4 @@ func recursiveZip(w http.ResponseWriter, destinationPath string) error {
 		return err
 	}
 	return nil
-}
-
-func readFile(filename string) ([]byte, error) {
-	f, err := os.Open(filename)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-
-	fi, err := f.Stat()
-	if err != nil {
-		return nil, err
-	}
-	if fi.IsDir() {
-		// it's a directory then we skip
-		log.Infof("%s is a dir, we skip it",fi.Name())
-		return nil, err
-	} else {
-		// it's not a directory
-		log.Infof("Read : %s",fi.Name())
-		return ioutil.ReadAll(f)
-	}
-}
-
-func handleGZip(w http.ResponseWriter) {
-	zipFilename := "generated.zip"
-	w.Header().Set("Content-Encoding", "gzip")
-	w.Header().Set("Content-Type", "application/zip")
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", zipFilename))
-
-	// Files to Gzip
-	gz := gzip.NewWriter(w)
-	defer gz.Close()
-
-	// Add files to zip
-	for _, file := range files {
-		b, _ := readFile(file)
-		gz.Write(b)
-	}
-}
-
-func GetGZip(w http.ResponseWriter, r *http.Request) {
-	zipFilename := "generated.zip"
-	w.Header().Set("Content-Encoding", "gzip")
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", zipFilename))
-
-	// Files to Gzip
-	tmpDir := "_temp/"
-	files := []string{
-		tmpDir + "pom.xml",
-		tmpDir + "simple/RestApplication.java",
-		tmpDir + "simple/service/Greeting.java",
-		tmpDir + "simple/service/GreetingEndpoint.java",
-	}
-	gz := gzip.NewWriter(w)
-	defer gz.Close()
-
-	// Add files to zip
-	for _, file := range files {
-		b, _ := ioutil.ReadFile(file)
-		gz.Write(b)
-	}
 }
