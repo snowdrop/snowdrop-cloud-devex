@@ -234,8 +234,7 @@ docker push quay.io/snowdrop/spring-boot-generator
 To test the docker image, execute this command to create a pod/service and route
 ```bash
 oc new-project generator
-oc create -f 
-
+oc create -f docker/generator.yml
 ```
   
 ## Java S2I image
