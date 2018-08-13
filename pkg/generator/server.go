@@ -20,17 +20,28 @@ import (
 var (
 	files           []string
 	tmpdir          = "/_temp/"
+	unixTempDir     = os.TempDir()
 	currentDir, _   = os.Getwd()
+	port			= "8000"
 )
 
 func main() {
 	// Enable Debug if env var is defined
 	logger.EnableLogLevelDebug()
 
+	// Get PORT env var to override server port
+	serverPort := os.Getenv("SERVER_PORT")
+	if serverPort != "" {
+		port = serverPort
+	}
+
+	log.Debugf("Temp dir location : %s",unixTempDir)
+	log.Infof("Starting HTTP Server on port %s, exposing endpoint %s",port,"/template/{id}")
+
 	router := mux.NewRouter()
 	router.HandleFunc("/template/{id}", GetProject).Methods("GET")
 
-	log.Fatal(http.ListenAndServe(":8000", router))
+	log.Fatal(http.ListenAndServe(":" + port, router))
 }
 
 func getUrlVal(r *http.Request, k string) string {
