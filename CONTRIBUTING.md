@@ -214,6 +214,22 @@ docker tag $TAG_ID quay.io/snowdrop/supervisord
 docker login quai.io
 docker push quay.io/snowdrop/supervisord
 ```
+
+## HTTP Server generating Spring Boot Zip file  
+
+```bash
+cd generator
+imagebuilder -t spring-boot-generator:latest .
+```
+  
+Tag the docker image and push it to `quay.io`
+
+```bash
+TAG_ID=$(docker images -q spring-boot-generator:latest)
+docker tag $TAG_ID quay.io/snowdrop/spring-boot-generator
+docker login quai.io
+docker push quay.io/snowdrop/spring-boot-generator
+```
   
 ## Java S2I image
 
