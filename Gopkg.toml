@@ -38,3 +38,8 @@ version="1.0.0"
 
 [[override]]
 name="github.com/gobuffalo/packr"
+version="1.13.1"
+
+[[override]]
+name="github.com/gorilla/mux"
+version="1.6.2"
