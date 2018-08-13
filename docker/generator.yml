@@ -25,6 +25,8 @@ items:
           env:
           - name: SERVER_PORT
             value: '8080'
+          - name: TEMPLATE_PATH
+            value: '/opt/generator'
 - apiVersion: v1
   kind: Service
   metadata:
