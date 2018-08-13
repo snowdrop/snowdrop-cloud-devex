@@ -14,14 +14,15 @@ import (
 )
 
 const (
-	templateDir  = "./tmpl/"
-	dummyDir     = "dummy"
+	templateDirName  = "tmpl"
+	dummyDirName     = "dummy"
 )
 
 var (
-	files       []string
-	templates   = make(map[string]template.Template)
-	box 		packr.Box
+	files            []string
+	pathtemplateDir	 string
+	templates        = make(map[string]template.Template)
+	box 		     packr.Box
 )
 
 type Project struct {
@@ -37,9 +38,13 @@ type Project struct {
 	UrlService  	   string
 }
 
-func CollectBoxTemplates(t string) {
-
-	box = packr.NewBox(templateDir + "/" + t)
+func CollectBoxTemplates(t, pathTemplateDir string) {
+	if pathTemplateDir == "" {
+		pathTemplateDir = "../scaffold"
+	}
+	pathTempl := strings.Join([]string{pathTemplateDir, templateDirName, t},"/")
+	log.Infof("Path to the template directory : %s",pathTempl)
+	box = packr.NewBox(pathTempl)
 	log.Infof("List of files :",box.List())
 
 	for _, tmpl:= range box.List() {
@@ -67,14 +72,14 @@ func ParseTemplates(dir string, outDir string, project Project) {
 		// TODO Use filepath.Join
 		path := dir + outDir + path.Dir(tFileName)
 		log.Debugf("Path : ",path)
-		pathConverted := strings.Replace(path,dummyDir,convertPackageToPath(project.PackageName),-1)
+		pathConverted := strings.Replace(path,dummyDirName,convertPackageToPath(project.PackageName),-1)
 		log.Debugf("Path converted: ",path)
 
 		// convert FileName
 		// TODO Use filepath.Join
 		fileName := dir + outDir + tFileName
 		log.Debugf("File name : ",fileName)
-		fileNameConverted := strings.Replace(fileName,dummyDir,convertPackageToPath(project.PackageName),-1)
+		fileNameConverted := strings.Replace(fileName,dummyDirName,convertPackageToPath(project.PackageName),-1)
 		log.Debugf("File name converted : ",fileNameConverted)
 
 		// Create missing folders
