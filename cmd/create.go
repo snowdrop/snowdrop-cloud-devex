@@ -62,7 +62,8 @@ var createCmd = &cobra.Command{
 			parameters = "?" + parameters
 		}
 
-		u := "http://localhost:8000/template/simple" + parameters
+		// TODO - Improve how we build the URL by adding either template when defined or ...
+		u := strings.Join([]string{p.UrlService, "template",template},"/") + parameters
 		req, err := http.NewRequest(http.MethodGet, u, strings.NewReader(""))
 
 		if err != nil {
@@ -100,8 +101,9 @@ var createCmd = &cobra.Command{
 }
 
 func init() {
-	createCmd.Flags().StringVarP(&template, "template", "t", "",
+	createCmd.Flags().StringVarP(&template, "template", "t", "simple",
 		fmt.Sprintf("Template name used to select the project to be created. Supported templates are '%s'", strings.Join(templates, ",")))
+	createCmd.Flags().StringVarP(&p.UrlService,"urlService","u","http://localhost:8000","URL of the HTTP Server exposing the spring boot service")
 	createCmd.Flags().StringVarP(&p.GroupId, "groupId", "g", "org.acme", "Group ID")
 	createCmd.Flags().StringVarP(&p.ArtifactId, "artifactId", "i", "cool", "Artifact ID")
 	createCmd.Flags().StringVarP(&p.Version, "version", "v", "1.0", "Version")
