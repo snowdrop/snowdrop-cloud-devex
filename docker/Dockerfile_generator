@@ -19,6 +19,7 @@ ARG GENERATOR_DIR=/opt/generator
 
 RUN mkdir -p ${GENERATOR_DIR}/bin
 
+COPY --from=builder /go/src/github.com/snowdrop/k8s-supervisor/pkg/scaffold/tmpl ${GENERATOR_DIR}/
 COPY --from=builder /go/src/github.com/snowdrop/k8s-supervisor/pkg/generator/server ${GENERATOR_DIR}/bin/
 
 RUN chgrp -R 0 ${GENERATOR_DIR} && \
