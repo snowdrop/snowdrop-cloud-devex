@@ -62,7 +62,6 @@ var createCmd = &cobra.Command{
 			parameters = "?" + parameters
 		}
 
-		// TODO - Improve how we build the URL by adding either template when defined or ...
 		u := strings.Join([]string{p.UrlService, "template",template},"/") + parameters
 		log.Infof("URL of the request calling the service is %s",u)
 		req, err := http.NewRequest(http.MethodGet, u, strings.NewReader(""))
