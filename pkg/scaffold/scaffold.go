@@ -33,6 +33,8 @@ type Project struct {
 
 	SnowdropBomVersion string
 	SpringVersion      string
+
+	UrlService  	   string
 }
 
 func CollectBoxTemplates(t string) {
