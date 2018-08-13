@@ -4,25 +4,29 @@ import (
 	"compress/gzip"
 	"net/http"
 	"os"
-
-	"github.com/gorilla/mux"
-	"github.com/snowdrop/k8s-supervisor/pkg/scaffold"
-	log "github.com/sirupsen/logrus"
-
 	"io/ioutil"
 	"fmt"
 	"path/filepath"
 	"archive/zip"
 	"io"
 	"strings"
+
+	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
+	"github.com/snowdrop/k8s-supervisor/pkg/scaffold"
+	"github.com/snowdrop/k8s-supervisor/pkg/common/logger"
 )
 
 var (
 	files           []string
-	currentDir, _ = os.Getwd()
+	tmpdir          = "/_temp/"
+	currentDir, _   = os.Getwd()
 )
 
 func main() {
+	// Enable Debug if env var is defined
+	logger.EnableLogLevelDebug()
+
 	router := mux.NewRouter()
 	router.HandleFunc("/template/{id}", GetProject).Methods("GET")
 
@@ -49,7 +53,7 @@ func GetProject(w http.ResponseWriter, r *http.Request) {
 	log.Info("Params : ",params)
 
 	scaffold.CollectBoxTemplates(params["id"])
-	scaffold.ParseTemplates(currentDir,p.OutDir,p)
+	scaffold.ParseTemplates(currentDir,tmpdir,p)
 	log.Info("Project generated")
 
 	handleZip(w)
@@ -71,7 +75,7 @@ func handleZip(w http.ResponseWriter) {
 // Get Files generated from templates under _temp directory and
 // them recursively to the file to be zipped
 func zipFiles(w http.ResponseWriter) error {
-	err := recursiveZip(w,currentDir + "/_temp/")
+	err := recursiveZip(w,currentDir + tmpdir)
 	if err != nil {
 		log.Error(err)
 		return err
