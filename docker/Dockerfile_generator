@@ -2,13 +2,12 @@
 # which upon invocation will create the necessary 'supervisor.conf' file
 FROM golang:1.9.4 as builder
 
-ENV GOPATH /go
+#Copy local project to go directory to the container's workspace
+ADD . /go/src/github.com/snowdrop/k8s-supervisor
+#RUN ls -la /go/src/github.com/snowdrop/k8s-supervisor
 
 #copy the source file
-WORKDIR /generator/
-
-# This is source code of the http server
-COPY server.go .
+WORKDIR /go/src/github.com/snowdrop/k8s-supervisor/pkg/generator/
 
 # generate executable that will be used by the entrypoint shell script to generate
 # the supervisor configuration
@@ -21,11 +20,11 @@ ARG GENERATOR_DIR=/opt/generator
 
 RUN mkdir -p ${GENERATOR_DIR}/bin
 
-COPY --from=builder /supervisord/server ${SUPERVISORD_DIR}/bin/
+COPY --from=builder /go/src/github.com/snowdrop/k8s-supervisor/pkg/generator/server ${GENERATOR_DIR}/bin/
 
 RUN chgrp -R 0 ${GENERATOR_DIR} && \
     chmod -R g+rwX ${GENERATOR_DIR} && \
-    chmod 775 ${SUPERVISORD_DIR}/bin/server
+    chmod 775 ${GENERATOR_DIR}/bin/server
 
 WORKDIR ${GENERATOR_DIR}
 ENTRYPOINT ["/opt/generator/bin/server"]
