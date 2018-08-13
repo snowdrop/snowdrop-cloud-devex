@@ -2,11 +2,10 @@
 # which upon invocation will create the necessary 'supervisor.conf' file
 FROM golang:1.9.4 as builder
 
-#Copy local project to go directory to the container's workspace
+# Copy the local project to the go directory to the container's workspace
 ADD . /go/src/github.com/snowdrop/k8s-supervisor
-#RUN ls -la /go/src/github.com/snowdrop/k8s-supervisor
 
-#copy the source file
+# Specify the directory from where we will build the server
 WORKDIR /go/src/github.com/snowdrop/k8s-supervisor/pkg/generator/
 
 # generate executable that will be used by the entrypoint shell script to generate
