@@ -64,12 +64,16 @@ func ParseTemplates(dir string, outDir string, project Project) {
 		tFileName := t.Name()
 		// TODO Use filepath.Join
 		path := dir + outDir + path.Dir(tFileName)
+		log.Debugf("Path : ",path)
 		pathConverted := strings.Replace(path,dummyDir,convertPackageToPath(project.PackageName),-1)
+		log.Debugf("Path converted: ",path)
 
 		// convert FileName
 		// TODO Use filepath.Join
 		fileName := dir + outDir + tFileName
+		log.Debugf("File name : ",fileName)
 		fileNameConverted := strings.Replace(fileName,dummyDir,convertPackageToPath(project.PackageName),-1)
+		log.Debugf("File name converted : ",fileNameConverted)
 
 		// Create missing folders
 		log.Infof("Path to generated file : ",pathConverted)
