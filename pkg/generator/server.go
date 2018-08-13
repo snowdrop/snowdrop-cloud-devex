@@ -13,16 +13,20 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/snowdrop/k8s-supervisor/pkg/scaffold"
 	"github.com/snowdrop/k8s-supervisor/pkg/common/logger"
+	"math/rand"
+	"time"
 )
 
 var (
-	files           []string
-	tmpdir          = "/_temp/"
-	unixTempDir     = os.TempDir()
 	currentDir, _   = os.Getwd()
 	port			= "8000"
 	pathTemplateDir = ""
+	letterRunes     = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 )
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
 
 func main() {
 	// Enable Debug if env var is defined
@@ -39,7 +43,6 @@ func main() {
 	   pathTemplateDir = t
 	}
 
-	log.Debugf("Temp dir location : %s",unixTempDir)
 	log.Infof("Starting HTTP Server on port %s, exposing endpoint %s",port,"/template/{id}")
 
 	router := mux.NewRouter()
@@ -68,20 +71,29 @@ func GetProject(w http.ResponseWriter, r *http.Request) {
 	log.Info("Params : ",params)
 
 	scaffold.CollectBoxTemplates(params["id"],pathTemplateDir)
+
+	tmpdir := "/_temp/" + randStringRunes(10) + "/"
+	log.Infof("Temp dir %s",tmpdir)
 	scaffold.ParseTemplates(currentDir,tmpdir,p)
 	log.Info("Project generated")
 
-	handleZip(w)
+	handleZip(w,tmpdir)
 	log.Info("Zip populated")
+
+	// Remove temp dir where project has been generated
+	err := os.RemoveAll(strings.Join([]string{currentDir,tmpdir},"/"))
+	if err != nil {
+		log.Error(err.Error())
+	}
 }
 
 // Generate Zip file to be returned as HTTP Response
-func handleZip(w http.ResponseWriter) {
+func handleZip(w http.ResponseWriter,tmpdir string) {
 	zipFilename := "generated.zip"
 	w.Header().Set("Content-Type", "application/zip")
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", zipFilename))
 
-	errZip := zipFiles(w)
+	errZip := zipFiles(w, tmpdir)
 	if errZip != nil {
 		log.Fatal(errZip)
 	}
@@ -89,7 +101,8 @@ func handleZip(w http.ResponseWriter) {
 
 // Get Files generated from templates under _temp directory and
 // them recursively to the file to be zipped
-func zipFiles(w http.ResponseWriter) error {
+func zipFiles(w http.ResponseWriter,tmpdir string) error {
+	log.Debug("Zip file path : ",strings.Join([]string{currentDir + tmpdir},"/"))
 	err := recursiveZip(w,currentDir + tmpdir)
 	if err != nil {
 		log.Error(err)
@@ -136,3 +149,12 @@ func recursiveZip(w http.ResponseWriter, destinationPath string) error {
 	}
 	return nil
 }
+
+func randStringRunes(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(b)
+}
+
