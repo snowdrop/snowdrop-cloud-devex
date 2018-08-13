@@ -15,6 +15,7 @@ import (
 	"github.com/snowdrop/k8s-supervisor/pkg/common/logger"
 	"math/rand"
 	"time"
+	"net/url"
 )
 
 var (
@@ -55,22 +56,28 @@ func getUrlVal(r *http.Request, k string) string {
 	return r.URL.Query().Get(k)
 }
 
+func getArrayVal(r *http.Request, k string, params map[string][]string) []string {
+	return params[k]
+}
+
 func GetProject(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
+	ids := mux.Vars(r)
+	params, _ := url.ParseQuery(r.URL.RawQuery)
 
 	p := scaffold.Project{
 		GroupId: getUrlVal(r,"groupId"),
 		ArtifactId: getUrlVal(r,"artifactId"),
 		Version: getUrlVal(r,"version"),
 		PackageName: getUrlVal(r,"packageName"),
+		Dependencies: getArrayVal(r,"dependencies",params),
 		SnowdropBomVersion: getUrlVal(r,"bomVersion"),
 		SpringVersion: getUrlVal(r,"springbootVersion"),
 		OutDir: getUrlVal(r,"outDir"),
 	}
 	log.Info("Project : ",p)
-	log.Info("Params : ",params)
+	log.Info("Params : ",ids)
 
-	scaffold.CollectBoxTemplates(params["id"],pathTemplateDir)
+	scaffold.CollectBoxTemplates(ids["id"],pathTemplateDir)
 
 	tmpdir := "/_temp/" + randStringRunes(10) + "/"
 	log.Infof("Temp dir %s",tmpdir)

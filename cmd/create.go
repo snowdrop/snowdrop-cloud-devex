@@ -56,6 +56,11 @@ var createCmd = &cobra.Command{
 		form.Add("bomVersion", p.SnowdropBomVersion)
 		form.Add("springbootVersion",p.SpringVersion)
 		form.Add("outDir",p.OutDir)
+		for _, v := range p.Dependencies {
+			if v != "" {
+				form.Add("dependencies", v)
+			}
+		}
 
 		parameters := form.Encode()
 		if parameters != "" {
@@ -104,6 +109,7 @@ func init() {
 	createCmd.Flags().StringVarP(&template, "template", "t", "simple",
 		fmt.Sprintf("Template name used to select the project to be created. Supported templates are '%s'", strings.Join(templates, ",")))
 	createCmd.Flags().StringVarP(&p.UrlService,"urlService","u","http://localhost:8000","URL of the HTTP Server exposing the spring boot service")
+	createCmd.Flags().StringArrayVarP(&p.Dependencies, "dependencies", "d", []string{}, "Spring Boot starters/dependencies")
 	createCmd.Flags().StringVarP(&p.GroupId, "groupId", "g", "org.acme", "Group ID")
 	createCmd.Flags().StringVarP(&p.ArtifactId, "artifactId", "i", "cool", "Artifact ID")
 	createCmd.Flags().StringVarP(&p.Version, "version", "v", "1.0", "Version")

@@ -30,6 +30,7 @@ type Project struct {
 	ArtifactId         string
 	Version            string
 	PackageName        string
+	Dependencies	   []string
 	OutDir             string
 
 	SnowdropBomVersion string
