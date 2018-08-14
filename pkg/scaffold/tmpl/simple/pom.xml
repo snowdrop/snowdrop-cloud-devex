@@ -22,7 +22,15 @@
        </dependency>
     </dependencies>
   </dependencyManagement>
-
+  {{ if .Modules }}
+  <dependencies>{{ range .Modules }}{{ range .Starters }}
+    <dependency>
+      <groupId>{{.GroupId}}</groupId>
+      <artifactId>{{.ArtifactId}}</artifactId>{{ if .Scope }}
+      <scope>{{.Scope}}</scope>{{ end }}
+    </dependency>{{ end }}{{ end }}
+  </dependencies>
+  {{ else }}
   <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -34,7 +42,7 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
+  {{ end }}
   <build>
     <plugins>
       <plugin>

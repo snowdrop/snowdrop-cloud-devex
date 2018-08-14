@@ -77,6 +77,10 @@ func GetProject(w http.ResponseWriter, r *http.Request) {
 	log.Info("Project : ",p)
 	log.Info("Params : ",ids)
 
+	// Parse Starters Config YAML file to load the starters associated to a module (web, ...)
+	scaffold.ParseStartersConfigFile()
+
+	// Collect the templates defined for the id (simple, rest, ...)
 	scaffold.CollectBoxTemplates(ids["id"],pathTemplateDir)
 
 	tmpdir := "/_temp/" + randStringRunes(10) + "/"
