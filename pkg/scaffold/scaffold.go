@@ -11,6 +11,8 @@ import (
 
 	"github.com/gobuffalo/packr"
 	log "github.com/sirupsen/logrus"
+	"github.com/ghodss/yaml"
+	"encoding/json"
 )
 
 const (
@@ -23,6 +25,7 @@ var (
 	pathtemplateDir	 string
 	templates        = make(map[string]template.Template)
 	box 		     packr.Box
+	config           Config
 )
 
 type Project struct {
@@ -35,8 +38,53 @@ type Project struct {
 
 	SnowdropBomVersion string
 	SpringVersion      string
+	Modules            []Module
 
 	UrlService  	   string
+}
+
+type Config struct {
+	Modules      []Module
+}
+
+type Module struct {
+	Name	     string
+	Description  string
+	Starters     []Starter
+}
+
+type Starter struct {
+	GroupId	     string
+	ArtifactId	 string
+	Scope	     string
+}
+
+func ParseStartersConfigFile() {
+	currentDir, _ := os.Getwd()
+	startersPath := strings.Join([]string{currentDir,"../scaffold/config/starters.yaml"},"/")
+	log.Infof("Parsing Starters's Config at %s", startersPath)
+
+	// Read file and parse it to create a Config's type
+	if _, err := os.Stat(startersPath); err == nil {
+		source, err := ioutil.ReadFile(startersPath)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+
+		err = yaml.Unmarshal(source, &config)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+	} else {
+		log.Fatal("No Starters's config file detected !!!")
+	}
+
+	if log.GetLevel() == log.DebugLevel {
+		log.Debug("Starters's config")
+		log.Debug("--------------------")
+		s, _ := json.Marshal(&config)
+		log.Debug(string(s))
+	}
 }
 
 func CollectBoxTemplates(t, pathTemplateDir string) {
@@ -60,8 +108,17 @@ func CollectBoxTemplates(t, pathTemplateDir string) {
 func ParseTemplates(dir string, outDir string, project Project) {
 	for _, t := range templates {
 
-		log.Debugf("Template : %s", t.Name())
+		log.Infof("Template : %s", t.Name())
 		var b bytes.Buffer
+
+		// Enrich project with starters dependencies if they exist
+		if strings.Contains(t.Name(),"pom.xml") {
+			if project.Dependencies != nil {
+				project = convertDependencyToModule(project.Dependencies, config.Modules, project)
+			}
+			log.Infof("Project enriched %+v ",project)
+		}
+
 		err := t.Execute(&b, project)
 		if err != nil {
 			log.Error(err.Error())
@@ -92,6 +149,18 @@ func ParseTemplates(dir string, outDir string, project Project) {
 			log.Error(err.Error())
 		}
 	}
+}
+
+func convertDependencyToModule(deps []string, modules []Module, p Project) Project {
+	for _, dep := range deps {
+		for _, module := range modules {
+			if module.Name == dep {
+				log.Infof("Match found for dep %s and starters %+v ",dep,module)
+				p.Modules = append(p.Modules,module)
+			}
+		}
+	}
+	return p
 }
 
 func convertPackageToPath(p string) string {
