@@ -16,6 +16,8 @@ import (
 )
 
 const (
+	configDirName    = "config"
+	configYamlName   = "starters.yaml"
 	templateDirName  = "tmpl"
 	dummyDirName     = "dummy"
 )
@@ -59,9 +61,11 @@ type Starter struct {
 	Scope	     string
 }
 
-func ParseStartersConfigFile() {
-	currentDir, _ := os.Getwd()
-	startersPath := strings.Join([]string{currentDir,"../scaffold/config/starters.yaml"},"/")
+func ParseStartersConfigFile(pathTemplateDir string) {
+	if pathTemplateDir == "" {
+		pathTemplateDir = "../scaffold"
+	}
+	startersPath := strings.Join([]string{pathTemplateDir, configDirName, configYamlName},"/")
 	log.Infof("Parsing Starters's Config at %s", startersPath)
 
 	// Read file and parse it to create a Config's type

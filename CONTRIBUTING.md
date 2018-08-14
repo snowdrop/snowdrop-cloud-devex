@@ -240,6 +240,7 @@ oc create -f docker/generator.yml
 Grab the route of the service and next generate a project
 ```bash
 sb create -t simple -i ocool -g org.acme.cool -v 1.0.0 -p me.snowdrop.cool -s 1.5.15.RELEASE -b 1.5.15.Final -u http://spring-boot-generator.192.168.65.2.nip.io/
+sb create -t simple -d web -i ocool -g org.acme.cool -v 1.0.0 -p me.snowdrop.cool -s 1.5.15.RELEASE -b 1.5.15.Final -u http://spring-boot-generator.192.168.65.2.nip.io/
 ```
   
 ## Java S2I image
