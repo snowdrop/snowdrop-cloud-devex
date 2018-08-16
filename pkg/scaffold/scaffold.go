@@ -2,17 +2,20 @@ package scaffold
 
 import (
 	"bytes"
+	"encoding/json"
 	"io/ioutil"
+	//"net/http"
 	"os"
 	"path"
-
 	"strings"
 	"text/template"
 
 	"github.com/gobuffalo/packr"
-	log "github.com/sirupsen/logrus"
 	"github.com/ghodss/yaml"
-	"encoding/json"
+	"github.com/shurcooL/httpfs/vfsutil"
+	log "github.com/sirupsen/logrus"
+
+	tmpl "github.com/snowdrop/k8s-supervisor/pkg/template"
 )
 
 const (
@@ -24,10 +27,12 @@ const (
 
 var (
 	files            []string
+	templateFiles    []string
 	pathtemplateDir	 string
 	templates        = make(map[string]template.Template)
 	box 		     packr.Box
 	config           Config
+	assets           = tmpl.Assets
 )
 
 type Project struct {
@@ -91,21 +96,34 @@ func ParseStartersConfigFile(pathTemplateDir string) {
 	}
 }
 
-func CollectBoxTemplates(t, pathTemplateDir string) {
-	if pathTemplateDir == "" {
-		pathTemplateDir = "../scaffold"
+func CollectVfsTemplates(t string) {
+
+	walkFn := func(path string, fi os.FileInfo, err error) error {
+		if err != nil {
+			log.Printf("can't stat file %s: %v\n", path, err)
+			return nil
+		}
+
+		if fi.IsDir() {
+			return nil
+		}
+
+		log.Debug("Path of the file to be added as template : " + path)
+		templateFiles = append(templateFiles,path)
+		return nil
 	}
-	pathTempl := strings.Join([]string{pathTemplateDir, templateDirName, t},"/")
-	log.Infof("Path to the template directory : %s",pathTempl)
-	box = packr.NewBox(pathTempl)
-	log.Infof("List of files :",box.List())
 
-	for _, tmpl:= range box.List() {
-		log.Debug("File : " + tmpl)
+	errW := vfsutil.Walk(assets, t, walkFn)
+	if errW != nil {
+		panic(errW)
+	}
 
-		t := template.New(tmpl)
-		t, _ = t.Parse(box.String(tmpl))
-		templates[tmpl] = *t
+	for i := range templateFiles {
+		log.Info("File template : " + templateFiles[i])
+
+		t := template.New(templateFiles[i])
+		t, _ = t.Parse(box.String(templateFiles[i]))
+		templates[templateFiles[i]] = *t
 	}
 }
 
