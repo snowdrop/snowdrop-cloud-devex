@@ -83,14 +83,14 @@ func GetProject(w http.ResponseWriter, r *http.Request) {
 	// Parse Starters Config YAML file to load the starters associated to a module (web, ...)
 	scaffold.ParseStartersConfigFile(pathTemplateDir)
 
-	// Collect the templates defined for the id (simple, rest, ...)
+	// Collect the java projects's template (simple, rest, ...) defined within the package template
 	scaffold.CollectVfsTemplates(ids["id"])
 
 	// Generate a random temp directory where populated files will be saved
 	tmpdir := strings.Join([]string{tmpDirName,randStringRunes(10)}, "/")
 	log.Infof("Temp dir %s",tmpdir)
 
-	// Parse the templates using the config of the project
+	// Parse the java project's templates using the config of the project
 	scaffold.ParseTemplates(currentDir,tmpdir,p)
 	log.Info("Project generated")
 

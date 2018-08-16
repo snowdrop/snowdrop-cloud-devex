@@ -1,40 +1,65 @@
 package buildpack
 
 import (
-	log "github.com/sirupsen/logrus"
-	"io/ioutil"
 	"text/template"
-
 	"bytes"
 	"fmt"
+	"os"
+	log "github.com/sirupsen/logrus"
+	"github.com/shurcooL/httpfs/vfsutil"
+
 	"github.com/snowdrop/k8s-supervisor/pkg/buildpack/types"
-	"path"
-	"runtime"
 )
 
 var (
-	templateNames    = []string{"imagestream", "route", "service"}
-	templateBuilders = make(map[string]template.Template)
+	assetsBuildPackTemplates  = Assets
+	templateBuildPackFiles    []string
+	templates                 = make(map[string]template.Template)
 )
 
 const (
-	builderpath = "tmpl/java/"
+	builderPath = "java"
 )
 
 func init() {
-	// Fill an array with our Builder's text/template
-	for tmpl := range templateNames {
-		buildPackDir := packageDirectory()
-		// Create Template and parse it
-		tfile, errFile := ioutil.ReadFile(buildPackDir + "/" + builderpath + templateNames[tmpl])
-		log.Debug("Template File :", tfile)
-		if errFile != nil {
-			log.Error("Err is ", errFile.Error())
+	walkFn := func(path string, fi os.FileInfo, err error) error {
+		if err != nil {
+			log.Printf("can't stat file %s: %v\n", path, err)
+			return nil
 		}
 
-		t := template.New(templateNames[tmpl])
-		t, _ = t.Parse(string(tfile))
-		templateBuilders[templateNames[tmpl]] = *t
+		if fi.IsDir() {
+			return nil
+		}
+
+		log.Info("Path of the buildpack file to be added as template : " + path)
+		templateBuildPackFiles = append(templateBuildPackFiles,path)
+		return nil
+	}
+
+	errW := vfsutil.Walk(assetsBuildPackTemplates, builderPath, walkFn)
+	if errW != nil {
+		panic(errW)
+	}
+
+
+	// Fill an array with our Builder's text/template
+	for i := range templateBuildPackFiles {
+		log.Info("BuildPack File : " + templateBuildPackFiles[i])
+
+		// Create a new Template using the File name as key and add it to the array
+		t := template.New(templateBuildPackFiles[i])
+
+		// Read Template's content
+		data, err := vfsutil.ReadFile(assetsBuildPackTemplates,templateBuildPackFiles[i])
+		if err != nil {
+			log.Error(err)
+		}
+		t, err = t.Parse(bytes.NewBuffer(data).String())
+		if err != nil {
+			log.Error(err)
+		}
+		templates[templateBuildPackFiles[i]] = *t
 	}
 }
 
@@ -42,19 +67,11 @@ func init() {
 func ParseTemplate(tmpl string, cfg types.Application) bytes.Buffer {
 	// Create Template and parse it
 	var b bytes.Buffer
-	t := templateBuilders[tmpl]
+	t := templates[tmpl]
 	err := t.Execute(&b, cfg)
 	if err != nil {
 		fmt.Println("There was an error:", err.Error())
 	}
 	log.Debug("Generated :", b.String())
 	return b
-}
-
-func packageDirectory() string {
-	_, filename, _, ok := runtime.Caller(0)
-	if !ok {
-		panic("No caller information")
-	}
-	return path.Dir(filename)
 }
