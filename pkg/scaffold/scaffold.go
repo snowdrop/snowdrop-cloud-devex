@@ -179,52 +179,6 @@ func ParseTemplates(dir string, outDir string, project Project) {
 	}
 }
 
-func ParseTemplatesOld(dir string, outDir string, project Project) {
-	for _, t := range templates {
-
-		log.Infof("Template : %s", t.Name())
-		var b bytes.Buffer
-
-		// Enrich project with starters dependencies if they exist
-		if strings.Contains(t.Name(),"pom.xml") {
-			if project.Dependencies != nil {
-				project = convertDependencyToModule(project.Dependencies, config.Modules, project)
-			}
-			log.Infof("Project enriched %+v ",project)
-		}
-
-		err := t.Execute(&b, project)
-		if err != nil {
-			log.Error(err.Error())
-		}
-		log.Debugf("Generated : %s", b.String())
-
-		// Convert Path
-		tFileName := t.Name()
-		// TODO Use filepath.Join
-		path := dir + outDir + path.Dir(tFileName)
-		log.Debugf("Path : ",path)
-		pathConverted := strings.Replace(path,dummyDirName,convertPackageToPath(project.PackageName),-1)
-		log.Debugf("Path converted: ",path)
-
-		// convert FileName
-		// TODO Use filepath.Join
-		fileName := dir + outDir + tFileName
-		log.Debugf("File name : ",fileName)
-		fileNameConverted := strings.Replace(fileName,dummyDirName,convertPackageToPath(project.PackageName),-1)
-		log.Debugf("File name converted : ",fileNameConverted)
-
-		// Create missing folders
-		log.Infof("Path to generated file : ",pathConverted)
-		os.MkdirAll(pathConverted, os.ModePerm)
-
-		err = ioutil.WriteFile(fileNameConverted, b.Bytes(),0644)
-		if err != nil {
-			log.Error(err.Error())
-		}
-	}
-}
-
 func convertDependencyToModule(deps []string, modules []Module, p Project) Project {
 	for _, dep := range deps {
 		for _, module := range modules {

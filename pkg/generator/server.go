@@ -21,11 +21,11 @@ import (
 )
 
 var (
-	currentDir, _   = os.Getwd()
-	port			= "8000"
-	pathTemplateDir = ""
-	tmpDirName      = "_temp"
-	letterRunes     = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	currentDir, _    = os.Getwd()
+	port			 = "8000"
+	pathGeneratorDir = ""
+	tmpDirName       = "_temp"
+	letterRunes      = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 )
 
 func init() {
@@ -42,9 +42,9 @@ func main() {
 		port = s
 	}
 
-	t := os.Getenv("TEMPLATE_PATH")
+	t := os.Getenv("GENERATOR_PATH")
 	if t != "" {
-	   pathTemplateDir = t
+	   pathGeneratorDir = t
 	}
 
 	log.Infof("Starting HTTP Server on port %s, exposing endpoint %s",port,"/template/{id}")
@@ -81,7 +81,7 @@ func GetProject(w http.ResponseWriter, r *http.Request) {
 	log.Info("Params : ",ids)
 
 	// Parse Starters Config YAML file to load the starters associated to a module (web, ...)
-	scaffold.ParseStartersConfigFile(pathTemplateDir)
+	scaffold.ParseStartersConfigFile(pathGeneratorDir)
 
 	// Collect the java projects's template (simple, rest, ...) defined within the package template
 	scaffold.CollectVfsTemplates(ids["id"])
