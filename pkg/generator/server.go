@@ -24,6 +24,7 @@ var (
 	currentDir, _   = os.Getwd()
 	port			= "8000"
 	pathTemplateDir = ""
+	tmpDirName      = "_temp"
 	letterRunes     = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 )
 
@@ -85,15 +86,23 @@ func GetProject(w http.ResponseWriter, r *http.Request) {
 	// Collect the templates defined for the id (simple, rest, ...)
 	scaffold.CollectVfsTemplates(ids["id"])
 
-	tmpdir := "/_temp/" + randStringRunes(10) + "/"
+	// Generate a random temp directory where populated files will be saved
+	tmpdir := strings.Join([]string{tmpDirName,randStringRunes(10)}, "/")
 	log.Infof("Temp dir %s",tmpdir)
+
+	// Parse the templates using the config of the project
 	scaffold.ParseTemplates(currentDir,tmpdir,p)
 	log.Info("Project generated")
 
-	handleZip(w,tmpdir)
+	zipDir := strings.Join([]string{tmpdir,ids["id"],"/"},"/")
+	handleZip(w,zipDir)
 	log.Info("Zip populated")
 
 	// Remove temp dir where project has been generated
+	removeTempDir(tmpdir)
+}
+
+func removeTempDir(tmpdir string) {
 	err := os.RemoveAll(strings.Join([]string{currentDir,tmpdir},"/"))
 	if err != nil {
 		log.Error(err.Error())
@@ -115,8 +124,9 @@ func handleZip(w http.ResponseWriter,tmpdir string) {
 // Get Files generated from templates under _temp directory and
 // them recursively to the file to be zipped
 func zipFiles(w http.ResponseWriter,tmpdir string) error {
-	log.Debug("Zip file path : ",strings.Join([]string{currentDir + tmpdir},"/"))
-	err := recursiveZip(w,currentDir + tmpdir)
+	fullPathZipDir := strings.Join([]string{currentDir,tmpdir},"/")
+	log.Info("Zip file path : ",fullPathZipDir)
+	err := recursiveZip(w,fullPathZipDir)
 	if err != nil {
 		log.Error(err)
 		return err
