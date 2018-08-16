@@ -10,7 +10,6 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/gobuffalo/packr"
 	"github.com/ghodss/yaml"
 	"github.com/shurcooL/httpfs/vfsutil"
 	log "github.com/sirupsen/logrus"
@@ -21,18 +20,15 @@ import (
 const (
 	configDirName    = "config"
 	configYamlName   = "starters.yaml"
-	templateDirName  = "tmpl"
 	dummyDirName     = "dummy"
 )
 
 var (
-	files            []string
-	templateFiles    []string
-	pathtemplateDir	 string
-	templates        = make(map[string]template.Template)
-	box 		     packr.Box
-	config           Config
-	assetsJavaTemplates           = tmpl.Assets
+	templateFiles            []string
+	config                   Config
+
+	assetsJavaTemplates      = tmpl.Assets
+	templates                = make(map[string]template.Template)
 )
 
 type Project struct {
