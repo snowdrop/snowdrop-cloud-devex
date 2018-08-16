@@ -32,7 +32,7 @@ var (
 	templates        = make(map[string]template.Template)
 	box 		     packr.Box
 	config           Config
-	assets           = tmpl.Assets
+	assetsJavaTemplates           = tmpl.Assets
 )
 
 type Project struct {
@@ -113,7 +113,7 @@ func CollectVfsTemplates(t string) {
 		return nil
 	}
 
-	errW := vfsutil.Walk(assets, t, walkFn)
+	errW := vfsutil.Walk(assetsJavaTemplates, t, walkFn)
 	if errW != nil {
 		panic(errW)
 	}
@@ -121,13 +121,72 @@ func CollectVfsTemplates(t string) {
 	for i := range templateFiles {
 		log.Info("File template : " + templateFiles[i])
 
+		// Create a new Template using the File name as key and add it to the array
 		t := template.New(templateFiles[i])
-		t, _ = t.Parse(box.String(templateFiles[i]))
+
+		// Read Template's content
+		data, err := vfsutil.ReadFile(assetsJavaTemplates,templateFiles[i])
+		if err != nil {
+			log.Error(err)
+		}
+		t, err = t.Parse(bytes.NewBuffer(data).String())
+		if err != nil {
+			log.Error(err)
+		}
 		templates[templateFiles[i]] = *t
 	}
 }
 
 func ParseTemplates(dir string, outDir string, project Project) {
+	for _, t := range templates {
+
+		log.Infof("Template : %s", t.Name())
+		var b bytes.Buffer
+
+		// Enrich project with starters dependencies if they exist
+		if strings.Contains(t.Name(),"pom.xml") {
+			if project.Dependencies != nil {
+				project = convertDependencyToModule(project.Dependencies, config.Modules, project)
+			}
+			log.Infof("Project enriched %+v ",project)
+		}
+
+		// Use template to generate the content
+		err := t.Execute(&b, project)
+		if err != nil {
+			log.Error(err.Error())
+		}
+
+		// Convert Path
+		tFileName := t.Name()
+		// TODO Use filepath.Join
+		path := dir + outDir + path.Dir(tFileName)
+		log.Debugf("Path : ",path)
+		pathConverted := strings.Replace(path,dummyDirName,convertPackageToPath(project.PackageName),-1)
+		log.Debugf("Path converted: ",path)
+
+		// convert FileName
+		// TODO Use filepath.Join
+		fileName := dir + outDir + tFileName
+		log.Debugf("File name : ",fileName)
+		fileNameConverted := strings.Replace(fileName,dummyDirName,convertPackageToPath(project.PackageName),-1)
+		log.Debugf("File name converted : ",fileNameConverted)
+
+		// Create missing folders
+		log.Infof("Path to generated file : ",pathConverted)
+		os.MkdirAll(pathConverted, os.ModePerm)
+
+		// Content generated
+		log.Infof("Content generated : %s",b.Bytes())
+
+		err = ioutil.WriteFile(fileNameConverted, b.Bytes(),0644)
+		if err != nil {
+			log.Error(err.Error())
+		}
+	}
+}
+
+func ParseTemplatesOld(dir string, outDir string, project Project) {
 	for _, t := range templates {
 
 		log.Infof("Template : %s", t.Name())
