@@ -10,6 +10,7 @@ import (
 
 	"github.com/snowdrop/k8s-supervisor/pkg/buildpack/types"
 	"github.com/snowdrop/k8s-supervisor/pkg/common/oc"
+	"strings"
 )
 
 func CreateServiceTemplate(clientset *kubernetes.Clientset, dc *appsv1.DeploymentConfig, application types.Application) {
@@ -17,7 +18,8 @@ func CreateServiceTemplate(clientset *kubernetes.Clientset, dc *appsv1.Deploymen
 		log.Infof("'%s' Service already exists, skipping", application.Name)
 	} else {
 		// Parse Service Template
-		var b = ParseTemplate("service", application)
+		tName := strings.Join([]string{builderPath,"service"},"/")
+		var b = ParseTemplate(tName, application)
 
 		// Create Service struct using the generated Service string
 		svc := corev1.Service{}

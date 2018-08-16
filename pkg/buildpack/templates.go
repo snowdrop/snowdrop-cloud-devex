@@ -32,7 +32,7 @@ func init() {
 			return nil
 		}
 
-		log.Info("Path of the buildpack file to be added as template : " + path)
+		log.Debugf("Path of the buildpack file to be added as template : %s" + path)
 		templateBuildPackFiles = append(templateBuildPackFiles,path)
 		return nil
 	}
@@ -45,7 +45,7 @@ func init() {
 
 	// Fill an array with our Builder's text/template
 	for i := range templateBuildPackFiles {
-		log.Info("BuildPack File : " + templateBuildPackFiles[i])
+		log.Debugf("BuildPack File : %s", templateBuildPackFiles[i])
 
 		// Create a new Template using the File name as key and add it to the array
 		t := template.New(templateBuildPackFiles[i])

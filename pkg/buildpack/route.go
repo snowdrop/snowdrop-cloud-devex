@@ -11,6 +11,7 @@ import (
 
 	"github.com/snowdrop/k8s-supervisor/pkg/buildpack/types"
 	"github.com/snowdrop/k8s-supervisor/pkg/common/oc"
+	"strings"
 )
 
 func CreateRouteTemplate(config *restclient.Config, application types.Application) {
@@ -20,7 +21,8 @@ func CreateRouteTemplate(config *restclient.Config, application types.Applicatio
 		routeV1Client := getClient(config)
 
 		// Parse Route Template
-		var b = ParseTemplate("route", application)
+		tName := strings.Join([]string{builderPath,"route"},"/")
+		var b = ParseTemplate(tName, application)
 
 		// Create Route struct using the generated Route string
 		route := routev1.Route{}

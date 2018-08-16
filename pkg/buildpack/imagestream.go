@@ -10,6 +10,7 @@ import (
 
 	"github.com/snowdrop/k8s-supervisor/pkg/buildpack/types"
 	"github.com/snowdrop/k8s-supervisor/pkg/common/oc"
+	"strings"
 )
 
 var defaultImages = []types.Image{
@@ -34,7 +35,8 @@ func CreateImageStreamTemplate(config *restclient.Config, appConfig types.Applic
 			log.Infof("'%s' ImageStream already exists, skipping", img.Name)
 		} else {
 			// Parse ImageStream Template
-			var b = ParseTemplate("imagestream", appCfg)
+			tName := strings.Join([]string{builderPath,"imagestream"},"/")
+			var b = ParseTemplate(tName, appCfg)
 
 			// Create ImageStream struct using the generated ImageStream string
 			img := imagev1.ImageStream{}
