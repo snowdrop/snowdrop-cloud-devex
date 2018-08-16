@@ -1,20 +1,22 @@
 package main
 
 import (
+	"archive/zip"
+	"fmt"
+	"io"
+	"math/rand"
 	"net/http"
 	"os"
-	"fmt"
 	"path/filepath"
-	"archive/zip"
-	"io"
 	"strings"
+	"time"
 
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 	"github.com/snowdrop/k8s-supervisor/pkg/scaffold"
 	"github.com/snowdrop/k8s-supervisor/pkg/common/logger"
-	"math/rand"
-	"time"
+
+
 	"net/url"
 )
 
@@ -81,7 +83,7 @@ func GetProject(w http.ResponseWriter, r *http.Request) {
 	scaffold.ParseStartersConfigFile(pathTemplateDir)
 
 	// Collect the templates defined for the id (simple, rest, ...)
-	scaffold.CollectBoxTemplates(ids["id"],pathTemplateDir)
+	scaffold.CollectVfsTemplates(ids["id"])
 
 	tmpdir := "/_temp/" + randStringRunes(10) + "/"
 	log.Infof("Temp dir %s",tmpdir)
