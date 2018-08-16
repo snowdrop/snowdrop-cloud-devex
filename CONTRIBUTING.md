@@ -267,9 +267,4 @@ docker build -t spring-boot-http:latest .
 TAG_ID=$(docker images -q <username>/spring-boot-http:latest)
 docker tag $TAG_ID quay.io/snowdrop/spring-boot-s2i
 docker push quay.io/snowdrop/spring-boot-s2i
-```   
-
-docker login -u="cmoulliard" -p="EfQulpeG3aM833zMctXfkNNeqVUFV75AEZ3jqU3R7ntPDpGDsGbDUNgLgGGgpziZ" quay.io
-TAG_ID=$(docker images -q spring-boot-http:latest)
-docker tag $TAG_ID  quay.io/snowdrop/spring-boot-s2i
-docker push quay.io/snowdrop/spring-boot-s2i
+```  
