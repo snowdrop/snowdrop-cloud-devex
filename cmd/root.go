@@ -21,6 +21,9 @@ var (
 	namespace string
 	appName   string
 	tool      *config.Tool
+
+	// VERSION is set during build
+	VERSION string
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -47,7 +50,9 @@ func init() {
 	//rootCmd.MarkPersistentFlagRequired("namespace")
 }
 
-func Execute() {
+func Execute(version string) {
+	VERSION = version
+
 	if err := rootCmd.Execute(); err != nil {
 		checkError(err, "Root execution")
 	}
