@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
-	//"net/http"
 	"os"
 	"path"
 	"strings"
@@ -155,25 +154,23 @@ func ParseTemplates(dir string, outDir string, project Project) {
 
 		// Convert Path
 		tFileName := t.Name()
-		// TODO Use filepath.Join
-		path := dir + outDir + path.Dir(tFileName)
-		log.Debugf("Path : ",path)
-		pathConverted := strings.Replace(path,dummyDirName,convertPackageToPath(project.PackageName),-1)
-		log.Debugf("Path converted: ",path)
+		pathF := strings.Join([]string{dir,outDir,path.Dir(tFileName)},"/")
+		log.Debugf("## Path : %s",pathF)
+		pathConverted := strings.Replace(pathF,dummyDirName,convertPackageToPath(project.PackageName),-1)
+		log.Debugf("Path converted: ",pathF)
 
-		// convert FileName
-		// TODO Use filepath.Join
-		fileName := dir + outDir + tFileName
-		log.Debugf("File name : ",fileName)
+		// Convert FileName
+		fileName := strings.Join([]string{dir,outDir,tFileName},"/")
+		log.Debugf("## File name : %s",fileName)
 		fileNameConverted := strings.Replace(fileName,dummyDirName,convertPackageToPath(project.PackageName),-1)
 		log.Debugf("File name converted : ",fileNameConverted)
 
 		// Create missing folders
-		log.Infof("Path to generated file : ",pathConverted)
+		log.Debugf("Path to generated file : ",pathConverted)
 		os.MkdirAll(pathConverted, os.ModePerm)
 
 		// Content generated
-		log.Infof("Content generated : %s",b.Bytes())
+		log.Debugf("Content generated : %s",b.Bytes())
 
 		err = ioutil.WriteFile(fileNameConverted, b.Bytes(),0644)
 		if err != nil {
