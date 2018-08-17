@@ -1,5 +1,8 @@
 VERSION=0.3.0
-BUILD_FLAGS := -ldflags="-X main.VERSION=$(VERSION)"
+PROJECT := github.com/snowdrop/k8s-supervisor
+GITCOMMIT := $(shell git rev-parse --short HEAD 2>/dev/null)
+# PKGS := $(shell go list  ./... | grep -v $(PROJECT)/vendor)
+BUILD_FLAGS := -ldflags="-w -X $(PROJECT)/cmd.GITCOMMIT=$(GITCOMMIT) -X $(PROJECT)/cmd.VERSION=$(VERSION)"
 
 all: clean build
 
@@ -16,6 +19,9 @@ cross: clean
 
 prepare-release: cross
 	./scripts/prepare_release.sh
+
+upload: prepare-release
+	./scripts/upload_assets.sh github_api_token=34909fe76fe183d69817d045c6ed030700c394f0
 
 version:
 	@echo $(VERSION)
