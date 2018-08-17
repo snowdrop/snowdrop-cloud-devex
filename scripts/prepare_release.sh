@@ -38,9 +38,8 @@ for arch in `ls -1 $BIN_DIR/`;do
     chmod +x $RELEASE_DIR/$target_file
 
     # Create a gzip of the binary
-    echo "tar compress the $target_file as $target_file.tar.gz"
-    #gzip -k --to-stdout $target_file > $target_file.gz
+    echo "tar compress the $target_file as $target_file.tgz"
     cd $RELEASE_DIR/
-    tar -czf $target_file.tar.gz $target_file
+    tar -czf $target_file.tgz $target_file
     cd ../..
 done
