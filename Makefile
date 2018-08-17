@@ -21,7 +21,7 @@ prepare-release: cross
 	./scripts/prepare_release.sh
 
 upload: prepare-release
-	./scripts/upload_assets.sh github_api_token=34909fe76fe183d69817d045c6ed030700c394f0
+	./scripts/upload_assets.sh
 
 version:
 	@echo $(VERSION)
