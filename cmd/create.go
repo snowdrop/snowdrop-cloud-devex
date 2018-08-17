@@ -108,7 +108,7 @@ var createCmd = &cobra.Command{
 func init() {
 	createCmd.Flags().StringVarP(&template, "template", "t", "simple",
 		fmt.Sprintf("Template name used to select the project to be created. Supported templates are '%s'", strings.Join(templates, ",")))
-	createCmd.Flags().StringVarP(&p.UrlService,"urlService","u","http://localhost:8000","URL of the HTTP Server exposing the spring boot service")
+	createCmd.Flags().StringVarP(&p.UrlService,"urlService","u","http://spring-boot-generator.195.201.87.126.nip.io","URL of the HTTP Server exposing the spring boot service")
 	createCmd.Flags().StringArrayVarP(&p.Dependencies, "dependencies", "d", []string{}, "Spring Boot starters/dependencies")
 	createCmd.Flags().StringVarP(&p.GroupId, "groupId", "g", "org.acme", "Group ID")
 	createCmd.Flags().StringVarP(&p.ArtifactId, "artifactId", "i", "cool", "Artifact ID")
