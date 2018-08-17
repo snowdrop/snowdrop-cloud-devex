@@ -28,14 +28,19 @@ for arch in `ls -1 $BIN_DIR/`;do
         suffix=".exe"
     fi
     source_file=$BIN_DIR/$arch/$APP$suffix
-    target_file=$RELEASE_DIR/$APP-$arch$suffix
+    target_file=$APP-$arch$suffix
+
+    # Move binaries to the release directory
+    echo "copying binary $source_file to release directory"
+    cp $source_file $RELEASE_DIR/$target_file
+
+    echo "Make bin generated executable"
+    chmod +x $RELEASE_DIR/$target_file
 
     # Create a gzip of the binary
-    echo "gzipping binary $source_file as $target_file"
-    # gzip --keep --to-stdout $source_file > $target_file.tar.gz
-    tar -czf $target_file.tar.gz $source_file
-
-    # Move binaries to the release directory as well
-    echo "copying binary $source_file to release directory"
-    cp $source_file $target_file
+    echo "tar compress the $target_file as $target_file.tar.gz"
+    #gzip -k --to-stdout $target_file > $target_file.gz
+    cd $RELEASE_DIR/
+    tar -czf $target_file.tar.gz $target_file
+    cd ../..
 done
