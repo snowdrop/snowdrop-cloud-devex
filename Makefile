@@ -1,4 +1,3 @@
-VERSION=0.3.0
 PROJECT := github.com/snowdrop/k8s-supervisor
 GITCOMMIT := $(shell git rev-parse --short HEAD 2>/dev/null)
 # PKGS := $(shell go list  ./... | grep -v $(PROJECT)/vendor)
