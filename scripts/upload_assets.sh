@@ -24,7 +24,10 @@ BIN_DIR="./dist/bin/"
 RELEASE_DIR="./dist/release"
 APP="sb"
 
-#echo "Create Release"
+echo "git tag"
+git tag -a $TAG
+
+echo "Create Release for tag $TAG"
 JSON='{"tag_name": "'"$TAG"'","target_commitish": "master","name": "'"$TAG"'","body": "'"$TAG"'-release","draft": false,"prerelease": false}'
 
 curl -H "$AUTH" \

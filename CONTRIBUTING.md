@@ -281,7 +281,7 @@ Execute this command within the root of the project where you pass as parameters
 make upload GITHUB_API_TOKEN=YOURTOKEN VERSION=0.3.0
 ```
 
-**Remark** : You can next edit the release to add a `changelog` using this command `git log --oneline --decorate v0.2.0`
+**Remark** : You can next edit the release to add a `changelog` using this command `git log --oneline --decorate v0.2.0..v0.3.0`
 
 ## Using goreleaser
 
