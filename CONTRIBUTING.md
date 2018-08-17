@@ -273,6 +273,18 @@ docker push quay.io/snowdrop/spring-boot-s2i
 
 # Release the project and generate go release
 
+## Make
+
+Execute this command within the root of the project where you pass as parameters your `GITHUB_API_TOKEN` and `VERSION` which corresponds to the tag to be created
+
+```yaml
+make upload GITHUB_API_TOKEN=YOURTOKEN VERSION=0.3.0
+```
+
+**Remark** : You can next edit the release to add a `changelog` using this command `git log --oneline --decorate v0.2.0`
+
+## Using goreleaser
+
 Tag the release and push it to the github repo
 
 ```bash
