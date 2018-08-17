@@ -9,7 +9,7 @@ done
 owner="snowdrop"
 repo="k8s-supervisor"
 
-AUTH="Authorization: token $github_api_token"
+AUTH="Authorization: token $GITHUB_API_TOKEN"
 
 GH_API="https://api.github.com"
 GH_REPO="$GH_API/repos/$owner/$repo"
@@ -17,7 +17,7 @@ GH_REPO="$GH_API/repos/$owner/$repo"
 WGET_ARGS="--content-disposition --auth-no-challenge --no-cookie"
 CURL_ARGS="-LJO#"
 
-TAG="v$version"
+TAG="v$VERSION"
 GH_TAGS="$GH_REPO/releases/tags/$TAG"
 
 BIN_DIR="./dist/bin/"
@@ -54,7 +54,7 @@ for arch in `ls -1 $BIN_DIR/`;do
      GH_ASSET_URL="https://uploads.github.com/repos/$owner/$repo/releases/$id/assets?name=$(basename $target_file)"
      echo "GH_ASSET_URL : $GH_ASSET_URL"
 
-     curl -H "Authorization: token $github_api_token" \
+     curl -i -H "Authorization: token $GITHUB_API_TOKEN" \
           -H "Accept: application/vnd.github.v3+json" \
           -H "Content-Type: $content_type" \
           -X POST \
