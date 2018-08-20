@@ -1,6 +1,5 @@
 PROJECT     := github.com/snowdrop/k8s-supervisor
 GITCOMMIT   := $(shell git rev-parse --short HEAD 2>/dev/null)
-# PKGS     := $(shell go list  ./... | grep -v $(PROJECT)/vendor)
 BUILD_FLAGS := -ldflags="-w -X $(PROJECT)/cmd.GITCOMMIT=$(GITCOMMIT) -X $(PROJECT)/cmd.VERSION=$(VERSION)"
 
 # go get -u github.com/shurcooL/vfsgen/cmd/vfsgendev
@@ -26,9 +25,13 @@ prepare-release: cross
 upload: prepare-release
 	./scripts/upload_assets.sh
 
-assets:
+assets: $(VFSGENDEV)
 	@echo ">> writing assets"
 	cd $(PREFIX)/pkg/template && go generate
+	cd $(PREFIX)/pkg/buildpack && go generate
+
+$(VFSGENDEV):
+	cd $(PREFIX)/vendor/github.com/shurcooL/vfsgen/ && go install ./cmd/vfsgendev/...
 
 version:
 	@echo $(VERSION)

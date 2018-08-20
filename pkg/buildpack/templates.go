@@ -1,3 +1,5 @@
+// +build dev
+
 package buildpack
 
 import (
@@ -12,6 +14,7 @@ import (
 )
 
 var (
+    Assets http.FileSystem    = http.Dir("tmpl")
 	assetsBuildPackTemplates  = Assets
 	templateBuildPackFiles    []string
 	templates                 = make(map[string]template.Template)
