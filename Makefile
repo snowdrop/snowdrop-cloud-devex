@@ -26,12 +26,9 @@ prepare-release: cross
 upload: prepare-release
 	./scripts/upload_assets.sh
 
-assets: $(VFSGENDEV)
+assets:
 	@echo ">> writing assets"
 	cd $(PREFIX)/pkg/template && go generate
-
-$(VFSGENDEV):
-	cd $(PREFIX)/vendor/github.com/shurcooL/vfsgen/ && go install ./cmd/vfsgendev/...
 
 version:
 	@echo $(VERSION)
