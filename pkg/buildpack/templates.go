@@ -6,6 +6,7 @@ import (
 	"text/template"
 	"bytes"
 	"fmt"
+    "net/http"
 	"os"
 	log "github.com/sirupsen/logrus"
 	"github.com/shurcooL/httpfs/vfsutil"
