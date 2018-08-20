@@ -31,7 +31,7 @@ assets: $(VFSGENDEV)
 	cd $(PREFIX)/pkg/template && go generate
 
 $(VFSGENDEV):
-    cd $(PREFIX)/vendor/github.com/shurcooL/vfsgen/ && go install ./cmd/vfsgendev/...
+	cd $(PREFIX)/vendor/github.com/shurcooL/vfsgen/ && go install ./cmd/vfsgendev/...
 
 version:
 	@echo $(VERSION)
