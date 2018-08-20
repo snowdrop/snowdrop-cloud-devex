@@ -19,7 +19,7 @@ items:
       spec:
         containers:
         - name: sb-generator
-          image: quay.io/snowdrop/spring-boot-generator
+          image: quay.io/snowdrop/spring-boot-generator:latest
           ports:
           - containerPort: 8080
           env:
