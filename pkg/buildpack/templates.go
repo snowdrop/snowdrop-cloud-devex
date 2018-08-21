@@ -1,12 +1,9 @@
-// +build dev
-
 package buildpack
 
 import (
 	"text/template"
 	"bytes"
 	"fmt"
-    "net/http"
 	"os"
 	log "github.com/sirupsen/logrus"
 	"github.com/shurcooL/httpfs/vfsutil"
@@ -15,7 +12,6 @@ import (
 )
 
 var (
-    Assets http.FileSystem    = http.Dir("tmpl")
 	assetsBuildPackTemplates  = Assets
 	templateBuildPackFiles    []string
 	templates                 = make(map[string]template.Template)
