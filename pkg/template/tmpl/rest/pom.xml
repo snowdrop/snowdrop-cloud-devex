@@ -3,8 +3,8 @@
   <groupId>{{.GroupId}}</groupId>
   <artifactId>{{.ArtifactId}}</artifactId>
   <version>{{.Version}}</version>
-  <name>Spring Boot - HTTP Booster</name>
-  <description>Spring Boot - HTTP Booster</description>
+  <name>Spring Boot - JAX-RS REST Demo</name>
+  <description>Spring Boot - JAX-RS REST Demo</description>
 
   <properties>
     <spring-boot-bom.version>{{.SnowdropBomVersion}}</spring-boot-bom.version>
