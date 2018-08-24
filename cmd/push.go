@@ -70,7 +70,7 @@ var pushCmd = &cobra.Command{
 				}
 
 				if uberJarFile != "" {
-					args := []string{"cp", uberJarFile, podName + ":/deployments", "-c", containerName}
+					args := []string{"cp", uberJarFile, podName + ":/deployments/app.jar", "-c", containerName}
 					log.Infof("Copy cmd : %s", args)
 					oc.ExecCommand(oc.Command{Args: args})
 				} else {

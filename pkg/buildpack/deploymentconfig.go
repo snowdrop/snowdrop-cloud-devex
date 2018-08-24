@@ -140,7 +140,7 @@ func javaDeploymentConfig(application types.Application) *appsv1.DeploymentConfi
 								},
 								{
 									Name:  "JAVA_APP_JAR",
-									Value: application.Name + "-" + application.Version + ".jar",
+									Value: "app.jar",
 								},
 								{
 									Name:  "JAVA_DEBUG",
