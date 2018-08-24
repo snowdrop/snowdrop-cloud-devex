@@ -288,13 +288,12 @@ And next execute the compilation using this command
 The following chapter describes how we have technically implemented such user stories:
 
 - pod of the application/component (created by odo) defined with a :
-  - initContainer : supervisord [2] where different commands are registered from ENV vars. E.g. start/stop the java runtime, debug or compile (= maven), ... 
+  - initContainer : supervisord [1] where different commands are registered from ENV vars. E.g. start/stop the java runtime, debug or compile (= maven), ... 
   - container : created using Java S2I image
   - shared volume 
 - commands can be executed remotely to trigger and action within the developer's pod -> supervisord ctl start|stop program1,....,programN
 - OpenShift Template -> converted into individual yaml files (= builder concept) and containing "{{.key}} to be processed by the go template engine
 - Developer's user preferences are stored into a MANIFEST yaml (as Cloudfoundry proposes too) which is parsed at bootstrap to create an "Application" struct object used next to process the template and replace the keys with their values
 
-- [1] https://github.com/cmoulliard/k8s-supervisor#create-the-deploymentconfig-for-the-local-spring-boot-project
-- [2] https://github.com/redhat-developer/odo/issues/556  
+- [1] https://github.com/redhat-developer/odo/issues/556  
 

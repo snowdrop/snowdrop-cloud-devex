@@ -32,7 +32,7 @@ Download and install the `k8s-supervisor's github project` within your `$GOPATH`
 
 ```bash
 cd $GOPATH/src
-go get github.com/cmoulliard/k8s-supervisor
+go get github.com/snowdrop/k8s-supervisor
 cd k8s-supervisor
 ```   
   
