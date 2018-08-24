@@ -16,9 +16,9 @@
 
 package {{.PackageName}}.service;
 
-import io.openshift.booster.exception.NotFoundException;
-import io.openshift.booster.exception.UnprocessableEntityException;
-import io.openshift.booster.exception.UnsupportedMediaTypeException;
+import {{.PackageName}}.exception.NotFoundException;
+import {{.PackageName}}.exception.UnprocessableEntityException;
+import {{.PackageName}}.exception.UnsupportedMediaTypeException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
