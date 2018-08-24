@@ -1,32 +1,18 @@
-# Cloud Native Developer's experience - Prototype
+# Cloud Native Developer's experience for Spring Boot
 
-The prototype developed within this projects aims to resolve the following user's stories.
+The prototype developed within this project aims to resolve the following user's stories for a Spring Boot developer
 
-"As a user, I want to install a pod running my runtime Java Application (Spring Boot, Vert.x, Swarm) where my endpoint is exposed as a Service accessible via a route, where I can instruct the pod to start or stop a command such as "compile", "run java", ..." within the pod"
+"As a developer, I want to install a pod running my runtime Java - Spring Boot application where my endpoint is exposed as a Service accessible via a route, where I can instruct the pod to start or stop a command such as "compile", "run java", ..." within the pod"
 
-"As a user, I want to customize the application deployed using a MANIFEST yaml file where I can specify, the name of the application, s2i image to be used, maven tool, port of the service, cpu, memory, ...."
+"As a developer, I would like to generate/scaffold a Spring Boot application supporting different technologies such as JAX-RS - REST, JPA, ...."
 
-"As a user, I would like to know according to the OpenShift platform, which version of the template/builder and which resources are processed when it will be installed/deployed"
+"As a developer, I want to customize the application deployed using a MANIFEST yaml file where I can specify, the name of the application, s2i image to be used, maven tool, port of the service, cpu, memory, ...."
 
-# Technical ideas
-
-The following chapter describes how we have technically implemented such user stories:
-
-- pod of the application/component (created by odo) defined with a :
-  - initContainer : supervisord [2] where different commands are registered from ENV vars. E.g. start/stop the java runtime, debug or compile (= maven), ... 
-  - container : created using Java S2I image
-  - shared volume 
-- commands can be executed remotely to trigger and action within the developer's pod -> supervisord ctl start|stop program1,....,programN
-- OpenShift Template -> converted into individual yaml files (= builder concept) and containing "{{.key}} to be processed by the go template engine
-- Developer's user preferences are stored into a MANIFEST yaml (as Cloudfoundry proposes too) which is parsed at bootstrap to create an "Application" struct object used next to process the template and replace the keys with their values
-
-- [1] https://github.com/cmoulliard/k8s-supervisor#create-the-deploymentconfig-for-the-local-spring-boot-project
-- [2] https://github.com/redhat-developer/odo/issues/556
+"As a developer, I would like to know according to the OpenShift platform, which version of the template/builder and which resources are processed when it will be installed/deployed"
 
 # Table of Contents
 
    * [Cloud Native Developer's experience - Prototype](#cloud-native-developers-experience---prototype)
-   * [Technical ideas](#technical-ideas)
    * [Table of Contents](#table-of-contents)
    * [Instructions](#instructions)
       * [Prerequisites](#prerequisites)
@@ -38,79 +24,135 @@ The following chapter describes how we have technically implemented such user st
       * [Remote debug the Java Application](#remote-debug-the-java-application)
       * [Clean up](#clean-up)
       * [Developer section to build the images](#developer-section-to-build-the-images)
+   * [Technical ideas](#technical-ideas)   
 
- 
 # Instructions
 
 ## Prerequisites
 
-- Go Lang : [>=1.9](https://golang.org/doc/install)
-- [GOWORKSPACE](https://golang.org/doc/code.html#Workspaces) variable defined
+- [minishift](https://docs.okd.io/latest/minishift/)
 - [oc Client Tools](https://www.openshift.org/download.html)
 
-## Download the project and install it
+## Download and validate the Spring boot's go client
 
-- Install the project within your `$GOPATH`'s workspace
+- Execute within a terminal this curl command in order to download our Spring Boot go client 
+
   ```bash
-  cd $GOPATH/src
-  go get github.com/cmoulliard/k8s-supervisor
-  cd k8s-supervisor
+  sudo curl -L https://github.com/snowdrop/k8s-supervisor/releases/download/v0.4.0/sb-darwin-amd64 -o /usr/local/bin/sb
+  or 
+  sudo curl -L https://github.com/snowdrop/k8s-supervisor/releases/download/v0.4.0/sb-linux-amd64 -o /usr/local/bin/sb
+  sudo chmod +x /usr/local/bin/sb
+  ```
+
+- Test it to check that you can access the commands proposed within your terminal 
+
+  ```bash
+  $sb -h
+  
+  sb (ODO's Spring Boot prototype) is a prototype project experimenting supervisord and MANIFEST concepts
+  
+  Usage:
+    sb [command]
+  
+  Examples:
+      # Creating and deploying a spring Boot application
+      git clone github.com/snowdrop/k8s-supervisor && cd k8s-supervisor/spring-boot
+      sb init -n namespace
+      sb push
+      sb compile
+      sb run
+  
+  Available Commands:
+    build       Build an image of the application
+    clean       Remove development pod for the component
+    compile     Compile local project within the development pod
+    create      Create a Spring Boot maven project
+    debug       Debug your SpringBoot application
+    exec        Stop, start or restart your SpringBoot application.
+    help        Help about any command
+    init        Create a development's pod for the component
+    push        Push local code to the development pod
+    version     Show sb  client version
+  
+  Flags:
+    -a, --application string   Application name (defaults to current directory name)
+    -h, --help                 help for sb
+    -k, --kubeconfig string    Path to a kubeconfig ($HOME/.kube/config). Only required if out-of-cluster.
+    -m, --masterurl string     The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.
+    -n, --namespace string     Namespace/project (defaults to current project)
+  
+  Use "sb [command] --help" for more information about a command.
+  ```
+
+## Create a project
+
+Create top of your OpenShift's cluster (minishift, ocp, ...) a project where you will deploy and run your spring boot application
+
+  ```bash
+  oc new-project <your-namespace>
+  ```  
+  
+  **WARNING**: Check/verify that you have access to an OpenShift cluster before to create your project. 
+  
+## Scaffold a Spring Boot's project
+
+Within your terminal, move to the folder where you would like to create a Spring REST application
+
+  ```bash
+  $ cd ~/my-spring-boot
   ```   
 
-- Build the project locally
+Execute the following command to create a Maven project containing the Spring code exposing a REST Endpoint `/api/greeting`
+
   ```bash
-  go build -o sb *.go
-  export PATH=$(pwd):$PATH
+  sb create -t rest -i my-spring-boot
+  ```
+
+  **REMARK** : The parameter `-i` will configure the `artifactId` to use the same name as the folder of your project. The command will populate a project using default values for the GAV, package name, Spring Boot version. That could be of course tailored using
+  the different parameters proposed by thecommand `sb create -h`  
+
+## Create the development's pod
+
+In order to run the Spring Boot application on OpenShift, we will install a Development's pod that our tool will use to interact in order to 
+install the application, compile it (optional), debug or start/stop it. Execute then this `init` command.
+
+  ```bash
+  sb init
   ```
   
-- Create the `k8s-supervisord` namespace on OpenShift
-  ```bash
-  oc new-project k8s-supervisord
-  ```  
-
-## Create the development's pod running the supervisord
-
-- Move to the `spring-boot` folder
-  ```bash
-  cd spring-boot
-  ```
-- Initialize your application, optionally passing the following parameters:
-  - `-k | --kubeconfig` : /PATH/TO/KUBE/CONFIG
-  - `-n | --namespace` : OpenShift project
-  - `-a | --application` : application name
+- After a few moment, verify that development's pod is up and running and logs the following messages
 
   ```bash
-  sb init -a spring-boot-http
-  ```
-  Here, we initialized a `spring-boot-http` application. This name will be used to create OpenShift resources and set up the environment.
+  $oc logs $(oc get pod -l app=my-spring-boot -o name)
+  time="2018-08-24T09:45:02Z" level=info msg="create process:run-java"
+  time="2018-08-24T09:45:02Z" level=info msg="create process:compile-java"
+  time="2018-08-24T09:45:02Z" level=info msg="create process:build"
+  ``` 
 
-- Verify if the `initContainer` has been injected within the `spring-boot-http` (the name you chose for your application) `DeploymentConfig`
-
-  ```bash
-  oc get dc/spring-boot-http -o jsonpath='{.spec.template.spec.initContainers[0].name}{"\n"}'
-  ```
-  This should yield `copy-supervisord` if everything is properly set up.
+## Push the code
   
-## Push the code  
-  
-- As the development pod has been created and is running the `supervisord` server, we will now push the code.
- 
-- if we want to compile the project using maven within the pod, then we will copy the following resources within the pod : `pom.xml, src/ folder`
-  In this case, use the following command 
+As the development's pod has been created and is running the `supervisord` server, we will now compile the maven project and push the binary code.
 
   ```bash
-  sb push --mode source
+  mvn clean package
   ```
   
-- To use your generated `uberjar` file located under `/target/application-name-version.jar`, then run this command :
+To use the created `uberjar` file located under `/target/<application-name-version>.jar`, then run this command :
   
   ```bash
   sb push --mode binary
   ```
-  
-## Compile the Spring Boot Java App
-  
-- Compile the code source pushed within the pod using this command 
+
+## Compile the maven project within the pod (optional)
+
+if you want or prefer to compile the project using the development's pod which contains the maven tool, then execute this command 
+responsible to copy the following resources within the pod : `pom.xml, src/ folder`
+             
+  ```bash
+  sb push --mode source
+  ```
+    
+And next execute the compilation using this command
     
   ```bash
   sb compile
@@ -164,12 +206,11 @@ The following chapter describes how we have technically implemented such user st
   
   **Remark** Before to launch the compilation's command using supervisord, the program will wait till the development's pod is alive !
   
-When the command finishes, you can verify the existence of the uberjar by executing:
+  **Trick**: When the command finishes, you can verify the existence of the uberjar by executing:
 
   ```bash
-  oc rsh $(oc get pod -o jsonpath='{.items[0].metadata.name}') ls -l /deployments
+  oc rsh $(oc get pod -l app=my-spring-boot -o name) ls -l /deployments
   ```
- 
   
 ## Start the java application
 
@@ -201,7 +242,7 @@ When the command finishes, you can verify the existence of the uberjar by execut
   
 - Access the endpoint of the Spring Boot application using curl
   ```bash
-  URL="http://$(oc get routes/spring-boot-http -o jsonpath='{.spec.host}')"
+  URL="http://$(oc get routes/my-spring-boot -o jsonpath='{.spec.host}')"
   curl $URL/api/greeting
   {"content":"Hello, World!"}% 
   ``` 
@@ -237,7 +278,21 @@ When the command finishes, you can verify the existence of the uberjar by execut
 ## Clean up
   
   ```bash
-  oc delete --force --grace-period=0 all --all
-  oc delete pvc/m2-data
+  sb clean
   ``` 
+  
+# Technical ideas
+
+The following chapter describes how we have technically implemented such user stories:
+
+- pod of the application/component (created by odo) defined with a :
+  - initContainer : supervisord [2] where different commands are registered from ENV vars. E.g. start/stop the java runtime, debug or compile (= maven), ... 
+  - container : created using Java S2I image
+  - shared volume 
+- commands can be executed remotely to trigger and action within the developer's pod -> supervisord ctl start|stop program1,....,programN
+- OpenShift Template -> converted into individual yaml files (= builder concept) and containing "{{.key}} to be processed by the go template engine
+- Developer's user preferences are stored into a MANIFEST yaml (as Cloudfoundry proposes too) which is parsed at bootstrap to create an "Application" struct object used next to process the template and replace the keys with their values
+
+- [1] https://github.com/cmoulliard/k8s-supervisor#create-the-deploymentconfig-for-the-local-spring-boot-project
+- [2] https://github.com/redhat-developer/odo/issues/556  
 
