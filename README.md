@@ -21,10 +21,11 @@ The prototype developed within this project aims to resolve the following user's
       * [Scaffold a Spring Boot's project](#scaffold-a-spring-boots-project)
       * [Create the development's pod](#create-the-developments-pod)
       * [Push the code](#push-the-code)
-      * [Compile the maven project within the pod (optional)](#compile-the-maven-project-within-the-pod-optional)
       * [Start the java application](#start-the-java-application)
+      * [Test the endpoint of the Spring Boot application](#test-the-endpoint-of-the-spring-boot-application)
       * [Remote debug the Java Application](#remote-debug-the-java-application)
       * [Stop/start or restart the spring boot application](#stopstart-or-restart-the-spring-boot-application)
+      * [Compile the maven project within the pod (optional)](#compile-the-maven-project-within-the-pod-optional)
       * [Clean up](#clean-up)
    * [Technical ideas](#technical-ideas) 
 
@@ -144,6 +145,72 @@ To use the created `uberjar` file located under `/target/<application-name-versi
   ```bash
   sb push --mode binary
   ```
+  
+## Start the java application
+
+- Launch the Spring Boot Application
+
+  ```bash
+  sb exec start
+  ime="2018-07-13T11:06:26Z" level=debug msg="succeed to find process:run-java"
+  time="2018-07-13T11:06:26Z" level=info msg="try to start program" program=run-java
+  time="2018-07-13T11:06:26Z" level=info msg="success to start program" program=run-java
+  Starting the Java application using /opt/run-java/run-java.sh ...
+  exec java -javaagent:/opt/jolokia/jolokia.jar=config=/opt/jolokia/etc/jolokia.properties -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:+UseParallelOldGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -XX:MaxMetaspaceSize=100m -XX:+ExitOnOutOfMemoryError -cp . -jar /deployments/spring-boot-http-1.0.jar
+  time="2018-07-13T11:06:27Z" level=debug msg="wait program exit" program=run-java
+  I> No access restrictor found, access to any MBean is allowed
+  Jolokia: Agent started with URL https://172.17.0.7:8778/jolokia/
+    .   ____          _            __ _ _
+   /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+  ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+   \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+    '  |____| .__|_| |_|_| |_\__, | / / / /
+   =========|_|==============|___/=/_/_/_/
+   :: Spring Boot ::       (v1.5.14.RELEASE)
+  ... 
+  2018-07-13 11:06:34.293  INFO 222 --- [           main] o.s.j.e.a.AnnotationMBeanExporter        : Registering beans for JMX exposure on startup
+  2018-07-13 11:06:34.304  INFO 222 --- [           main] o.s.c.support.DefaultLifecycleProcessor  : Starting beans in phase 0
+  2018-07-13 11:06:34.427  INFO 222 --- [           main] s.b.c.e.t.TomcatEmbeddedServletContainer : Tomcat started on port(s): 8080 (http)
+  2018-07-13 11:06:34.436  INFO 222 --- [           main] io.openshift.booster.BoosterApplication  : Started BoosterApplication in 6.412 seconds (JVM running for 7.32) 
+  ```
+  
+## Test the endpoint of the Spring Boot application
+
+Access the endpoint of the Spring Boot application using curl and the route exposed on the cloud platform
+
+  ```bash
+  URL="http://$(oc get routes/my-spring-boot -o jsonpath='{.spec.host}')"
+  curl $URL/api/greeting
+  {"content":"Hello, World!"}% 
+  ``` 
+  
+## Remote debug the Java Application
+  
+- You can also debug your application by forwarding the traffic between the pod and your machine using the following command : 
+  ```bash
+  sb debug
+  INFO[0000] sb exec start command called                        
+  INFO[0000] [Step 1] - Parse MANIFEST of the project if it exists 
+  INFO[0000] [Step 2] - Get K8s config file               
+  INFO[0000] [Step 3] - Create kube Rest config client using config's file of the developer's machine 
+  INFO[0000] [Step 4] - Wait till the dev's pod is available 
+  INFO[0000] [Step 5] - Restart Java Application          
+  run-java: stopped
+  run-java: started
+  INFO[0003] [Step 6] - Remote Debug the spring Boot Application ... 
+  Forwarding from 127.0.0.1:5005 -> 5005
+  ```
+  
+  **Remark** : You can change the local/remote ports to be used by passing the parameter `-p`. E.g `sb debug -p 9009:9009`
+  
+## Stop/start or restart the spring boot application
+
+- The Spring Boot Application can be stopped, started or restarted using respectively these commands:
+  ```bash
+  sb exec stop
+  sb exec start
+  sb exec restart
+  ```  
 
 ## Compile the maven project within the pod (optional)
 
@@ -214,68 +281,6 @@ And next execute the compilation using this command
   oc rsh $(oc get pod -l app=my-spring-boot -o name) ls -l /deployments
   ```
   
-## Start the java application
-
-- Launch the Spring Boot Application
-
-  ```bash
-  sb exec start
-  ime="2018-07-13T11:06:26Z" level=debug msg="succeed to find process:run-java"
-  time="2018-07-13T11:06:26Z" level=info msg="try to start program" program=run-java
-  time="2018-07-13T11:06:26Z" level=info msg="success to start program" program=run-java
-  Starting the Java application using /opt/run-java/run-java.sh ...
-  exec java -javaagent:/opt/jolokia/jolokia.jar=config=/opt/jolokia/etc/jolokia.properties -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:+UseParallelOldGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -XX:MaxMetaspaceSize=100m -XX:+ExitOnOutOfMemoryError -cp . -jar /deployments/spring-boot-http-1.0.jar
-  time="2018-07-13T11:06:27Z" level=debug msg="wait program exit" program=run-java
-  I> No access restrictor found, access to any MBean is allowed
-  Jolokia: Agent started with URL https://172.17.0.7:8778/jolokia/
-    .   ____          _            __ _ _
-   /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
-  ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
-   \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
-    '  |____| .__|_| |_|_| |_\__, | / / / /
-   =========|_|==============|___/=/_/_/_/
-   :: Spring Boot ::       (v1.5.14.RELEASE)
-  ... 
-  2018-07-13 11:06:34.293  INFO 222 --- [           main] o.s.j.e.a.AnnotationMBeanExporter        : Registering beans for JMX exposure on startup
-  2018-07-13 11:06:34.304  INFO 222 --- [           main] o.s.c.support.DefaultLifecycleProcessor  : Starting beans in phase 0
-  2018-07-13 11:06:34.427  INFO 222 --- [           main] s.b.c.e.t.TomcatEmbeddedServletContainer : Tomcat started on port(s): 8080 (http)
-  2018-07-13 11:06:34.436  INFO 222 --- [           main] io.openshift.booster.BoosterApplication  : Started BoosterApplication in 6.412 seconds (JVM running for 7.32) 
-  ```
-  
-- Access the endpoint of the Spring Boot application using curl
-  ```bash
-  URL="http://$(oc get routes/my-spring-boot -o jsonpath='{.spec.host}')"
-  curl $URL/api/greeting
-  {"content":"Hello, World!"}% 
-  ``` 
-  
-## Remote debug the Java Application
-  
-- You can also debug your application by forwarding the traffic between the pod and your machine using the following command : 
-  ```bash
-  sb debug
-  INFO[0000] sb exec start command called                        
-  INFO[0000] [Step 1] - Parse MANIFEST of the project if it exists 
-  INFO[0000] [Step 2] - Get K8s config file               
-  INFO[0000] [Step 3] - Create kube Rest config client using config's file of the developer's machine 
-  INFO[0000] [Step 4] - Wait till the dev's pod is available 
-  INFO[0000] [Step 5] - Restart Java Application          
-  run-java: stopped
-  run-java: started
-  INFO[0003] [Step 6] - Remote Debug the spring Boot Application ... 
-  Forwarding from 127.0.0.1:5005 -> 5005
-  ```
-  
-  **Remark** : You can change the local/remote ports to be used by passing the parameter `-p`. E.g `sb debug -p 9009:9009`
-  
-## Stop/start or restart the spring boot application
-
-- The Spring Boot Application can be stopped, started or restarted using respectively these commands:
-  ```bash
-  sb exec stop
-  sb exec start
-  sb exec restart
-  ```  
   
 ## Clean up
   
