@@ -48,10 +48,10 @@ var Assets = func() http.FileSystem {
 		},
 		"/crud/src/main/java/dummy": &vfsgen۰DirInfo{
 			name:    "dummy",
-			modTime: time.Date(2018, 8, 24, 12, 16, 59, 137323145, time.UTC),
+			modTime: time.Date(2018, 8, 24, 12, 48, 1, 866594828, time.UTC),
 		},
-		"/crud/src/main/java/dummy/BoosterApplication.java": &vfsgen۰CompressedFileInfo{
-			name:             "BoosterApplication.java",
+		"/crud/src/main/java/dummy/CrudApplication.java": &vfsgen۰CompressedFileInfo{
+			name:             "CrudApplication.java",
 			modTime:          time.Date(2018, 8, 24, 12, 16, 59, 136708302, time.UTC),
 			uncompressedSize: 945,
 
@@ -341,7 +341,7 @@ var Assets = func() http.FileSystem {
 		fs["/crud/src/main/java/dummy"].(os.FileInfo),
 	}
 	fs["/crud/src/main/java/dummy"].(*vfsgen۰DirInfo).entries = []os.FileInfo{
-		fs["/crud/src/main/java/dummy/BoosterApplication.java"].(os.FileInfo),
+		fs["/crud/src/main/java/dummy/CrudApplication.java"].(os.FileInfo),
 		fs["/crud/src/main/java/dummy/exception"].(os.FileInfo),
 		fs["/crud/src/main/java/dummy/service"].(os.FileInfo),
 	}
