@@ -13,6 +13,8 @@
         <rest-assured.version>3.1.0</rest-assured.version>
         <spring-boot-bom.version>{{.SnowdropBomVersion}}</spring-boot-bom.version>
         <spring-boot.version>{{.SpringVersion}}</spring-boot.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
     <dependencyManagement>
