@@ -110,10 +110,10 @@ func init() {
 		fmt.Sprintf("Template name used to select the project to be created. Supported templates are '%s'", strings.Join(templates, ",")))
 	createCmd.Flags().StringVarP(&p.UrlService,"urlService","u","http://spring-boot-generator.195.201.87.126.nip.io","URL of the HTTP Server exposing the spring boot service")
 	createCmd.Flags().StringArrayVarP(&p.Dependencies, "dependencies", "d", []string{}, "Spring Boot starters/dependencies")
-	createCmd.Flags().StringVarP(&p.GroupId, "groupId", "g", "org.acme", "Group ID")
-	createCmd.Flags().StringVarP(&p.ArtifactId, "artifactId", "i", "cool", "Artifact ID")
+	createCmd.Flags().StringVarP(&p.GroupId, "groupId", "g", "com.example", "Group ID")
+	createCmd.Flags().StringVarP(&p.ArtifactId, "artifactId", "i", "demo", "Artifact ID")
 	createCmd.Flags().StringVarP(&p.Version, "version", "v", "1.0", "Version")
-	createCmd.Flags().StringVarP(&p.PackageName, "packageName", "p", "me.snowdrop", "Package Name")
+	createCmd.Flags().StringVarP(&p.PackageName, "packageName", "p", "com.example.demo", "Package Name")
 	createCmd.Flags().StringVarP(&p.SpringVersion, "springbootVersion", "s", "1.5.15.RELEASE", "Spring Boot Version")
 	createCmd.Flags().StringVarP(&p.SnowdropBomVersion, "bomVersion", "b", "1.5.15.Final", "Snowdrop Bom Version")
 
