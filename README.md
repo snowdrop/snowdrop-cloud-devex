@@ -53,7 +53,7 @@ The following chapter describes how we have technically implemented such user st
 - Install the project within your `$GOPATH`'s workspace
   ```bash
   cd $GOPATH/src
-  go get github.com/cmoulliard/k8s-supervisor
+  go get github.com/snowdrop/k8s-supervisor
   cd k8s-supervisor
   ```   
 
