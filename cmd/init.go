@@ -22,8 +22,10 @@ var initCmd = &cobra.Command{
 
 		cmds := ""
 		if len(args) > 0 && strings.HasPrefix(args[0],"CMDS") {
-			cmds = args[0]
+			cmds = strings.TrimPrefix(args[0],"CMDS=")
 		}
+
+		log.Info("Commands to be passed to the supervisord : ", cmds)
 
 		// Create ImageStreams
 		log.Info("Create ImageStreams for Supervisord and Java S2I Image of SpringBoot")
