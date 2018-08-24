@@ -15,8 +15,23 @@
     * [Java S2I image](#java-s2i-image)
  * [Release the project and generate go release](#release-the-project-and-generate-go-release)
 
+# Prerequisites
 
-# Scenario to be validated
+ - Go Lang : [>=1.9](https://golang.org/doc/install)
+ - [GOWORKSPACE](https://golang.org/doc/code.html#Workspaces) variable defined
+ - [minishift](https://docs.okd.io/latest/minishift/)
+
+# Install the go project
+
+Download and install the `k8s-supervisor's github project` within your `$GOPATH`'s directory
+
+```bash
+cd $GOPATH/src
+go get github.com/cmoulliard/k8s-supervisor
+cd k8s-supervisor
+```   
+  
+# Scenario to be executed to validate changes before to commit
 
 ## Test 0 : Build executable and test it
 
