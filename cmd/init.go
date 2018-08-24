@@ -6,6 +6,7 @@ import (
 
 	"github.com/openshift/api/apps/v1"
 	"github.com/snowdrop/k8s-supervisor/pkg/buildpack"
+	"strings"
 )
 
 var initCmd = &cobra.Command{
@@ -19,6 +20,11 @@ var initCmd = &cobra.Command{
 		log.Info("Init command called")
 		setup := Setup()
 
+		cmds := ""
+		if len(args) > 0 && strings.HasPrefix(args[0],"CMDS") {
+			cmds = args[0]
+		}
+
 		// Create ImageStreams
 		log.Info("Create ImageStreams for Supervisord and Java S2I Image of SpringBoot")
 		buildpack.CreateDefaultImageStreams(setup.RestConfig, setup.Application)
@@ -29,7 +35,7 @@ var initCmd = &cobra.Command{
 
 		var dc *v1.DeploymentConfig
 		log.Info("Create or retrieve DeploymentConfig using Supervisord and Java S2I Image of SpringBoot")
-		dc = buildpack.CreateOrRetrieveDeploymentConfig(setup.RestConfig, setup.Application)
+		dc = buildpack.CreateOrRetrieveDeploymentConfig(setup.RestConfig, setup.Application, cmds)
 
 		log.Info("Create Service using Template")
 		buildpack.CreateServiceTemplate(setup.Clientset, dc, setup.Application)
