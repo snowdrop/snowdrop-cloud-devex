@@ -7,6 +7,9 @@ import (
 
 	"fmt"
 	"github.com/snowdrop/k8s-supervisor/pkg/common/oc"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 )
 
 var (
@@ -50,10 +53,32 @@ var pushCmd = &cobra.Command{
 				oc.ExecCommand(oc.Command{Args: args})
 			}
 		case "binary":
-			uberjarName := strings.Join([]string{setup.Application.Name, setup.Application.Version}, "-") + ".jar"
-			args := []string{"cp", oc.Client.Pwd + "/target/" + uberjarName, podName + ":/deployments", "-c", containerName}
-			log.Infof("Copy cmd : %s", args)
-			oc.ExecCommand(oc.Command{Args: args})
+			targetDir := oc.Client.Pwd + "/target/"
+			if _, err := os.Stat(targetDir); os.IsNotExist(err) {
+				log.Error("No output found! Please build the application with 'mvn clean package' before pushing")
+			} else {
+				filesInTarget, err := ioutil.ReadDir(oc.Client.Pwd + "/target/")
+				if err != nil {
+					panic(err)
+				}
+
+				uberJarFile := ""
+				for _, f := range filesInTarget {
+					if filepath.Ext(f.Name()) == ".jar" {
+						uberJarFile = targetDir + f.Name()
+					}
+				}
+
+				if uberJarFile != "" {
+					args := []string{"cp", uberJarFile, podName + ":/deployments", "-c", containerName}
+					log.Infof("Copy cmd : %s", args)
+					oc.ExecCommand(oc.Command{Args: args})
+				} else {
+					log.Error("No uber-jar file found! Please build the application with 'mvn clean package' before pushing")
+				}
+
+			}
+
 		}
 	},
 }
