@@ -106,8 +106,11 @@ oc delete pvc/m2-data
 go build -o sb *.go
 export PATH=$PATH:$(pwd)
 export CURRENT=$(pwd)
+
 cd spring-boot
 rm .sb.state
+
+mvn clean package
 sb init -n k8s-supervisord
 sb push --mode binary
 sb exec start
