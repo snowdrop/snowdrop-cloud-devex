@@ -12,19 +12,21 @@ The prototype developed within this project aims to resolve the following user's
 
 # Table of Contents
 
-   * [Cloud Native Developer's experience - Prototype](#cloud-native-developers-experience---prototype)
+   * [Cloud Native Developer's experience for Spring Boot](#cloud-native-developers-experience-for-spring-boot)
    * [Table of Contents](#table-of-contents)
    * [Instructions](#instructions)
       * [Prerequisites](#prerequisites)
-      * [Download the project and install it](#download-the-project-and-install-it)
-      * [Create the development's pod running the supervisord](#create-the-developments-pod-running-the-supervisord)
+      * [Download and validate the Spring boot's go client](#download-and-validate-the-spring-boots-go-client)
+      * [Create a project](#create-a-project)
+      * [Scaffold a Spring Boot's project](#scaffold-a-spring-boots-project)
+      * [Create the development's pod](#create-the-developments-pod)
       * [Push the code](#push-the-code)
-      * [Compile the Spring Boot Java App](#compile-the-spring-boot-java-app)
+      * [Compile the maven project within the pod (optional)](#compile-the-maven-project-within-the-pod-optional)
       * [Start the java application](#start-the-java-application)
       * [Remote debug the Java Application](#remote-debug-the-java-application)
+      * [Stop/start or restart the spring boot application](#stopstart-or-restart-the-spring-boot-application)
       * [Clean up](#clean-up)
-      * [Developer section to build the images](#developer-section-to-build-the-images)
-   * [Technical ideas](#technical-ideas)   
+   * [Technical ideas](#technical-ideas) 
 
 # Instructions
 
