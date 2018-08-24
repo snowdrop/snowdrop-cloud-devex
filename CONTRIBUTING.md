@@ -1,22 +1,42 @@
 # Developer's section
 
- * [Scenario to be validated](#scenario-to-be-validated)
-    * [Test 0 : Build executable and test it](#test-0--build-executable-and-test-it)
-    * [Test 1 : source -&gt; compile -&gt; run](#test-1--source---compile---run)
-    * [Test 2 : binary -&gt; run](#test-2--binary---run)
-    * [Test 3 : debug](#test-3--debug)
-    * [Test 4 : source -&gt; compile -&gt; kill pod -&gt; compile again (m2 repo is back again)](#test-4--source---compile---kill-pod---compile-again-m2-repo-is-back-again)
-    * [Test 5 : build (code not yet finalized as image is build bit no deployment is available)](#test-5--build-code-not-yet-finalized-as-image-is-build-bit-no-deployment-is-available)
-    * [Test 6 : Scaffold a project](#test-6--scaffold-a-project)
- * [Build the supervisor and java s2i images](#build-the-supervisor-and-java-s2i-images)
-    * [Common step](#common-step)
-    * [Supervisord image](#supervisord-image)
-    * [HTTP Server generating Spring Boot Zip file](#http-server-generating-spring-boot-zip-file)
-    * [Java S2I image](#java-s2i-image)
- * [Release the project and generate go release](#release-the-project-and-generate-go-release)
+   * [Developer's section](#developers-section)
+   * [Prerequisites](#prerequisites)
+   * [Install the go project](#install-the-go-project)
+   * [Scenario to be executed to validate changes before to commit](#scenario-to-be-executed-to-validate-changes-before-to-commit)
+      * [Test 0 : Build executable and test it](#test-0--build-executable-and-test-it)
+      * [Test 1 : source -&gt; compile -&gt; run](#test-1--source---compile---run)
+      * [Test 2 : binary -&gt; run](#test-2--binary---run)
+      * [Test 3 : debug](#test-3--debug)
+      * [Test 4 : source -&gt; compile -&gt; kill pod -&gt; compile again (m2 repo is back again)](#test-4--source---compile---kill-pod---compile-again-m2-repo-is-back-again)
+      * [Test 5 : build (code not yet finalized as image is build bit no deployment is available)](#test-5--build-code-not-yet-finalized-as-image-is-build-bit-no-deployment-is-available)
+      * [Test 6 : Scaffold a project](#test-6--scaffold-a-project)
+   * [Build the supervisor and java s2i images](#build-the-supervisor-and-java-s2i-images)
+      * [Common step](#common-step)
+      * [Supervisord image](#supervisord-image)
+      * [HTTP Server generating Spring Boot Zip file](#http-server-generating-spring-boot-zip-file)
+      * [Java S2I image](#java-s2i-image)
+   * [Release the project and generate go release](#release-the-project-and-generate-go-release)
+      * [Make](#make)
+      * [Using goreleaser](#using-goreleaser)
 
+# Prerequisites
 
-# Scenario to be validated
+ - Go Lang : [>=1.9](https://golang.org/doc/install)
+ - [GOWORKSPACE](https://golang.org/doc/code.html#Workspaces) variable defined
+ - [minishift](https://docs.okd.io/latest/minishift/)
+
+# Install the go project
+
+Download and install the `k8s-supervisor's github project` within your `$GOPATH`'s directory
+
+```bash
+cd $GOPATH/src
+go get github.com/cmoulliard/k8s-supervisor
+cd k8s-supervisor
+```   
+  
+# Scenario to be executed to validate changes before to commit
 
 ## Test 0 : Build executable and test it
 
