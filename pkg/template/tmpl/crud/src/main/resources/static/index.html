@@ -22,7 +22,10 @@
     <!-- Load AngularJS -->
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
     <script type="text/javascript">
-      var app = angular.module("FruitManagement", []);
+      var app = angular.module("FruitManagement", [], function($interpolateProvider) {
+          $interpolateProvider.startSymbol('[[');
+          $interpolateProvider.endSymbol(']]');
+      });
 
       //Controller Part
       app.controller("FruitManagementController", function ($scope, $http) {
@@ -131,7 +134,7 @@
         <div class="col-2">Name</div>
     </div>
     <div class="row" ng-repeat="fruit in fruits">
-        <div class="col-2">{{ fruit.name }}</div>
+        <div class="col-2">[[ fruit.name ]]</div>
         <div class="col-8"><a ng-click="edit( fruit )" class="btn">Edit</a> <a ng-click="remove( fruit )" class="btn">Remove</a>
         </div>
     </div>
