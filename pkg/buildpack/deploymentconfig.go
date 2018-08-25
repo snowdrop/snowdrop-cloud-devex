@@ -213,7 +213,7 @@ func javaDeploymentConfig(application types.Application, commands string) *appsv
 }
 
 func populateEnvVar(application types.Application) []corev1.EnvVar {
-	envs := []corev1.EnvVar
+	envs := []corev1.EnvVar{}
 
 	// enrich with User's env var from MANIFEST
 	for _, e := range application.Env {
