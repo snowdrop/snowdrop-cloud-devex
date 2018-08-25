@@ -59,7 +59,7 @@ func DeletePVC(clientset *kubernetes.Clientset, application types.Application) {
 	}
 }
 
-func CreateOrRetrieveDeploymentConfig(config *restclient.Config, application types.Application) *appsv1.DeploymentConfig {
+func CreateOrRetrieveDeploymentConfig(config *restclient.Config, application types.Application, commands string) *appsv1.DeploymentConfig {
 	deploymentConfigV1client := getAppsClient(config)
 
 	deploymentConfigs := deploymentConfigV1client.DeploymentConfigs(application.Namespace)
@@ -70,7 +70,7 @@ func CreateOrRetrieveDeploymentConfig(config *restclient.Config, application typ
 		dc, errCreate = deploymentConfigs.Get(application.Name, metav1.GetOptions{})
 		log.Infof("'%s' DeploymentConfig already exists, skipping", application.Name)
 	} else {
-		dc, errCreate = deploymentConfigs.Create(javaDeploymentConfig(application))
+		dc, errCreate = deploymentConfigs.Create(javaDeploymentConfig(application, commands))
 	}
 	if errCreate != nil {
 		log.Fatalf("DeploymentConfig not created: %s", errCreate.Error())
@@ -95,7 +95,10 @@ func DeleteDeploymentConfig(config *restclient.Config, application types.Applica
 	}
 }
 
-func javaDeploymentConfig(application types.Application) *appsv1.DeploymentConfig {
+func javaDeploymentConfig(application types.Application, commands string) *appsv1.DeploymentConfig {
+	if commands == "" {
+		commands = "run-java:/usr/local/s2i/run;compile-java:/usr/local/s2i/assemble;build:/deployments/buildapp"
+	}
 	return &appsv1.DeploymentConfig{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: application.Name,
@@ -122,7 +125,7 @@ func javaDeploymentConfig(application types.Application) *appsv1.DeploymentConfi
 					},
 				},
 				Spec: corev1.PodSpec{
-					InitContainers: []corev1.Container{*supervisordInitContainer(application.SupervisordName)},
+					InitContainers: []corev1.Container{*supervisordInitContainer(application.SupervisordName, commands)},
 					Containers: []corev1.Container{
 						{
 							Image: "dev-s2i:latest",
@@ -133,24 +136,7 @@ func javaDeploymentConfig(application types.Application) *appsv1.DeploymentConfi
 									Protocol:      corev1.ProtocolTCP,
 								},
 							},
-							Env: []corev1.EnvVar{
-								{
-									Name:  "JAVA_APP_DIR",
-									Value: "/deployments",
-								},
-								{
-									Name:  "JAVA_APP_JAR",
-									Value: "app.jar",
-								},
-								{
-									Name:  "JAVA_DEBUG",
-									Value: "true",
-								},
-								{
-									Name:  "JAVA_DEBUG_PORT",
-									Value: "5005",
-								},
-							},
+							Env: populateEnvVar(application),
 							/*							Resources: corev1.ResourceRequirements{
 														Limits: corev1.ResourceList{
 															corev1.ResourceCPU: resource.MustParse(appConfig.Cpu),
@@ -226,7 +212,25 @@ func javaDeploymentConfig(application types.Application) *appsv1.DeploymentConfi
 	}
 }
 
-func supervisordInitContainer(name string) *corev1.Container {
+func populateEnvVar(application types.Application) []corev1.EnvVar {
+	envs := []corev1.EnvVar
+
+	// enrich with User's env var from MANIFEST
+	for _, e := range application.Env {
+		envs = append(envs, corev1.EnvVar{Name: e.Name, Value: e.Value})
+	}
+
+	// Add default values
+	envs = append(envs,
+		corev1.EnvVar{Name:  "JAVA_APP_DIR", Value: "/deployments",},
+		corev1.EnvVar{Name:  "JAVA_APP_JAR", Value: application.Name + "-" + application.Version + ".jar",},
+		corev1.EnvVar{Name:  "JAVA_DEBUG", Value: "true",},
+		corev1.EnvVar{Name:  "JAVA_DEBUG_PORT", Value: "5005",})
+
+	return envs
+}
+
+func supervisordInitContainer(name string, commands string) *corev1.Container {
 	return &corev1.Container{
 		Name:  name,
 		Image: name + ":latest",
@@ -240,7 +244,7 @@ func supervisordInitContainer(name string) *corev1.Container {
 		Env: []corev1.EnvVar{
 			{
 				Name:  "CMDS",
-				Value: "echo:/var/lib/supervisord/conf/echo.sh;run-java:/usr/local/s2i/run;compile-java:/usr/local/s2i/assemble;build:/deployments/buildapp",
+				Value: commands,
 			},
 		},
 	}
