@@ -136,24 +136,7 @@ func javaDeploymentConfig(application types.Application, commands string) *appsv
 									Protocol:      corev1.ProtocolTCP,
 								},
 							},
-							Env: []corev1.EnvVar{
-								{
-									Name:  "JAVA_APP_DIR",
-									Value: "/deployments",
-								},
-								{
-									Name:  "JAVA_APP_JAR",
-									Value: application.Name + "-" + application.Version + ".jar",
-								},
-								{
-									Name:  "JAVA_DEBUG",
-									Value: "true",
-								},
-								{
-									Name:  "JAVA_DEBUG_PORT",
-									Value: "5005",
-								},
-							},
+							Env: populateEnvVar(application),
 							/*							Resources: corev1.ResourceRequirements{
 														Limits: corev1.ResourceList{
 															corev1.ResourceCPU: resource.MustParse(appConfig.Cpu),
@@ -227,6 +210,24 @@ func javaDeploymentConfig(application types.Application, commands string) *appsv
 			},
 		},
 	}
+}
+
+func populateEnvVar(application types.Application) []corev1.EnvVar {
+	envs := []corev1.EnvVar
+
+	// enrich with User's env var from MANIFEST
+	for _, e := range application.Env {
+		envs = append(envs, corev1.EnvVar{Name: e.Name, Value: e.Value})
+	}
+
+	// Add default values
+	envs = append(envs,
+		corev1.EnvVar{Name:  "JAVA_APP_DIR", Value: "/deployments",},
+		corev1.EnvVar{Name:  "JAVA_APP_JAR", Value: application.Name + "-" + application.Version + ".jar",},
+		corev1.EnvVar{Name:  "JAVA_DEBUG", Value: "true",},
+		corev1.EnvVar{Name:  "JAVA_DEBUG_PORT", Value: "5005",})
+
+	return envs
 }
 
 func supervisordInitContainer(name string, commands string) *corev1.Container {

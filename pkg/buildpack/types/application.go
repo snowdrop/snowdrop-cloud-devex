@@ -10,6 +10,12 @@ type Application struct {
 	Port    int32   `default:"8080"`
 	Image   Image
 	SupervisordName string
+	Env     []Env
+}
+
+type Env struct {
+    Name string
+    Value string
 }
 
 type Image struct {
