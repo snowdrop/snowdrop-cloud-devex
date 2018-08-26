@@ -59,7 +59,7 @@ The prototype developed within this project aims to resolve the following user's
   
   Examples:
       # Creating and deploying a spring Boot application
-      git clone github.com/snowdrop/k8s-supervisor && cd k8s-supervisor/spring-boot
+      git clone https://github.com/snowdrop/k8s-supervisor.git && cd k8s-supervisor/spring-boot
       sb init -n namespace
       sb push
       sb compile
