@@ -75,7 +75,15 @@
 
 [[projects]]
   name = "github.com/kubernetes-incubator/service-catalog"
-  packages = ["pkg/apis/servicecatalog","pkg/apis/servicecatalog/v1beta1","pkg/apis/settings","pkg/apis/settings/v1alpha1","pkg/client/clientset_generated/clientset/scheme","pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1","pkg/filter"]
+  packages = [
+    "pkg/apis/servicecatalog",
+    "pkg/apis/servicecatalog/v1beta1",
+    "pkg/apis/settings",
+    "pkg/apis/settings/v1alpha1",
+    "pkg/client/clientset_generated/clientset/scheme",
+    "pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
+    "pkg/filter"
+  ]
   revision = "44182ac234fdf184a5dcca63d01c9f67a56c4e75"
   version = "v0.1.29"
 

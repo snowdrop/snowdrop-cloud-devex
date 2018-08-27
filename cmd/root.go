@@ -20,7 +20,6 @@ import (
 var (
 	namespace string
 	appName   string
-	tool      *config.Tool
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -70,29 +69,27 @@ func checkError(err error, context string, a ...interface{}) {
 }
 
 func Setup() config.Tool {
-	if tool == nil {
-		tool = &config.Tool{}
+	tool := &config.Tool{}
 
-		// Parse MANIFEST
-		tool.Application = parseManifest()
+	// Parse MANIFEST
+	tool.Application = parseManifest()
 
-		// Get K8s' config file
-		tool.KubeConfig = getK8Config(*rootCmd)
+	// Get K8s' config file
+	tool.KubeConfig = getK8Config(*rootCmd)
 
-		// Switch to namespace if specified or retrieve the current one if not
-		currentNs, err := oc.ExecCommandAndReturn(oc.Command{Args: []string{"project", "-q", namespace}})
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Infof("Using '%s' namespace", currentNs)
-		tool.Application.Namespace = currentNs
-
-		// Create Kube Rest's Config Client
-		tool.RestConfig = createKubeRestconfig(tool.KubeConfig)
-		tool.Clientset = createClientSet(tool.KubeConfig, tool.RestConfig)
-
-		tool.Application.Name = createApplicationName(tool.Application.Name)
+	// Switch to namespace if specified or retrieve the current one if not
+	currentNs, err := oc.ExecCommandAndReturn(oc.Command{Args: []string{"project", "-q", namespace}})
+	if err != nil {
+		log.Fatal(err)
 	}
+	log.Infof("Using '%s' namespace", currentNs)
+	tool.Application.Namespace = currentNs
+
+	// Create Kube Rest's Config Client
+	tool.RestConfig = createKubeRestconfig(tool.KubeConfig)
+	tool.Clientset = createClientSet(tool.KubeConfig, tool.RestConfig)
+
+	tool.Application.Name = createApplicationName(tool.Application.Name)
 
 	return *tool
 }
