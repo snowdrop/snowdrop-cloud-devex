@@ -46,3 +46,6 @@ name = "github.com/shurcooL/httpfs"
 [[constraint]]
 name = "github.com/kubernetes-incubator/service-catalog"
 version = "v0.1.29"
+
+[[constraint]]
+name = "github.com/shurcooL/vfsgen"
