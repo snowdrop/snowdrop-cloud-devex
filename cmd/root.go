@@ -2,8 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/snowdrop/k8s-supervisor/pkg/buildpack"
@@ -15,6 +13,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"os"
+	"path"
 )
 
 var (
@@ -90,6 +90,8 @@ func Setup() config.Tool {
 		// Create Kube Rest's Config Client
 		tool.RestConfig = createKubeRestconfig(tool.KubeConfig)
 		tool.Clientset = createClientSet(tool.KubeConfig, tool.RestConfig)
+
+		tool.Application.Name = createApplicationName(tool.Application.Name)
 	}
 
 	return *tool
@@ -111,7 +113,7 @@ func SetupAndWaitForPod() (config.Tool, *v1.Pod) {
 func parseManifest() types.Application {
 	log.Info("Parse MANIFEST of the project if it exists")
 	current, _ := os.Getwd()
-	return buildpack.ParseManifest(current+"/MANIFEST", appName)
+	return buildpack.ParseManifest(current + "/MANIFEST")
 }
 
 func getK8Config(cmd cobra.Command) config.Kube {
@@ -151,4 +153,28 @@ func createKubeRestconfig(kubeCfg config.Kube) *restclient.Config {
 		log.Fatalf("Error building kubeconfig: %s", err.Error())
 	}
 	return kubeRestClient
+}
+
+func createApplicationName(nameInManifest string) string {
+	// if we specified an application name, use it and override any set value
+	if len(appName) > 0 {
+		log.Infof("Using explicit application name '%s'", appName)
+		return appName
+	} else if len(nameInManifest) > 0 { //the value was already set in the Manifest so use it
+		log.Infof("Using application name '%s' that was set in MANIFEST", appName)
+		return nameInManifest
+	}
+	existingDCs := oc.GetNamesByLabel("dc", buildpack.OdoLabelName, buildpack.OdoLabelValue)
+	if len(existingDCs) != 0 {
+		//use the name of the first matching DeploymentConfig
+		dcName := existingDCs[0]
+		log.Infof("Using application name '%s' from the existing DeploymentConfig labeled with '%s=%s'", dcName, "io.openshift.odo", "inject-supervisord")
+		return dcName
+	}
+
+	// use the name of the current directory
+	current, _ := os.Getwd()
+	directoryName := path.Base(current)
+	log.Infof("Using (default) application name '%s' which is the name the project's directory", directoryName)
+	return directoryName
 }

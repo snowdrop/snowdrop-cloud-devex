@@ -17,6 +17,9 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
+const OdoLabelName = "io.openshift.odo"
+const OdoLabelValue = "inject-supervisord"
+
 func CreatePVC(clientset *kubernetes.Clientset, application types.Application, size string) {
 	if !oc.Exists("pvc", pvcName) {
 		quantity, err := resource.ParseQuantity(size)
@@ -103,8 +106,8 @@ func javaDeploymentConfig(application types.Application, commands string) *appsv
 		ObjectMeta: metav1.ObjectMeta{
 			Name: application.Name,
 			Labels: map[string]string{
-				"app":              application.Name,
-				"io.openshift.odo": "inject-supervisord",
+				"app":        application.Name,
+				OdoLabelName: OdoLabelValue,
 			},
 		},
 		Spec: appsv1.DeploymentConfigSpec{
@@ -222,10 +225,10 @@ func populateEnvVar(application types.Application) []corev1.EnvVar {
 
 	// Add default values
 	envs = append(envs,
-		corev1.EnvVar{Name:  "JAVA_APP_DIR", Value: "/deployments",},
-		corev1.EnvVar{Name:  "JAVA_APP_JAR", Value: "app.jar",},
-		corev1.EnvVar{Name:  "JAVA_DEBUG", Value: "true",},
-		corev1.EnvVar{Name:  "JAVA_DEBUG_PORT", Value: "5005",})
+		corev1.EnvVar{Name: "JAVA_APP_DIR", Value: "/deployments"},
+		corev1.EnvVar{Name: "JAVA_APP_JAR", Value: "app.jar"},
+		corev1.EnvVar{Name: "JAVA_DEBUG", Value: "true"},
+		corev1.EnvVar{Name: "JAVA_DEBUG_PORT", Value: "5005"})
 
 	return envs
 }
