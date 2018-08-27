@@ -182,13 +182,19 @@ Access the endpoint of the Spring Boot application using curl and the route expo
   URL="http://$(oc get routes/my-spring-boot -o jsonpath='{.spec.host}')"
   curl $URL/api/greeting
   {"content":"Hello, World!"}% 
-  ``` 
+  ```   
   
-## Remote debug the Java Application
-  
+## Start, stop, debug or restart the spring boot application
+
+- The Spring Boot Application can be stopped, started or restarted using respectively these commands:
+  ```bash
+  sb exec stop
+  sb exec start
+  sb exec restart
+  ```
 - You can also debug your application by forwarding the traffic between the pod and your machine using the following command : 
   ```bash
-  sb debug
+  sb exec debug
   INFO[0000] sb exec start command called                        
   INFO[0000] [Step 1] - Parse MANIFEST of the project if it exists 
   INFO[0000] [Step 2] - Get K8s config file               
@@ -201,16 +207,8 @@ Access the endpoint of the Spring Boot application using curl and the route expo
   Forwarding from 127.0.0.1:5005 -> 5005
   ```
   
-  **Remark** : You can change the local/remote ports to be used by passing the parameter `-p`. E.g `sb debug -p 9009:9009`
-  
-## Stop/start or restart the spring boot application
+  **Remark** : You can change the local/remote ports to be used by passing the parameter `-p`. E.g `sb exec debug -p 9009:9009`
 
-- The Spring Boot Application can be stopped, started or restarted using respectively these commands:
-  ```bash
-  sb exec stop
-  sb exec start
-  sb exec restart
-  ```  
 
 ## Compile the maven project within the pod (optional)
 
