@@ -36,6 +36,46 @@ func getClusterServiceClasses(scc *servicecatalogclienset.ServicecatalogV1beta1C
 	return classList.Items, nil
 }
 
+// GetServiceInstanceList returns list service instances
+func getServiceInstanceList(scc *servicecatalogclienset.ServicecatalogV1beta1Client, project string, selector string) ([]scv1beta1.ServiceInstance, error) {
+	// List ServiceInstance according to given selectors
+	svcList, err := scc.ServiceInstances(project).List(metav1.ListOptions{LabelSelector: selector})
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to list ServiceInstances")
+	}
+
+	return svcList.Items, nil
+}
+
+// CreateServiceInstance creates service instance from service catalog
+func createServiceInstance(scc *servicecatalogclienset.ServicecatalogV1beta1Client, ns string, componentName string, componentType string, labels map[string]string) error {
+	// Creating Service Instance
+	_, err := scc.ServiceInstances(ns).Create(
+		&scv1beta1.ServiceInstance{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "ServiceInstance",
+				APIVersion: "servicecatalog.k8s.io/v1beta1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Finalizers: []string{"kubernetes-incubator/service-catalog"},
+				Name:       componentName,
+				Namespace:  ns,
+				Labels:     labels,
+			},
+			Spec: scv1beta1.ServiceInstanceSpec{
+				PlanReference: scv1beta1.PlanReference{
+					ClusterServiceClassExternalName: componentType,
+				},
+			},
+			Status: scv1beta1.ServiceInstanceStatus{},
+		})
+
+	if err != nil {
+		return errors.Wrap(err, "unable to create service instance")
+	}
+	return nil
+}
+
 func getClient(config *restclient.Config) *servicecatalogclienset.ServicecatalogV1beta1Client {
 	serviceCatalogV1Client, err := servicecatalogclienset.NewForConfig(config)
 	if err != nil {
