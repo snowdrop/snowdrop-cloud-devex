@@ -23,7 +23,7 @@ var catalogListCmd = &cobra.Command{
 	Long:    "List all available services from the Service Catalog's broker.",
 	Example: ` sb catalog list`,
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Info("Catalog command called")
+		log.Info("Catalog list command called")
 		setup := Setup()
 
 		catalog.List(setup.RestConfig)
@@ -36,7 +36,10 @@ var catalogSelectCmd = &cobra.Command{
 	Long:    "Select a service and install it in a namespace.",
 	Example: ` sb catalog select`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(rootCmd.Use + " v" + VERSION + " (" + GITCOMMIT + ")")
+		log.Info("Catalog select command called")
+		setup := Setup()
+
+		catalog.Select(setup.RestConfig)
 	},
 }
 var catalogBindCmd = &cobra.Command{
@@ -45,7 +48,10 @@ var catalogBindCmd = &cobra.Command{
 	Long:    "Bind a service to a secret's namespace.",
 	Example: ` sb catalog bind`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(rootCmd.Use + " v" + VERSION + " (" + GITCOMMIT + ")")
+		log.Info("Catalog Bind command called")
+		setup := Setup()
+
+		catalog.Bind(setup.RestConfig)
 	},
 }
 
