@@ -13,7 +13,7 @@ var catalogCmd = &cobra.Command{
 	Long:  `List, select or bind a service from a catalog.`,
 	Example: fmt.Sprintf("%s\n%s\n%s",
 		catalogListCmd.Example,
-		catalogSelectCmd.Example,
+		catalogInstanceCmd.Example,
 		catalogBindCmd.Example),
 }
 
@@ -30,16 +30,16 @@ var catalogListCmd = &cobra.Command{
 	},
 }
 
-var catalogSelectCmd = &cobra.Command{
-	Use:     "select",
-	Short:   "Select a service and install it",
-	Long:    "Select a service and install it in a namespace.",
-	Example: ` sb catalog select`,
+var catalogInstanceCmd = &cobra.Command{
+	Use:     "create",
+	Short:   "Create a service instance",
+	Long:    "Create a service instance and install it in a namespace.",
+	Example: ` sb catalog create`,
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Info("Catalog select command called")
 		setup := Setup()
 
-		catalog.Select(setup.RestConfig)
+		catalog.Create(setup.RestConfig)
 	},
 }
 var catalogBindCmd = &cobra.Command{
@@ -57,7 +57,7 @@ var catalogBindCmd = &cobra.Command{
 
 func init() {
 	catalogCmd.AddCommand(catalogListCmd)
-	catalogCmd.AddCommand(catalogSelectCmd)
+	catalogCmd.AddCommand(catalogInstanceCmd)
 	catalogCmd.AddCommand(catalogBindCmd)
 
 	catalogCmd.Annotations = map[string]string{"command": "catalog"}
