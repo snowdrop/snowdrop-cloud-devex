@@ -40,7 +40,7 @@ env:
     value: luke
   - name: DB_PASSWORD
     value: secret
-  - name: spring.profiles.active
+  - name: SPRING_PROFILES_ACTIVE
     value: openshift
 ```
 
