@@ -41,9 +41,9 @@ The prototype developed within this project aims to resolve the following user's
 - Execute within a terminal this curl command in order to download our Spring Boot go client 
 
   ```bash
-  sudo curl -L https://github.com/snowdrop/k8s-supervisor/releases/download/v0.5.0/sb-darwin-amd64 -o /usr/local/bin/sb
+  sudo curl -L https://github.com/snowdrop/k8s-supervisor/releases/download/v0.6.0/sb-darwin-amd64 -o /usr/local/bin/sb
   or 
-  sudo curl -L https://github.com/snowdrop/k8s-supervisor/releases/download/v0.5.0/sb-linux-amd64 -o /usr/local/bin/sb
+  sudo curl -L https://github.com/snowdrop/k8s-supervisor/releases/download/v0.6.0/sb-linux-amd64 -o /usr/local/bin/sb
   sudo chmod +x /usr/local/bin/sb
   ```
 
