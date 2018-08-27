@@ -161,7 +161,7 @@ func createApplicationName(nameInManifest string) string {
 		log.Infof("Using explicit application name '%s'", appName)
 		return appName
 	} else if len(nameInManifest) > 0 { //the value was already set in the Manifest so use it
-		log.Infof("Using application name '%s' that was set in MANIFEST", appName)
+		log.Infof("Using application name '%s' that was set in MANIFEST", nameInManifest)
 		return nameInManifest
 	}
 	existingDCs := oc.GetNamesByLabel("dc", buildpack.OdoLabelName, buildpack.OdoLabelValue)
