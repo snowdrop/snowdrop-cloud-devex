@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- SB tool is installed. See README.md 
+- SB tool is installed (>= 0.6.0). See README.md 
 
 ## Step by step instructions
 
@@ -12,14 +12,14 @@
 cd /path/to/my-spring-boot
 ```
 
-- Log to your OpenShift's cluster and create a demo namespace
+- Log to your OpenShift's cluster and create a crud namespace
 
 ```bash
 oc login -u admin -p admin
 oc new-project crud
 ```
 
-- Install the `Postgresql` database on Openshift
+- Install the `Postgresql` database on OpenShift
 
 ```bash
 oc new-app \
