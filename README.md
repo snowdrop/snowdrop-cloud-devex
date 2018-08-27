@@ -112,7 +112,7 @@ Execute the following command to create a Maven project containing the Spring co
   ```
 
   **REMARK** : The parameter `-i` will configure the `artifactId` to use the same name as the folder of your project. The command will populate a project using default values for the GAV, package name, Spring Boot version. That could be of course tailored using
-  the different parameters proposed by thecommand `sb create -h`  
+  the different parameters proposed by the command `sb create -h`  
 
 ## Create the development's pod
 

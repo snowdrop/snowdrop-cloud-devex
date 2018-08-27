@@ -53,7 +53,6 @@ export PATH=$PATH:$(pwd)
 export CURRENT=$(pwd)
 
 cd spring-boot
-rm .sb.state
 mvn clean package
 
 sb init -n k8s-supervisord
@@ -78,7 +77,6 @@ export PATH=$PATH:$(pwd)
 export CURRENT=$(pwd)
 
 cd spring-boot
-rm .sb.state
 sb init -n k8s-supervisord
 sb push --mode source
 sb compile
@@ -108,7 +106,6 @@ export PATH=$PATH:$(pwd)
 export CURRENT=$(pwd)
 
 cd spring-boot
-rm .sb.state
 
 mvn clean package
 sb init -n k8s-supervisord
@@ -139,7 +136,6 @@ export PATH=$PATH:$(pwd)
 export CURRENT=$(pwd)
  
 cd spring-boot
-rm .sb.state
 sb init -n k8s-supervisord
 sb push --mode binary
 sb exec stop
@@ -162,7 +158,6 @@ export PATH=$PATH:$(pwd)
 export CURRENT=$(pwd)
 
 cd spring-boot
-rm .sb.state
 
 sb init -n k8s-supervisord
 sb push --mode source
@@ -189,7 +184,6 @@ export PATH=$PATH:$(pwd)
 export CURRENT=$(pwd)
 
 cd spring-boot
-rm .sb.state
 
 sb init -n k8s-supervisord
 sb build
