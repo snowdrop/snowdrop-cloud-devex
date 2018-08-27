@@ -25,7 +25,7 @@ var (
 	PARAMS                      = map[string]string{
 		"postgresql_user": "luke",
 		"postgresql_password": "secret",
-		"postgresql_database": "my-database",
+		"postgresql_database": "my_data",
 		"postgresql_version": "9.6",
 	}
 )
