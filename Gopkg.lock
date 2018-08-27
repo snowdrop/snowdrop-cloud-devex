@@ -8,12 +8,6 @@
   version = "v1.0.0"
 
 [[projects]]
-  name = "github.com/gobuffalo/packr"
-  packages = ["."]
-  revision = "4399355520ba52518a972ac16c24f6eb8a1610c1"
-  version = "v1.13.1"
-
-[[projects]]
   name = "github.com/gogo/protobuf"
   packages = ["proto","sortkeys"]
   revision = "1adfc126b41513cc696b209667c8656ea7aac67c"
@@ -80,6 +74,12 @@
   version = "1.1.4"
 
 [[projects]]
+  name = "github.com/kubernetes-incubator/service-catalog"
+  packages = ["pkg/apis/servicecatalog","pkg/apis/servicecatalog/v1beta1","pkg/apis/settings","pkg/apis/settings/v1alpha1","pkg/client/clientset_generated/clientset/scheme","pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1","pkg/filter"]
+  revision = "44182ac234fdf184a5dcca63d01c9f67a56c4e75"
+  version = "v0.1.29"
+
+[[projects]]
   name = "github.com/modern-go/concurrent"
   packages = ["."]
   revision = "bacd9c7ef1dd9b15be4a9909b8ac7a4e313eec94"
@@ -108,6 +108,12 @@
   packages = ["."]
   revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
   version = "v0.8.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/shurcooL/httpfs"
+  packages = ["vfsutil"]
+  revision = "809beceb23714880abc4a382a00c05f89d13b1cc"
 
 [[projects]]
   name = "github.com/sirupsen/logrus"
@@ -190,6 +196,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e78ae1bc6005b9c93b2a5ab01f08140713c1fd8416f931f75adf867c10d35b5f"
+  inputs-digest = "2b43c41d224f541576c93003f94b5812cec891e927c8538a09fba4ce670a537f"
   solver-name = "gps-cdcl"
   solver-version = 1
