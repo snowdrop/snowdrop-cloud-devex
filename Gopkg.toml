@@ -42,3 +42,7 @@ version = "1.6.2"
 
 [[constraint]]
 name = "github.com/shurcooL/httpfs"
+
+[[constraint]]
+name = "github.com/kubernetes-incubator/service-catalog"
+version = "v0.1.29"
