@@ -104,7 +104,7 @@ func SetupAndWaitForPod() (config.Tool, *v1.Pod) {
 	log.Info("Wait till the dev pod is available")
 	pod, err := buildpack.WaitAndGetPod(setup.Clientset, setup.Application)
 	if err != nil {
-		log.Error("Pod watch error", err)
+		log.Fatalf("Pod watch error: %s", err)
 	}
 
 	return setup, pod

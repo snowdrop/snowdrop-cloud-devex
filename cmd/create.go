@@ -4,22 +4,22 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
+	"archive/zip"
+	"fmt"
+	"github.com/snowdrop/k8s-supervisor/pkg/scaffold"
+	"io"
 	"io/ioutil"
 	"net/http"
-	"strings"
+	"net/url"
 	"os"
 	"path/filepath"
-	"archive/zip"
-	"io"
-	"fmt"
-	"net/url"
-	"github.com/snowdrop/k8s-supervisor/pkg/scaffold"
+	"strings"
 )
 
 var (
-	template   string
-	templates  = []string{"simple","rest","crud"}
-	p          = scaffold.Project{}
+	template  string
+	templates = []string{"simple", "rest", "crud"}
+	p         = scaffold.Project{}
 )
 
 type SpringForm struct {
@@ -44,7 +44,7 @@ var createCmd = &cobra.Command{
 			log.WithField("template", mode).Fatal("The provided template is not supported: ")
 		}
 
-		log.Info("Create command called with template '%s'", template)
+		log.Infof("Create command called with template '%s'", template)
 
 		client := http.Client{}
 
@@ -54,8 +54,8 @@ var createCmd = &cobra.Command{
 		form.Add("version", p.Version)
 		form.Add("packageName", p.PackageName)
 		form.Add("bomVersion", p.SnowdropBomVersion)
-		form.Add("springbootVersion",p.SpringVersion)
-		form.Add("outDir",p.OutDir)
+		form.Add("springbootVersion", p.SpringVersion)
+		form.Add("outDir", p.OutDir)
 		for _, v := range p.Dependencies {
 			if v != "" {
 				form.Add("dependencies", v)
@@ -67,8 +67,8 @@ var createCmd = &cobra.Command{
 			parameters = "?" + parameters
 		}
 
-		u := strings.Join([]string{p.UrlService, "template",template},"/") + parameters
-		log.Infof("URL of the request calling the service is %s",u)
+		u := strings.Join([]string{p.UrlService, "template", template}, "/") + parameters
+		log.Infof("URL of the request calling the service is %s", u)
 		req, err := http.NewRequest(http.MethodGet, u, strings.NewReader(""))
 
 		if err != nil {
@@ -108,7 +108,7 @@ var createCmd = &cobra.Command{
 func init() {
 	createCmd.Flags().StringVarP(&template, "template", "t", "simple",
 		fmt.Sprintf("Template name used to select the project to be created. Supported templates are '%s'", strings.Join(templates, ",")))
-	createCmd.Flags().StringVarP(&p.UrlService,"urlService","u","http://spring-boot-generator.195.201.87.126.nip.io","URL of the HTTP Server exposing the spring boot service")
+	createCmd.Flags().StringVarP(&p.UrlService, "urlService", "u", "http://spring-boot-generator.195.201.87.126.nip.io", "URL of the HTTP Server exposing the spring boot service")
 	createCmd.Flags().StringArrayVarP(&p.Dependencies, "dependencies", "d", []string{}, "Spring Boot starters/dependencies")
 	createCmd.Flags().StringVarP(&p.GroupId, "groupId", "g", "com.example", "Group ID")
 	createCmd.Flags().StringVarP(&p.ArtifactId, "artifactId", "i", "demo", "Artifact ID")
