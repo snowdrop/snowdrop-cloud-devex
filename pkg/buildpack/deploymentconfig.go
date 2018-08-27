@@ -223,7 +223,7 @@ func populateEnvVar(application types.Application) []corev1.EnvVar {
 	// Add default values
 	envs = append(envs,
 		corev1.EnvVar{Name:  "JAVA_APP_DIR", Value: "/deployments",},
-		corev1.EnvVar{Name:  "JAVA_APP_JAR", Value: application.Name + "-" + application.Version + ".jar",},
+		corev1.EnvVar{Name:  "JAVA_APP_JAR", Value: "app.jar",},
 		corev1.EnvVar{Name:  "JAVA_DEBUG", Value: "true",},
 		corev1.EnvVar{Name:  "JAVA_DEBUG_PORT", Value: "5005",})
 
