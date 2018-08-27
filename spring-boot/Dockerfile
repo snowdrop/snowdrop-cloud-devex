@@ -10,7 +10,9 @@ RUN mkdir -p /tmp/src/target
 
 RUN chown -R 1001:0 /tmp/src/ && chown -R 1001:0 $HOME && \
     chmod -R ug+rwX /tmp/src/ && \
-    chmod -R g+rw /tmp/src/ && \
+    chmod -R g+rw /tmp/src/
+
+RUN mkdir -p /tmp/artifacts/configuration  && \
     chmod -R a+rw /tmp/artifacts/
 
 USER 1001
