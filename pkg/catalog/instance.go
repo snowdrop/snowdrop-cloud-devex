@@ -7,11 +7,7 @@ import (
 	servicecatalogclienset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 	scv1beta1 "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	log "github.com/sirupsen/logrus"
-	"k8s.io/apimachinery/pkg/runtime"
-
 	"github.com/pkg/errors"
-	"fmt"
-	"encoding/json"
 )
 
 const (
@@ -36,6 +32,10 @@ func Create(config *restclient.Config) {
 	serviceCatalogClient := GetClient(config)
 	log.Infof("Service instance will be created ...")
 	createServiceInstance(serviceCatalogClient, NS, INSTANCE_NAME, CLASS_NAME, PLAN, EXTERNAL_ID, PARAMS)
+	log.Infof("Service instance created")
+
+	log.Infof("Let's generate a secret containing the parameters to be used by the application")
+	bind(serviceCatalogClient,NS,INSTANCE_NAME,EXTERNAL_ID,INSTANCE_NAME,INSTANCE_NAME,nil,nil)
 }
 
 // CreateServiceInstance creates service instance from service catalog
@@ -60,19 +60,5 @@ func createServiceInstance(scc *servicecatalogclienset.ServicecatalogV1beta1Clie
 	if err != nil {
 		return errors.Wrap(err, "unable to create service instance")
 	}
-	log.Infof("Service instance created")
 	return nil
-}
-
-// BuildParameters converts a map of variable assignments to a byte encoded json document,
-// which is what the ServiceCatalog API consumes.
-func BuildParameters(params interface{}) *runtime.RawExtension {
-	paramsJSON, err := json.Marshal(params)
-	if err != nil {
-		// This should never be hit because marshalling a map[string]string is pretty safe
-		// I'd rather throw a panic then force handling of an error that I don't think is possible.
-		panic(fmt.Errorf("unable to marshal the request parameters %v (%s)", params, err))
-	}
-
-	return &runtime.RawExtension{Raw: paramsJSON}
 }
