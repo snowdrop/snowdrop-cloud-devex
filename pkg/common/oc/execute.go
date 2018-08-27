@@ -57,3 +57,14 @@ func Exists(kind string, name string) bool {
 		return name == s
 	}
 }
+
+func GetNamesByLabel(kind string, labelName string, labelValue string) []string {
+	s, err := ExecCommandAndReturn(Command{Args: []string{"get", kind, "-l", labelName + "=" + labelValue, "-o", "jsonpath={.items[*].metadata.name}"}})
+	if err != nil {
+		panic(err)
+	} else if len(s) == 0 {
+		return make([]string, 0)
+	} else {
+		return strings.Fields(s)
+	}
+}
