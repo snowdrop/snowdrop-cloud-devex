@@ -16,7 +16,7 @@ import (
 
 const (
 	CLASS_NAME                  = "dh-postgresql-apb"
-	INSTANCE_NAME				= "my-database"
+	INSTANCE_NAME				= "my-postgresql-db"
 	PLAN                        = "dev"
 	POSTGRESQL_VERSION          = "9.6"
 	NS                          = "crud"
