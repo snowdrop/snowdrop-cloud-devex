@@ -17,6 +17,7 @@ import (
 const (
 	CLASS_NAME                  = "dh-postgresql-apb"
 	INSTANCE_NAME				= "my-database"
+	PLAN                        = "dev"
 	POSTGRESQL_VERSION          = "9.6"
 	NS                          = "crud"
 )
@@ -33,11 +34,11 @@ var (
 func Create(config *restclient.Config) {
 	serviceCatalogClient := GetClient(config)
 	log.Infof("Service instance will be created ...")
-	createServiceInstance(serviceCatalogClient, NS, INSTANCE_NAME, CLASS_NAME, PARAMS)
+	createServiceInstance(serviceCatalogClient, NS, INSTANCE_NAME, CLASS_NAME, PLAN, PARAMS)
 }
 
 // CreateServiceInstance creates service instance from service catalog
-func createServiceInstance(scc *servicecatalogclienset.ServicecatalogV1beta1Client, ns string, instanceName string, className string, params interface{}) error {
+func createServiceInstance(scc *servicecatalogclienset.ServicecatalogV1beta1Client, ns string, instanceName string, className string, plan string, params interface{}) error {
 	// Creating Service Instance
 	_, err := scc.ServiceInstances(ns).Create(
 		&scv1beta1.ServiceInstance{
@@ -48,7 +49,7 @@ func createServiceInstance(scc *servicecatalogclienset.ServicecatalogV1beta1Clie
 			Spec: scv1beta1.ServiceInstanceSpec{
 				PlanReference: scv1beta1.PlanReference{
 					ClusterServiceClassExternalName: className,
-					ClusterServicePlanExternalName:  "dev",
+					ClusterServicePlanExternalName:  plan,
 				},
 				Parameters: BuildParameters(params),
 			},
