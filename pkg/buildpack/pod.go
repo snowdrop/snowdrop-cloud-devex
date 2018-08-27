@@ -1,8 +1,10 @@
 package buildpack
 
 import (
+	"encoding/json"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"time"
 
 	"k8s.io/client-go/kubernetes"
 
@@ -23,11 +25,11 @@ func WaitAndGetPod(c *kubernetes.Clientset, application types.Application) (*cor
 		return nil, errors.Wrapf(err, "unable to watch pod")
 	}
 	defer w.Stop()
-	for {
-		val, ok := <-w.ResultChan()
-		if !ok {
-			break
-		}
+
+	const timeoutInSeconds = 10
+	duration := timeoutInSeconds * time.Second
+	select {
+	case val := <-w.ResultChan():
 		if e, ok := val.Object.(*corev1.Pod); ok {
 			log.Debugf("Status of %s pod is %s", e.Name, e.Status.Phase)
 			switch e.Status.Phase {
@@ -38,8 +40,15 @@ func WaitAndGetPod(c *kubernetes.Clientset, application types.Application) (*cor
 				return nil, errors.Errorf("pod %s status %s", e.Name, e.Status.Phase)
 			}
 		}
+	case <-time.After(duration):
+		bytes, e := json.Marshal(selector)
+		if e != nil {
+			return nil, errors.Errorf("Couldn't marshall pod selector to JSON: %s", e)
+		}
+		return nil, errors.Errorf("Waited %s but couldn't find pod matching '%s' selector", duration, string(bytes))
 	}
-	return nil, errors.Errorf("unknown error while waiting for pod matchin '%s' selector", podSelector)
+
+	return nil, errors.Errorf("unknown error while waiting for pod matching '%s' selector", selector)
 }
 
 func podSelector(application types.Application) metav1.ListOptions {
