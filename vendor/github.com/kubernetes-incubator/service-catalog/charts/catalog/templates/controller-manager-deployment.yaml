@@ -69,8 +69,10 @@ spec:
         - --broker-relist-interval
         - {{ .Values.controllerManager.brokerRelistInterval }}
         {{- end }}
+        {{- if .Values.originatingIdentityEnabled }}
         - --feature-gates
-        - OriginatingIdentity={{.Values.originatingIdentityEnabled}}
+        - OriginatingIdentity=true
+        {{- end }}
         {{- if .Values.asyncBindingOperationsEnabled }}
         - --feature-gates
         - AsyncBindingOperations=true

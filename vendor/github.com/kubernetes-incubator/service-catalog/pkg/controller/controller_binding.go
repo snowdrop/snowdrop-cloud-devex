@@ -1217,14 +1217,6 @@ func (c *controller) prepareBindRequest(
 	}
 
 	appGUID := string(ns.UID)
-	clusterID := c.getClusterID()
-
-	requestContext := map[string]interface{}{
-		"platform":           ContextProfilePlatformKubernetes,
-		"namespace":          instance.Namespace,
-		clusterIdentifierKey: clusterID,
-	}
-
 	request := &osb.BindRequest{
 		BindingID:    binding.Spec.ExternalID,
 		InstanceID:   instance.Spec.ExternalID,
@@ -1233,7 +1225,6 @@ func (c *controller) prepareBindRequest(
 		AppGUID:      &appGUID,
 		Parameters:   parameters,
 		BindResource: &osb.BindResource{AppGUID: &appGUID},
-		Context:      requestContext,
 	}
 
 	// Asynchronous binding operations are currently ALPHA and not

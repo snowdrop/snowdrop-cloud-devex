@@ -29,7 +29,6 @@ import (
 	scmeta "github.com/kubernetes-incubator/service-catalog/pkg/api/meta"
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	v1beta1informers "github.com/kubernetes-incubator/service-catalog/pkg/client/informers_generated/externalversions/servicecatalog/v1beta1"
-	sctestutil "github.com/kubernetes-incubator/service-catalog/test/util"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	fakeosb "github.com/pmorie/go-open-service-broker-client/v2/fake"
 	corev1 "k8s.io/api/core/v1"
@@ -360,7 +359,6 @@ func TestReconcileServiceBindingWithSecretConflict(t *testing.T) {
 		BindResource: &osb.BindResource{
 			AppGUID: strPtr(testNamespaceGUID),
 		},
-		Context: testContext,
 	})
 
 	actions := fakeCatalogClient.Actions()
@@ -484,7 +482,6 @@ func TestReconcileServiceBindingWithParameters(t *testing.T) {
 		BindResource: &osb.BindResource{
 			AppGUID: strPtr(testNamespaceGUID),
 		},
-		Context: testContext,
 	})
 
 	actions := fakeCatalogClient.Actions()
@@ -620,7 +617,6 @@ func TestReconcileServiceBindingWithSecretTransform(t *testing.T) {
 		BindResource: &osb.BindResource{
 			AppGUID: strPtr(testNamespaceGUID),
 		},
-		Context: testContext,
 	})
 
 	actions := fakeCatalogClient.Actions()
@@ -803,7 +799,6 @@ func TestReconcileServiceBindingNonbindableClusterServiceClassBindablePlan(t *te
 		BindResource: &osb.BindResource{
 			AppGUID: strPtr(testNamespaceGUID),
 		},
-		Context: testContext,
 	})
 
 	actions := fakeCatalogClient.Actions()
@@ -1659,7 +1654,6 @@ func TestReconcileServiceBindingWithServiceBindingCallFailure(t *testing.T) {
 		BindResource: &osb.BindResource{
 			AppGUID: strPtr(testNamespaceGUID),
 		},
-		Context: testContext,
 	})
 
 	events := getRecordedEvents(testController)
@@ -1734,7 +1728,6 @@ func TestReconcileServiceBindingWithServiceBindingFailure(t *testing.T) {
 		BindResource: &osb.BindResource{
 			AppGUID: strPtr(testNamespaceGUID),
 		},
-		Context: testContext,
 	})
 
 	events := getRecordedEvents(testController)
@@ -2033,8 +2026,10 @@ func TestReconcileUnbindingWithClusterServiceBrokerHTTPError(t *testing.T) {
 func TestReconcileBindingUsingOriginatingIdentity(t *testing.T) {
 	for _, tc := range originatingIdentityTestCases {
 		func() {
-			prevOrigIDEnablement := sctestutil.EnableOriginatingIdentity(t, tc.enableOriginatingIdentity)
-			defer utilfeature.DefaultFeatureGate.Set(fmt.Sprintf("%v=%v", scfeatures.OriginatingIdentity, prevOrigIDEnablement))
+			if tc.enableOriginatingIdentity {
+				utilfeature.DefaultFeatureGate.Set(fmt.Sprintf("%v=true", scfeatures.OriginatingIdentity))
+				defer utilfeature.DefaultFeatureGate.Set(fmt.Sprintf("%v=false", scfeatures.OriginatingIdentity))
+			}
 
 			fakeKubeClient, fakeCatalogClient, fakeBrokerClient, testController, sharedInformers := newTestController(t, fakeosb.FakeClientConfiguration{
 				BindReaction: &fakeosb.BindReaction{
@@ -2090,8 +2085,13 @@ func TestReconcileBindingUsingOriginatingIdentity(t *testing.T) {
 func TestReconcileBindingDeleteUsingOriginatingIdentity(t *testing.T) {
 	for _, tc := range originatingIdentityTestCases {
 		func() {
-			prevOrigIDEnablement := sctestutil.EnableOriginatingIdentity(t, tc.enableOriginatingIdentity)
-			defer utilfeature.DefaultFeatureGate.Set(fmt.Sprintf("%v=%v", scfeatures.OriginatingIdentity, prevOrigIDEnablement))
+			if tc.enableOriginatingIdentity {
+				err := utilfeature.DefaultFeatureGate.Set(fmt.Sprintf("%v=true", scfeatures.OriginatingIdentity))
+				if err != nil {
+					t.Fatalf("Failed to enable originating identity feature: %v", err)
+				}
+				defer utilfeature.DefaultFeatureGate.Set(fmt.Sprintf("%v=false", scfeatures.OriginatingIdentity))
+			}
 
 			fakeKubeClient, fakeCatalogClient, fakeBrokerClient, testController, sharedInformers := newTestController(t, fakeosb.FakeClientConfiguration{
 				UnbindReaction: &fakeosb.UnbindReaction{
@@ -2189,7 +2189,6 @@ func TestReconcileBindingSuccessOnFinalRetry(t *testing.T) {
 		BindResource: &osb.BindResource{
 			AppGUID: strPtr(testNamespaceGUID),
 		},
-		Context: testContext,
 	})
 
 	actions := fakeCatalogClient.Actions()
@@ -2315,7 +2314,6 @@ func TestReconcileBindingWithSecretConflictFailedAfterFinalRetry(t *testing.T) {
 		BindResource: &osb.BindResource{
 			AppGUID: strPtr(testNamespaceGUID),
 		},
-		Context: testContext,
 	})
 
 	actions := fakeCatalogClient.Actions()
@@ -2502,7 +2500,6 @@ func TestReconcileServiceBindingWithSecretParameters(t *testing.T) {
 		BindResource: &osb.BindResource{
 			AppGUID: strPtr(testNamespaceGUID),
 		},
-		Context: testContext,
 	})
 
 	actions := fakeCatalogClient.Actions()
@@ -2678,7 +2675,6 @@ func TestReconcileBindingWithSetOrphanMitigation(t *testing.T) {
 				BindResource: &osb.BindResource{
 					AppGUID: strPtr(testNamespaceGUID),
 				},
-				Context: testContext,
 			})
 
 			kubeActions := fakeKubeClient.Actions()
@@ -3106,7 +3102,6 @@ func TestReconcileServiceBindingAsynchronousBind(t *testing.T) {
 			AppGUID: strPtr(testNamespaceGUID),
 		},
 		AcceptsIncomplete: true,
-		Context:           testContext,
 	})
 
 	// Kube actions

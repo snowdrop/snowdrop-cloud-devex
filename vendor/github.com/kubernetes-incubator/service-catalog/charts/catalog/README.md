@@ -53,8 +53,6 @@ chart and their default values.
 | `apiserver.storage.type` | The storage backend to use; the only valid value is `etcd`, left for other storages support in future, e.g. `crd` | `etcd` |
 | `apiserver.storage.etcd.useEmbedded` | If storage type is `etcd`: Whether to embed an etcd container in the apiserver pod; THIS IS INADEQUATE FOR PRODUCTION USE! | `true` |
 | `apiserver.storage.etcd.servers` | If storage type is `etcd`: etcd URL(s); override this if NOT using embedded etcd. Only etcd v3 is supported. | `http://localhost:2379` |
-| `apiserver.storage.etcd.image` | etcd image to use | `quay.io/coreos/etcd:latest` |
-| `apiserver.storage.etcd.imagePullPolicy` | `imagePullPolicy` for etcd | `Always` |
 | `apiserver.storage.etcd.persistence.enabled` | Enable persistence using PVC | `false` |
 | `apiserver.storage.etcd.persistence.storageClass` | PVC Storage Class | `nil` (uses alpha storage class annotation) |
 | `apiserver.storage.etcd.persistence.accessMode` | PVC Access Mode | `ReadWriteOnce` |
@@ -84,7 +82,7 @@ chart and their default values.
 | `controllerManager.resources` | Resources allocation (Requests and Limits) | `{requests: {cpu: 100m, memory: 20Mi}, limits: {cpu: 100m, memory: 30Mi}}` |
 | `useAggregator` | whether or not to set up the controller-manager to go through the main Kubernetes API server's API aggregator | `true` |
 | `rbacEnable` | If true, create & use RBAC resources | `true` |
-| `originatingIdentityEnabled` | Whether the OriginatingIdentity feature should be enabled | `true` |
+| `originatingIdentityEnabled` | Whether the OriginatingIdentity alpha feature should be enabled | `false` |
 | `asyncBindingOperationsEnabled` | Whether or not alpha support for async binding operations is enabled | `false` |
 | `namespacedServiceBrokerDisabled` | Whether or not alpha support for namespace scoped brokers is disabled | `false` |
 

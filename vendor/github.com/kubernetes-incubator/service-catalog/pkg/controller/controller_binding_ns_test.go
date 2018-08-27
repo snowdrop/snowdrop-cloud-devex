@@ -134,7 +134,6 @@ func TestReconcileServiceBindingWithParametersNamespacedRefs(t *testing.T) {
 		BindResource: &osb.BindResource{
 			AppGUID: strPtr(testNamespaceGUID),
 		},
-		Context: testContext,
 	})
 
 	actions := fakeCatalogClient.Actions()
