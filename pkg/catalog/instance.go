@@ -8,7 +8,6 @@ import (
 	scv1beta1 "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	log "github.com/sirupsen/logrus"
 
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"github.com/pkg/errors"
 )
 
@@ -37,12 +36,6 @@ func Create(config *restclient.Config) {
 	log.Infof("Service instance will be created ...")
 	createServiceInstance(serviceCatalogClient, NS, INSTANCE_NAME, CLASS_NAME, PLAN, EXTERNAL_ID, PARAMS)
 	log.Infof("Service instance created")
-
-	// Generate UUID otherwise binding will fail if we use same id as the instanceName, bidingName
-	UUID := string(uuid.NewUUID())
-
-	log.Infof("Let's generate a secret containing the parameters to be used by the application")
-	bind(serviceCatalogClient,NS,BINDING_NAME,INSTANCE_NAME,UUID,SECRET_NAME, nil,nil)
 }
 
 // CreateServiceInstance creates service instance from service catalog
