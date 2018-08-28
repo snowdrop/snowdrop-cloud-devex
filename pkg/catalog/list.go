@@ -26,12 +26,16 @@ func List(config *restclient.Config) {
 
 func printResults(classes []scv1beta1.ClusterServiceClass) {
 	table := tablewriter.NewWriter(os.Stdout)
+	table.SetRowLine(true)
 	table.SetHeader([]string{"Name", "Description", "Long Description"})
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table.SetCenterSeparator("*")
+	table.SetColumnSeparator("‡")
+	table.SetRowSeparator("-")
 	for _, class := range classes {
 		var meta map[string]interface{}
 		json.Unmarshal(class.Spec.ExternalMetadata.Raw, &meta)
-		longDescription := "--------"
+		longDescription := ""
 		if val, ok := meta["longDescription"]; ok {
 			longDescription = val.(string)
 		}
