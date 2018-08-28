@@ -16,16 +16,28 @@ import (
 	"sort"
 )
 
-func List(config *restclient.Config) {
+func List(config *restclient.Config, matching string) {
 	serviceCatalogClient := GetClient(config)
 	classes, _ := getClusterServiceClasses(serviceCatalogClient)
 	log.Info("List of services")
 	log.Info("================")
 
-	sort.Slice(classes[:], func(i, j int) bool {
-		return classes[i].Spec.ExternalName < classes[j].Spec.ExternalName
+	var filtered []scv1beta1.ClusterServiceClass
+	if len(matching) > 0 {
+		filtered = make([]scv1beta1.ClusterServiceClass, 0)
+		for _, value := range classes {
+			if strings.Contains(value.Spec.CommonServiceClassSpec.ExternalName, matching) {
+				filtered = append(filtered, value)
+			}
+		}
+	} else {
+		filtered = classes
+	}
+
+	sort.Slice(filtered[:], func(i, j int) bool {
+		return filtered[i].Spec.ExternalName < filtered[j].Spec.ExternalName
 	})
-	printResults(classes)
+	printResults(filtered)
 }
 
 func printResults(classes []scv1beta1.ClusterServiceClass) {

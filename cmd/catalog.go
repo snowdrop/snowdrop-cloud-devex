@@ -8,18 +8,20 @@ import (
 )
 
 func init() {
+	var matching string
 	catalogListCmd := &cobra.Command{
 		Use:     "list",
 		Short:   "List all available services from the catalog",
 		Long:    "List all available services from the Service Catalog's broker.",
-		Example: ` sb catalog list`,
+		Example: ` sb catalog list [-s <part of service name>]`,
 		Run: func(cmd *cobra.Command, args []string) {
 			log.Info("Catalog list command called")
 			setup := Setup()
 
-			catalog.List(setup.RestConfig)
+			catalog.List(setup.RestConfig, matching)
 		},
 	}
+	catalogListCmd.Flags().StringVarP(&matching, "search", "s", "foo", "Only return services whose name matches the specified text")
 
 	catalogInstanceCmd := &cobra.Command{
 		Use:     "create",
