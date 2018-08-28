@@ -7,12 +7,15 @@ import (
 	servicecatalogclienset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 	scv1beta1 "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	log "github.com/sirupsen/logrus"
+
+	"k8s.io/apimachinery/pkg/util/uuid"
 	"github.com/pkg/errors"
 )
 
 const (
 	CLASS_NAME                  = "dh-postgresql-apb"
 	INSTANCE_NAME				= "my-postgresql-db"
+	BINDING_NAME				= "my-postgresql-db-binding"
 	PLAN                        = "dev"
 	EXTERNAL_ID                 = "a7c00676-4398-11e8-842f-0ed5f89f718b"
 	POSTGRESQL_VERSION          = "9.6"
@@ -34,8 +37,11 @@ func Create(config *restclient.Config) {
 	createServiceInstance(serviceCatalogClient, NS, INSTANCE_NAME, CLASS_NAME, PLAN, EXTERNAL_ID, PARAMS)
 	log.Infof("Service instance created")
 
+	// Generate UUID otherwise binding will fail if we use same id as the instanceName, bidingName
+	UUID := string(uuid.NewUUID())
+
 	log.Infof("Let's generate a secret containing the parameters to be used by the application")
-	bind(serviceCatalogClient,NS,INSTANCE_NAME,EXTERNAL_ID,INSTANCE_NAME,INSTANCE_NAME,nil,nil)
+	bind(serviceCatalogClient,NS,BINDING_NAME,INSTANCE_NAME,UUID,INSTANCE_NAME, nil,nil)
 }
 
 // CreateServiceInstance creates service instance from service catalog

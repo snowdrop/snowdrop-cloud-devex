@@ -18,7 +18,7 @@ func Bind(config *restclient.Config) {
 }
 
 // Bind an instance to a secret.
-func bind(scc *servicecatalogclienset.ServicecatalogV1beta1Client, namespace, bindingName, externalID, instanceName, secretName string,
+func bind(scc *servicecatalogclienset.ServicecatalogV1beta1Client, namespace, bindingName, instanceName, externalID, secretName string,
 	params interface{}, secrets map[string]string) error {
 
 	// Manually defaulting the name of the binding
