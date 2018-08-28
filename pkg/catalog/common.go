@@ -3,12 +3,11 @@ package catalog
 import (
 	restclient "k8s.io/client-go/rest"
 
-	servicecatalogclienset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 	scv1beta1 "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	servicecatalogclienset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 
 	log "github.com/sirupsen/logrus"
 
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -20,12 +19,6 @@ func GetClient(config *restclient.Config) *servicecatalogclienset.Servicecatalog
 		log.Fatal("error creating service catalog Clientset", err.Error())
 	}
 	return serviceCatalogV1Client
-}
-
-func PrettyPrint(b []byte) ([]byte, error) {
-	var out bytes.Buffer
-	err := json.Indent(&out, b, "", "  ")
-	return out.Bytes(), err
 }
 
 // BuildParameters converts a map of variable assignments to a byte encoded json document,
@@ -58,4 +51,3 @@ func BuildParametersFrom(secrets map[string]string) []scv1beta1.ParametersFromSo
 	}
 	return params
 }
-
