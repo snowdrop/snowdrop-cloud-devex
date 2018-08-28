@@ -109,7 +109,14 @@ var Assets = func() http.FileSystem {
 		},
 		"/crud/src/main/resources": &vfsgen۰DirInfo{
 			name:    "resources",
-			modTime: time.Date(2018, 8, 24, 12, 12, 49, 551230305, time.UTC),
+			modTime: time.Date(2018, 8, 27, 15, 21, 14, 16140813, time.UTC),
+		},
+		"/crud/src/main/resources/application-openshift-catalog.properties": &vfsgen۰CompressedFileInfo{
+			name:             "application-openshift-catalog.properties",
+			modTime:          time.Date(2018, 8, 27, 15, 21, 14, 16206255, time.UTC),
+			uncompressedSize: 248,
+
+			compressedContent: []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x6c\xce\x31\x0f\x82\x30\x10\x05\xe0\x9d\xdf\xe1\x4a\xd9\x49\x18\x30\x90\xb8\x28\x84\x62\x1c\xcd\xd1\x5e\x10\x52\x69\xbd\x2b\x3a\x18\xfe\xbb\xb1\xc4\xb8\xb0\x5d\x2e\xdf\x7b\x79\xec\x68\x98\x7a\xa1\xc1\x03\xdb\x99\x14\x8a\x99\x4c\x36\xea\x4e\xa5\xce\xb2\xef\x09\xf9\x61\xd2\x24\xd9\xbd\x8b\xfd\xf5\x50\xc9\x76\x49\xc3\x59\x57\x4d\xbb\xac\xdf\x53\x7e\x2c\x97\x68\xa3\x88\x91\x26\xb8\x63\x16\xd4\x59\x96\xcd\x96\x72\xc0\xfc\xb2\xa4\x57\x55\xe7\x52\x5e\xaa\xa6\xd8\x92\x9a\x86\x27\x52\xac\x0c\x30\xc7\xa1\xd8\x52\x2f\xfe\x2b\x45\x11\xc0\x2f\x39\x3a\x10\xb7\xa1\xfb\x6e\xf0\x28\xb4\x36\x31\xcc\xde\x66\x8a\x10\x3c\x46\x9f\x00\x00\x00\xff\xff\x3e\xb6\x76\x99\xf8\x00\x00\x00"),
 		},
 		"/crud/src/main/resources/application-openshift.properties": &vfsgen۰CompressedFileInfo{
 			name:             "application-openshift.properties",
@@ -356,6 +363,7 @@ var Assets = func() http.FileSystem {
 		fs["/crud/src/main/java/dummy/service/FruitRepository.java"].(os.FileInfo),
 	}
 	fs["/crud/src/main/resources"].(*vfsgen۰DirInfo).entries = []os.FileInfo{
+		fs["/crud/src/main/resources/application-openshift-catalog.properties"].(os.FileInfo),
 		fs["/crud/src/main/resources/application-openshift.properties"].(os.FileInfo),
 		fs["/crud/src/main/resources/import.sql"].(os.FileInfo),
 		fs["/crud/src/main/resources/static"].(os.FileInfo),
