@@ -13,6 +13,7 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/pkg/errors"
+	"sort"
 )
 
 func List(config *restclient.Config) {
@@ -21,6 +22,9 @@ func List(config *restclient.Config) {
 	log.Info("List of services")
 	log.Info("================")
 
+	sort.Slice(classes[:], func(i, j int) bool {
+		return classes[i].Spec.ExternalName < classes[j].Spec.ExternalName
+	})
 	printResults(classes)
 }
 
