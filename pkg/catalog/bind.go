@@ -18,14 +18,14 @@ import (
 	"k8s.io/apimachinery/pkg/util/uuid"
 )
 
-func Bind(config *restclient.Config) {
+func Bind(config *restclient.Config, application types.Application) {
 	serviceCatalogClient := GetClient(config)
 
 	// Generate UUID otherwise the binding's creation will fail if we use the same id as the instanceName, bindingName
 	UUID := string(uuid.NewUUID())
 
 	log.Infof("Let's generate a secret containing the parameters to be used by the application")
-	bind(serviceCatalogClient, NS, BINDING_NAME, INSTANCE_NAME, UUID, SECRET_NAME, nil, nil)
+	bind(serviceCatalogClient, application.Namespace, BINDING_NAME, INSTANCE_NAME, UUID, SECRET_NAME, nil, nil)
 }
 
 // Bind an instance to a secret.
