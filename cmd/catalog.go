@@ -44,6 +44,7 @@ func init() {
 			setup := Setup()
 
 			catalog.Bind(setup.RestConfig)
+			catalog.MountSecretAsEnfFrom(setup.RestConfig,setup.Application,catalog.SECRET_NAME)
 		},
 	}
 
