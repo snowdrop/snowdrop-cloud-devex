@@ -7,33 +7,32 @@ import (
 	"github.com/snowdrop/k8s-supervisor/pkg/buildpack"
 )
 
-var cleanCmd = &cobra.Command{
-	Use:     "clean [flags]",
-	Short:   "Remove development pod for the component",
-	Long:    `Remove development pod for the component.`,
-	Example: ` sb clean`,
-	Args:    cobra.RangeArgs(0, 1),
-	Run: func(cmd *cobra.Command, args []string) {
-
-		log.Info("Clean command called")
-
-		setup := Setup()
-
-		buildpack.DeleteDefaultImageStreams(setup.RestConfig, setup.Application)
-
-		buildpack.DeletePVC(setup.Clientset, setup.Application)
-
-		buildpack.DeleteDeploymentConfig(setup.RestConfig, setup.Application)
-
-		buildpack.DeleteService(setup.Clientset, setup.Application)
-
-		buildpack.DeleteRoute(setup.RestConfig, setup.Application)
-
-		log.Info("Deleted resources")
-	},
-}
-
 func init() {
+	cleanCmd := &cobra.Command{
+		Use:     "clean [flags]",
+		Short:   "Remove development pod for the component",
+		Long:    `Remove development pod for the component.`,
+		Example: ` sb clean`,
+		Args:    cobra.RangeArgs(0, 1),
+		Run: func(cmd *cobra.Command, args []string) {
+
+			log.Info("Clean command called")
+
+			setup := Setup()
+
+			buildpack.DeleteDefaultImageStreams(setup.RestConfig, setup.Application)
+
+			buildpack.DeletePVC(setup.Clientset, setup.Application)
+
+			buildpack.DeleteDeploymentConfig(setup.RestConfig, setup.Application)
+
+			buildpack.DeleteService(setup.Clientset, setup.Application)
+
+			buildpack.DeleteRoute(setup.RestConfig, setup.Application)
+
+			log.Info("Deleted resources")
+		},
+	}
 
 	// Add a defined annotation in order to appear in the help menu
 	cleanCmd.Annotations = map[string]string{"command": "clean"}

@@ -2,11 +2,11 @@ package cmd
 
 import (
 	log "github.com/sirupsen/logrus"
+	"github.com/snowdrop/k8s-supervisor/pkg/scaffold"
 	"github.com/spf13/cobra"
 
 	"archive/zip"
 	"fmt"
-	"github.com/snowdrop/k8s-supervisor/pkg/scaffold"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -16,96 +16,96 @@ import (
 	"strings"
 )
 
-var (
-	template  string
-	templates = []string{"simple", "rest", "crud"}
-	p         = scaffold.Project{}
-)
-
 type SpringForm struct {
 	GroupId string
 }
 
-var createCmd = &cobra.Command{
-	Use:     "create [flags]",
-	Short:   "Create a Spring Boot maven project",
-	Long:    `Create a Spring Boot maven project.`,
-	Example: ` sb create`,
-	Args:    cobra.RangeArgs(0, 1),
-	Run: func(cmd *cobra.Command, args []string) {
-		var valid bool
-		for _, t := range templates {
-			if template == t {
-				valid = true
-			}
-		}
-
-		if !valid {
-			log.WithField("template", mode).Fatal("The provided template is not supported: ")
-		}
-
-		log.Infof("Create command called with template '%s'", template)
-
-		client := http.Client{}
-
-		form := url.Values{}
-		form.Add("groupId", p.GroupId)
-		form.Add("artifactId", p.ArtifactId)
-		form.Add("version", p.Version)
-		form.Add("packageName", p.PackageName)
-		form.Add("bomVersion", p.SnowdropBomVersion)
-		form.Add("springbootVersion", p.SpringVersion)
-		form.Add("outDir", p.OutDir)
-		for _, v := range p.Dependencies {
-			if v != "" {
-				form.Add("dependencies", v)
-			}
-		}
-
-		parameters := form.Encode()
-		if parameters != "" {
-			parameters = "?" + parameters
-		}
-
-		u := strings.Join([]string{p.UrlService, "template", template}, "/") + parameters
-		log.Infof("URL of the request calling the service is %s", u)
-		req, err := http.NewRequest(http.MethodGet, u, strings.NewReader(""))
-
-		if err != nil {
-			log.Error(err.Error())
-		}
-		addClientHeader(req)
-
-		res, err := client.Do(req)
-		if err != nil {
-			log.Error(err.Error())
-		}
-		body, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			log.Error(err.Error())
-		}
-
-		currentDir, _ := os.Getwd()
-		dir := filepath.Join(currentDir, p.OutDir)
-		zipFile := dir + ".zip"
-
-		err = ioutil.WriteFile(zipFile, body, 0644)
-		if err != nil {
-			log.Errorf("Failed to download file %s due to %s", zipFile, err)
-		}
-		err = Unzip(zipFile, dir)
-		if err != nil {
-			log.Errorf("Failed to unzip new project file %s due to %s", zipFile, err)
-		}
-		err = os.Remove(zipFile)
-		if err != nil {
-			log.Errorf(err.Error())
-		}
-
-	},
-}
-
 func init() {
+	var (
+		template  string
+		templates = []string{"simple", "rest", "crud"}
+		p         = scaffold.Project{}
+	)
+
+	createCmd := &cobra.Command{
+		Use:     "create [flags]",
+		Short:   "Create a Spring Boot maven project",
+		Long:    `Create a Spring Boot maven project.`,
+		Example: ` sb create`,
+		Args:    cobra.RangeArgs(0, 1),
+		Run: func(cmd *cobra.Command, args []string) {
+			var valid bool
+			for _, t := range templates {
+				if template == t {
+					valid = true
+				}
+			}
+
+			if !valid {
+				log.WithField("template", template).Fatal("The provided template is not supported: ")
+			}
+
+			log.Infof("Create command called with template '%s'", template)
+
+			client := http.Client{}
+
+			form := url.Values{}
+			form.Add("groupId", p.GroupId)
+			form.Add("artifactId", p.ArtifactId)
+			form.Add("version", p.Version)
+			form.Add("packageName", p.PackageName)
+			form.Add("bomVersion", p.SnowdropBomVersion)
+			form.Add("springbootVersion", p.SpringVersion)
+			form.Add("outDir", p.OutDir)
+			for _, v := range p.Dependencies {
+				if v != "" {
+					form.Add("dependencies", v)
+				}
+			}
+
+			parameters := form.Encode()
+			if parameters != "" {
+				parameters = "?" + parameters
+			}
+
+			u := strings.Join([]string{p.UrlService, "template", template}, "/") + parameters
+			log.Infof("URL of the request calling the service is %s", u)
+			req, err := http.NewRequest(http.MethodGet, u, strings.NewReader(""))
+
+			if err != nil {
+				log.Error(err.Error())
+			}
+			addClientHeader(req)
+
+			res, err := client.Do(req)
+			if err != nil {
+				log.Error(err.Error())
+			}
+			body, err := ioutil.ReadAll(res.Body)
+			if err != nil {
+				log.Error(err.Error())
+			}
+
+			currentDir, _ := os.Getwd()
+			dir := filepath.Join(currentDir, p.OutDir)
+			zipFile := dir + ".zip"
+
+			err = ioutil.WriteFile(zipFile, body, 0644)
+			if err != nil {
+				log.Errorf("Failed to download file %s due to %s", zipFile, err)
+			}
+			err = Unzip(zipFile, dir)
+			if err != nil {
+				log.Errorf("Failed to unzip new project file %s due to %s", zipFile, err)
+			}
+			err = os.Remove(zipFile)
+			if err != nil {
+				log.Errorf(err.Error())
+			}
+
+		},
+	}
+
 	createCmd.Flags().StringVarP(&template, "template", "t", "simple",
 		fmt.Sprintf("Template name used to select the project to be created. Supported templates are '%s'", strings.Join(templates, ",")))
 	createCmd.Flags().StringVarP(&p.UrlService, "urlService", "u", "http://spring-boot-generator.195.201.87.126.nip.io", "URL of the HTTP Server exposing the spring boot service")

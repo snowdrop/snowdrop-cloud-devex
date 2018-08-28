@@ -1,58 +1,56 @@
 package cmd
 
 import (
-	log "github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
-
 	"archive/tar"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"github.com/snowdrop/k8s-supervisor/pkg/buildpack"
 	"github.com/snowdrop/k8s-supervisor/pkg/buildpack/types"
 	"github.com/snowdrop/k8s-supervisor/pkg/common/oc"
+	"github.com/spf13/cobra"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 )
 
-var buildCmd = &cobra.Command{
-	Use:     "build [flags]",
-	Short:   "Build an image of the application",
-	Long:    `Build an image of the application.`,
-	Example: ` sb build`,
-	Args:    cobra.RangeArgs(0, 1),
-	Run: func(cmd *cobra.Command, args []string) {
-
-		log.Info("Build command called")
-		log.Debugf("Namespace: %s", namespace)
-
-		setup := Setup()
-
-		// Create Build
-		log.Info("Create Build resource")
-		buildpack.CreateBuild(setup.RestConfig, setup.Application)
-
-		//Create target imageStream
-		images := []types.Image{
-			*buildpack.CreateTypeImage(false, setup.Application.Name, "latest", "", false),
-		}
-		buildpack.CreateImageStreamTemplate(setup.RestConfig, setup.Application, images)
-
-		// Generate tar and next start the build using it
-		//r := generateTar("")
-
-		// TODO - Add a watch to check if the build has been created
-
-		// Start the build
-		args = []string{"start-build", setup.Application.Name, "--from-dir=" + oc.Client.Pwd, "--follow"}
-		log.Infof("Starr-build cmd : %s", args)
-		oc.ExecCommand(oc.Command{Args: args})
-	},
-}
-
 func init() {
+	buildCmd := &cobra.Command{
+		Use:     "build [flags]",
+		Short:   "Build an image of the application",
+		Long:    `Build an image of the application.`,
+		Example: ` sb build`,
+		Args:    cobra.RangeArgs(0, 1),
+		Run: func(cmd *cobra.Command, args []string) {
+
+			log.Info("Build command called")
+
+			setup := Setup()
+			log.Debugf("Namespace: %s", setup.Application.Namespace)
+
+			// Create Build
+			log.Info("Create Build resource")
+			buildpack.CreateBuild(setup.RestConfig, setup.Application)
+
+			//Create target imageStream
+			images := []types.Image{
+				*buildpack.CreateTypeImage(false, setup.Application.Name, "latest", "", false),
+			}
+			buildpack.CreateImageStreamTemplate(setup.RestConfig, setup.Application, images)
+
+			// Generate tar and next start the build using it
+			//r := generateTar("")
+
+			// TODO - Add a watch to check if the build has been created
+
+			// Start the build
+			args = []string{"start-build", setup.Application.Name, "--from-dir=" + oc.Client.Pwd, "--follow"}
+			log.Infof("Starr-build cmd : %s", args)
+			oc.ExecCommand(oc.Command{Args: args})
+		},
+	}
 
 	// Add a defined annotation in order to appear in the help menu
-	buildCmd.Annotations = map[string]string{"command": "init"}
+	buildCmd.Annotations = map[string]string{"command": "build"}
 
 	rootCmd.AddCommand(buildCmd)
 }
