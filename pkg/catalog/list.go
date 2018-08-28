@@ -55,8 +55,8 @@ func getClusterServiceClasses(scc *servicecatalogclienset.ServicecatalogV1beta1C
 	for _, class := range classList.Items {
 		// we are only interested in services from the automation-service-broker
 		// this broker however could have various names depending on the setup
-		if strings.Contains(class.Spec.ClusterServiceBrokerName, "automation") &&
-			strings.Contains(class.Spec.ClusterServiceBrokerName, "broker") {
+		if strings.Contains(class.Spec.ClusterServiceBrokerName, "ansible-service-broker") ||
+			strings.Contains(class.Spec.ClusterServiceBrokerName, "openshift-automation-service-broker") {
 
 			itemsFromAutomationBroker = append(itemsFromAutomationBroker, class)
 		}
