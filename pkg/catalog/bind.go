@@ -18,25 +18,23 @@ import (
 	"k8s.io/apimachinery/pkg/util/uuid"
 )
 
-func Bind(config *restclient.Config, application types.Application) {
+func Bind(config *restclient.Config, application types.Application, instance string, secret string) {
 	serviceCatalogClient := GetClient(config)
 
-	// Generate UUID otherwise the binding's creation will fail if we use the same id as the instanceName, bindingName
-	UUID := string(uuid.NewUUID())
-
 	log.Infof("Let's generate a secret containing the parameters to be used by the application")
-	bind(serviceCatalogClient, application.Namespace, BINDING_NAME, INSTANCE_NAME, UUID, SECRET_NAME, nil, nil)
+	bind(serviceCatalogClient, application.Namespace, instance, secret, nil, nil)
 }
 
 // Bind an instance to a secret.
-func bind(scc *servicecatalogclienset.ServicecatalogV1beta1Client, namespace, bindingName, instanceName, externalID, secretName string,
+func bind(scc *servicecatalogclienset.ServicecatalogV1beta1Client, namespace, instanceName, secretName string,
 	params interface{}, secrets map[string]string) error {
 
-	// Manually defaulting the name of the binding
-	// I'm not doing the same for the secret since the API handles defaulting that value.
-	if bindingName == "" {
-		bindingName = instanceName
-	}
+	// automatically create a binding name from the instance
+	bindingName := instanceName + "-binding"
+
+	// Generate UUID otherwise the binding's creation will fail if we use the same id as the instanceName, bindingName
+	// todo: check I think this is needed since external id is optional
+	UUID := string(uuid.NewUUID())
 
 	_, err := scc.ServiceBindings(namespace).Create(
 		&scv1beta1.ServiceBinding{
@@ -45,7 +43,7 @@ func bind(scc *servicecatalogclienset.ServicecatalogV1beta1Client, namespace, bi
 				Namespace: namespace,
 			},
 			Spec: scv1beta1.ServiceBindingSpec{
-				ExternalID: externalID,
+				ExternalID: UUID,
 				ServiceInstanceRef: scv1beta1.LocalObjectReference{
 					Name: instanceName,
 				},

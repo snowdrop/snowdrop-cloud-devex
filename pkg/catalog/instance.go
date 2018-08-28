@@ -12,30 +12,18 @@ import (
 	"github.com/pkg/errors"
 )
 
-const (
-	CLASS_NAME         = "dh-postgresql-apb"
-	INSTANCE_NAME      = "my-postgresql-db"
-	SECRET_NAME        = "my-postgresql-db-credentials"
-	BINDING_NAME       = "my-postgresql-db-binding"
-	PLAN               = "dev"
-	EXTERNAL_ID        = "a7c00676-4398-11e8-842f-0ed5f89f718b"
-	POSTGRESQL_VERSION = "9.6"
-)
-
-var (
-	PARAMS = map[string]string{
-		"postgresql_user":     "luke",
-		"postgresql_password": "secret",
-		"postgresql_database": "my_data",
-		"postgresql_version":  "9.6",
-	}
-)
-
-func Create(config *restclient.Config, application types.Application) {
+func Create(config *restclient.Config, application types.Application, instanceName string) {
 	serviceCatalogClient := GetClient(config)
-	log.Infof("Service instance will be created ...")
-	createServiceInstance(serviceCatalogClient, application.Namespace, INSTANCE_NAME, CLASS_NAME, PLAN, EXTERNAL_ID, PARAMS)
-	log.Infof("Service instance created")
+	log.Infof("Service instance '%s' will be created ...", instanceName)
+
+	service, e := application.GetService(instanceName)
+	if e != nil {
+		log.Errorf("No such service definition '%s' found in MANIFEST", instanceName)
+	} else {
+		createServiceInstance(serviceCatalogClient, application.Namespace, instanceName, service.Class, service.Plan, service.ExternalId, service.ParametersAsMap())
+		log.Infof("Service instance created")
+	}
+
 }
 
 // CreateServiceInstance creates service instance from service catalog
