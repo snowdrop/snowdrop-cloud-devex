@@ -1,13 +1,13 @@
 package catalog
 
 import (
-	corev1 "k8s.io/api/core/v1"
-	appsocpv1 "github.com/openshift/client-go/apps/clientset/versioned/typed/apps/v1"
 	appsv1 "github.com/openshift/api/apps/v1"
+	appsocpv1 "github.com/openshift/client-go/apps/clientset/versioned/typed/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	servicecatalogclienset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 	scv1beta1 "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	servicecatalogclienset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	restclient "k8s.io/client-go/rest"
 
 	log "github.com/sirupsen/logrus"
@@ -25,7 +25,7 @@ func Bind(config *restclient.Config) {
 	UUID := string(uuid.NewUUID())
 
 	log.Infof("Let's generate a secret containing the parameters to be used by the application")
-	bind(serviceCatalogClient,NS,BINDING_NAME,INSTANCE_NAME,UUID,SECRET_NAME, nil,nil)
+	bind(serviceCatalogClient, NS, BINDING_NAME, INSTANCE_NAME, UUID, SECRET_NAME, nil, nil)
 }
 
 // Bind an instance to a secret.
@@ -63,7 +63,7 @@ func bind(scc *servicecatalogclienset.ServicecatalogV1beta1Client, namespace, bi
 }
 
 //Mount the secret as EnvFrom to the DeploymentConfig of the Application
-func MountSecretAsEnfFrom(config *restclient.Config, application types.Application, secretName string) error {
+func MountSecretAsEnvFrom(config *restclient.Config, application types.Application, secretName string) error {
 
 	// Retrieve the DeploymentConfig
 	deploymentConfigV1client := getAppsClient(config)
@@ -98,7 +98,7 @@ func addSecretAsEnvFromSource(secretName string) corev1.EnvFromSource {
 		SecretRef: &corev1.SecretEnvSource{
 			LocalObjectReference: corev1.LocalObjectReference{Name: secretName},
 		},
-    }
+	}
 }
 
 func getAppsClient(config *restclient.Config) *appsocpv1.AppsV1Client {
