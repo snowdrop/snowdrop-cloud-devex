@@ -25,7 +25,7 @@ func Bind(config *restclient.Config) {
 	UUID := string(uuid.NewUUID())
 
 	log.Infof("Let's generate a secret containing the parameters to be used by the application")
-	bind(serviceCatalogClient,NS,BINDING_NAME,INSTANCE_NAME,UUID,SECRET_NAME, nil,nil)
+	bind(serviceCatalogClient, NS, BINDING_NAME, INSTANCE_NAME, UUID, SECRET_NAME, nil, nil)
 }
 
 // Bind an instance to a secret.
@@ -80,25 +80,27 @@ func MountSecretAsEnfFrom(config *restclient.Config, application types.Applicati
 	}
 
 	// Add the Secret as EnvVar to the container
-	appcontainer := dc.Spec.Template.Spec.Containers[0]
-	appcontainer.EnvFrom = append(appcontainer.EnvFrom, addSecretAsEnvFromSource(secretName))
+	dc.Spec.Template.Spec.Containers[0].EnvFrom = addSecretAsEnvFromSource(secretName)
 
 	// Update the DeploymentConfig
 	_, errUpdate := deploymentConfigs.Update(dc)
 	if errUpdate != nil {
 		log.Fatalf("DeploymentConfig not updated : %s", errUpdate.Error())
 	}
+	log.Infof("'%s' EnvFrom secret added to the DeploymentConfig", secretName)
 
 	// Redeploy it
 	return nil
 }
 
-func addSecretAsEnvFromSource(secretName string) corev1.EnvFromSource {
-	return corev1.EnvFromSource{
-		SecretRef: &corev1.SecretEnvSource{
-			LocalObjectReference: corev1.LocalObjectReference{Name: secretName},
+func addSecretAsEnvFromSource(secretName string) []corev1.EnvFromSource {
+	return []corev1.EnvFromSource{
+		{
+			SecretRef: &corev1.SecretEnvSource{
+				LocalObjectReference: corev1.LocalObjectReference{Name: secretName},
+			},
 		},
-    }
+	}
 }
 
 func getAppsClient(config *restclient.Config) *appsocpv1.AppsV1Client {
