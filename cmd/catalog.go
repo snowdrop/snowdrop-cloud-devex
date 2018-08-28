@@ -43,7 +43,7 @@ func init() {
 			log.Info("Catalog Bind command called")
 			setup := Setup()
 
-			//catalog.Bind(setup.RestConfig)
+			catalog.Bind(setup.RestConfig)
 			catalog.MountSecretAsEnfFrom(setup.RestConfig,setup.Application,catalog.SECRET_NAME)
 		},
 	}

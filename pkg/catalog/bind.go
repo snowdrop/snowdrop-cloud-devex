@@ -90,6 +90,18 @@ func MountSecretAsEnfFrom(config *restclient.Config, application types.Applicati
 	log.Infof("'%s' EnvFrom secret added to the DeploymentConfig", secretName)
 
 	// Redeploy it
+	request := &appsv1.DeploymentRequest{
+		Name:   application.Name,
+		Latest: true,
+		Force:  true,
+	}
+
+	_, errRedeploy := deploymentConfigs.Instantiate(application.Name, request)
+	if errRedeploy != nil {
+		log.Fatalf("Redeployment of the DeploymentConfig failed %s", errRedeploy.Error())
+	}
+	log.Infof("'%s' Deployment Config rollout succeeded to latest", secretName)
+
 	return nil
 }
 
