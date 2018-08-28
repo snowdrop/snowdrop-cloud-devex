@@ -50,3 +50,8 @@ func bind(scc *servicecatalogclienset.ServicecatalogV1beta1Client, namespace, bi
 	log.Infof("Binding instance created")
 	return nil
 }
+
+//Mount the secret as EnvFrom to the DeploymentConfig of the Application
+func mountSecretAsEnfFrom() error {
+	return nil
+}
