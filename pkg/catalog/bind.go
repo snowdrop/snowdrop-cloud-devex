@@ -38,7 +38,7 @@ func bind(scc *servicecatalogclienset.ServicecatalogV1beta1Client, namespace, bi
 				ServiceInstanceRef: scv1beta1.LocalObjectReference{
 					Name: instanceName,
 				},
-				SecretName:     secretName + "-credentials",
+				SecretName:     secretName,
 				Parameters:     BuildParameters(params),
 				ParametersFrom: BuildParametersFrom(secrets),
 			},
