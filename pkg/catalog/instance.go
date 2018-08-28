@@ -15,6 +15,7 @@ import (
 const (
 	CLASS_NAME                  = "dh-postgresql-apb"
 	INSTANCE_NAME				= "my-postgresql-db"
+	SECRET_NAME                 = "my-postgresql-db-credentials"
 	BINDING_NAME				= "my-postgresql-db-binding"
 	PLAN                        = "dev"
 	EXTERNAL_ID                 = "a7c00676-4398-11e8-842f-0ed5f89f718b"
@@ -41,7 +42,7 @@ func Create(config *restclient.Config) {
 	UUID := string(uuid.NewUUID())
 
 	log.Infof("Let's generate a secret containing the parameters to be used by the application")
-	bind(serviceCatalogClient,NS,BINDING_NAME,INSTANCE_NAME,UUID,INSTANCE_NAME, nil,nil)
+	bind(serviceCatalogClient,NS,BINDING_NAME,INSTANCE_NAME,UUID,SECRET_NAME, nil,nil)
 }
 
 // CreateServiceInstance creates service instance from service catalog
