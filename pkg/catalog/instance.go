@@ -10,6 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/pkg/errors"
+	"github.com/pborman/uuid"
 )
 
 func Create(config *restclient.Config, application types.Application, instanceName string) {
@@ -28,6 +29,11 @@ func Create(config *restclient.Config, application types.Application, instanceNa
 
 // CreateServiceInstance creates service instance from service catalog
 func createServiceInstance(scc *servicecatalogclienset.ServicecatalogV1beta1Client, ns string, instanceName string, className string, plan string, externalID string, params interface{}) error {
+
+	// Generate UUID otherwise the binding's creation will fail if we use the same id as the instanceName, bindingName
+	// todo: check I think this is needed since external id is optional
+	UUID := string(uuid.NewUUID())
+
 	// Creating Service Instance
 	_, err := scc.ServiceInstances(ns).Create(
 		&scv1beta1.ServiceInstance{
@@ -36,7 +42,7 @@ func createServiceInstance(scc *servicecatalogclienset.ServicecatalogV1beta1Clie
 				Namespace: ns,
 			},
 			Spec: scv1beta1.ServiceInstanceSpec{
-				ExternalID: externalID,
+				ExternalID: UUID,
 				PlanReference: scv1beta1.PlanReference{
 					ClusterServiceClassExternalName: className,
 					ClusterServicePlanExternalName:  plan,
