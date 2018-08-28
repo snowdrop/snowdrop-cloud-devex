@@ -7,7 +7,7 @@
 
 ## Step by step instructions
 
-- Bootstrap minishift using this configuration
+- Bootstrap minishift using this configuration or `oc cluster up --enable=*,service-catalog,automation-service-broker`
 
 ```bash
 minishift config set memory 6G
@@ -32,19 +32,20 @@ cd /path/to/my-spring-boot
 
 - Create a `MANIFEST`'s project file within the current folder containing the :
   - ENV vars used by the spring's boot application to use the Service provisioned from the catalog
-  - Pass the information and parameters needed to create the `Service Instance` and secret with the DB's paramerters  
- which supports `Postgresql`'s database
+  - Pass the information and parameters needed to create the `Service Instance` and the DB's parameters  
+    which supports `Postgresql`'s database
 
-```yaml
+```bash
+cat > MANIFEST << EOF
 name: my-spring-boot
 env:
   - name: SPRING_PROFILES_ACTIVE
     value: openshift-catalog
-service:
+services:
   - class: dh-postgresql-apb
     name: my-postgresql-db
     plan: dev
-    parameter:
+    parameters:
       - name: postgresql_user
         value: luke
       - name: postgresql_password
@@ -52,49 +53,40 @@ service:
       - name: postgresql_database
         value: my_data
       - name: postgresql_version
-        value: 9.6  
+        value: 9.6
+EOF
 ```
 
-- Create a service's Instance
-
-```bash
-sb catalog create -c dh-postgresql-apb
-```
-
-**REMARK** : Optionaly, you can pass the `-c` parameter which is then used as key to find within the MANIFEST the service's instance config.
-
-- Bind the service to generate a secret
-
-```bash
-sb bind <name_of_instance> <secret_name>
-```
-
-where : `<name_of_instance>` corresponds to the service's instance name created previously `my-postgresql-db` and `<secret_name>` is the name of the secret containing the parameters to be injected to the Development's pod.
-
-- Initialize the Development's pod 
-
-```bash
-sb init -n crud
-```
-
-- Mount the secret as Env Vars to the Development's pod
-
-```bash
-sb mount <deployment_config_name> <secret_name>
-```
-
-where : `<deployment_config_name>` is the name of the DeploymentConfig of the Application and `<secret_name>`, the secret created previously
-
-QUESTION: We should certyainly mount the secret during the step `sb init` to avoid to have to do it using `sb mount` command. WDYT ?
-
-
-- Scaffold the CRUD project using as artifactId - `my-spring-boot` name
+- Scaffold the CRUD project using as artifactId the `my-spring-boot` name specified within the MANIFEST 
 
 ```bash
 sb create -t crud -i my-spring-boot
 ```
 
-- Generate the binary uber jar file and push it
+- Initialize the Development's pod and pass as parameter the namespace to be used
+
+```bash
+sb init -n crud-catalog
+```
+
+- Create a service's instance using our service instance name `my-postgresql-db`
+
+```bash
+sb catalog create <name_of_the_service_instance>
+```
+
+where `<name_of_the_service_instance>` is the name to be defined for th service that we will create using the command (e.g my-postgresql-apb).
+The Service class to be selected from the catalog is specified within the MANIFEST using the field services/class `db-postgresql-apb` 
+
+- Create a secret using the service's parameters and bind/mount them to the DeploymentConfig created during `sb init` step
+
+```bash
+sb bind --secret <secret_name> --toInstance <name_of_the_service_instance>
+```
+
+where : `<name_of_the_service_instance>` corresponds to the service's instance name created previously `my-postgresql-db` and `<secret_name>` is the name of the secret (e.g my-postgresql-db-secret).
+
+- Generate the Spring Boot binary uber jar file and push it to the development's pod
 
 ```bash
 mvn clean package
