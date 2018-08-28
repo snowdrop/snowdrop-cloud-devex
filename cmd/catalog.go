@@ -25,28 +25,35 @@ func init() {
 		Use:     "create",
 		Short:   "Create a service instance",
 		Long:    "Create a service instance and install it in a namespace.",
-		Example: ` sb catalog create`,
+		Example: ` sb catalog create <instance name>`,
+		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			log.Info("Catalog select command called")
 			setup := Setup()
 
-			catalog.Create(setup.RestConfig, setup.Application)
+			catalog.Create(setup.RestConfig, setup.Application, args[0])
 		},
 	}
 
+	var (
+		secret   string
+		instance string
+	)
 	catalogBindCmd := &cobra.Command{
 		Use:     "bind",
 		Short:   "Bind a service to a secret's namespace",
 		Long:    "Bind a service to a secret's namespace.",
-		Example: ` sb catalog bind`,
+		Example: ` sb catalog bind --secret foo --toInstance instance`,
 		Run: func(cmd *cobra.Command, args []string) {
 			log.Info("Catalog Bind command called")
 			setup := Setup()
 
-			catalog.Bind(setup.RestConfig, setup.Application)
-			catalog.MountSecretAsEnvFrom(setup.RestConfig, setup.Application, catalog.SECRET_NAME)
+			catalog.Bind(setup.RestConfig, setup.Application, instance, secret)
+			catalog.MountSecretAsEnvFrom(setup.RestConfig, setup.Application, secret)
 		},
 	}
+	catalogBindCmd.Flags().StringVarP(&secret, "secret", "s", "secret name", "Secret name to bind")
+	catalogBindCmd.Flags().StringVarP(&instance, "toInstance", "i", "instance name", "Instance name to bind the instance to")
 
 	catalogCmd := &cobra.Command{
 		Use:   "catalog [options]",
