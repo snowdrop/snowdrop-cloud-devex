@@ -30,7 +30,7 @@ func init() {
 			log.Info("Catalog select command called")
 			setup := Setup()
 
-			catalog.Create(setup.RestConfig)
+			catalog.Create(setup.RestConfig, setup.Application)
 		},
 	}
 
@@ -43,7 +43,7 @@ func init() {
 			log.Info("Catalog Bind command called")
 			setup := Setup()
 
-			catalog.Bind(setup.RestConfig)
+			catalog.Bind(setup.RestConfig, setup.Application)
 			catalog.MountSecretAsEnvFrom(setup.RestConfig, setup.Application, catalog.SECRET_NAME)
 		},
 	}
