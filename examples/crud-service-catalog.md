@@ -39,7 +39,7 @@ cd /path/to/my-spring-boot
 name: my-spring-boot
 env:
   - name: SPRING_PROFILES_ACTIVE
-    value: openshift
+    value: openshift-catalog
 service:
   - class: dh-postgresql-apb
     name: my-postgresql-db
