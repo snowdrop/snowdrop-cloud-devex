@@ -1,4 +1,4 @@
-# Scaffold a Spring Boot project using a CRUD template and connect to a DB selected from a catalog
+# Scaffold a Spring Boot project using a CRUD template and connect to a DB installed using a Service Broker and Catalog
 
 ## Prerequisites
 
@@ -58,10 +58,10 @@ service:
 - Create a service's Instance
 
 ```bash
-sb instance create -c dh-postgresql-apb
+sb catalog create -c dh-postgresql-apb
 ```
 
-REMARK : The `-c` parameter will be used as key to find within the MANIFEST the service's instance config. WDYT ?
+**REMARK** : Optionaly, you can pass the `-c` parameter which is then used as key to find within the MANIFEST the service's instance config.
 
 - Bind the service to generate a secret
 
