@@ -10,7 +10,6 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/pkg/errors"
-	"github.com/pborman/uuid"
 )
 
 func Create(config *restclient.Config, application types.Application, instanceName string) {
