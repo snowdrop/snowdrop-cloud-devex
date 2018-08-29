@@ -19,16 +19,17 @@ type serviceInstanceCreateParameterSchema struct {
 }
 
 type property struct {
-	Title   string
-	Type    string
-	Pattern string
+	Title       string
+	Type        string
+	Description string
 }
 
 type propertyOut struct {
-	Name     string
-	Title    string
-	Type     string
-	Required bool
+	Name        string
+	Title       string
+	Description string
+	Type        string
+	Required    bool
 }
 
 func Plan(config *restclient.Config, className string) {
@@ -97,6 +98,7 @@ func getProperties(plan *scv1beta1.ClusterServicePlan) ([]propertyOut, error) {
 		propertyOut := propertyOut{}
 		propertyOut.Name = k
 		propertyOut.Title = v.Title
+		propertyOut.Description = v.Description
 		propertyOut.Type = v.Type
 		propertyOut.Required = isRequired(schema.Required, k)
 		result = append(result, propertyOut)
@@ -117,7 +119,7 @@ func isRequired(required []string, name string) bool {
 func printPlanResults(results map[string][]propertyOut) {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetRowLine(true)
-	table.SetHeader([]string{"Plan", "Property Name", "Required", "Description"})
+	table.SetHeader([]string{"Plan", "Property Name", "Required", "Type", "Description", "Long Description"})
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
 	table.SetCenterSeparator("*")
 	table.SetColumnSeparator("‡")
@@ -125,7 +127,7 @@ func printPlanResults(results map[string][]propertyOut) {
 
 	for plan, properties := range results {
 		for _, property := range properties {
-			row := []string{plan, property.Name, strconv.FormatBool(property.Required), property.Title}
+			row := []string{plan, property.Name, strconv.FormatBool(property.Required), property.Type, property.Title, property.Description}
 			table.Append(row)
 		}
 		table.Append([]string{"", "", "", ""})
