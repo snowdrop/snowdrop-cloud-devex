@@ -75,7 +75,7 @@ func init() {
 		Use:   "catalog [options]",
 		Short: "List, select or bind a service from a catalog.",
 		Long:  `List, select or bind a service from a catalog.`,
-		Example: fmt.Sprintf("%s\n%s\n%s",
+		Example: fmt.Sprintf("%s\n%s\n%s\n%s",
 			catalogListCmd.Example,
 			catalogInstanceCmd.Example,
 			catalogPlanCmd.Example,
