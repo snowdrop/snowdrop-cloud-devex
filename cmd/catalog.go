@@ -21,7 +21,7 @@ func init() {
 			catalog.List(setup.RestConfig, matching)
 		},
 	}
-	catalogListCmd.Flags().StringVarP(&matching, "search", "s", "foo", "Only return services whose name matches the specified text")
+	catalogListCmd.Flags().StringVarP(&matching, "search", "s", "", "Only return services whose name matches the specified text")
 
 	catalogInstanceCmd := &cobra.Command{
 		Use:     "create",
