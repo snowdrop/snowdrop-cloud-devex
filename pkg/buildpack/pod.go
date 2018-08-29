@@ -31,8 +31,8 @@ func WaitAndGetPod(c *kubernetes.Clientset, application types.Application) (*cor
 	select {
 	case val := <-w.ResultChan():
 		log.Debugf("Received event of type %s", val.Type)
-		if e, ok := val.Object.(*corev1.Pod); ok {
-			return e, nil
+		if pod, ok := val.Object.(*corev1.Pod); ok {
+			return pod, nil
 		} else {
 			return nil, errors.Errorf("Unable to convert event object to Pod")
 		}
