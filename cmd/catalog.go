@@ -57,6 +57,20 @@ func init() {
 	catalogBindCmd.Flags().StringVarP(&secret, "secret", "s", "secret name", "Name of the secret to bind")
 	catalogBindCmd.Flags().StringVarP(&instance, "toInstance", "i", "instance name", "Instance name to bind the secret to")
 
+	catalogPlanCmd := &cobra.Command{
+		Use:     "plan",
+		Short:   "Show the plans of a service",
+		Long:    "Show the plans of a ClusterServiceClass",
+		Example: ` sb catalog plan <class name>`,
+		Args:    cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			log.Info("Catalog plan command called")
+			setup := Setup()
+
+			catalog.Plan(setup.RestConfig, args[0])
+		},
+	}
+
 	catalogCmd := &cobra.Command{
 		Use:   "catalog [options]",
 		Short: "List, select or bind a service from a catalog.",
@@ -64,11 +78,13 @@ func init() {
 		Example: fmt.Sprintf("%s\n%s\n%s",
 			catalogListCmd.Example,
 			catalogInstanceCmd.Example,
+			catalogPlanCmd.Example,
 			catalogBindCmd.Example),
 	}
 
 	catalogCmd.AddCommand(catalogListCmd)
 	catalogCmd.AddCommand(catalogInstanceCmd)
+	catalogCmd.AddCommand(catalogPlanCmd)
 	catalogCmd.AddCommand(catalogBindCmd)
 
 	catalogCmd.Annotations = map[string]string{"command": "catalog"}

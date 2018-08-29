@@ -18,7 +18,7 @@ import (
 
 func List(config *restclient.Config, matching string) {
 	serviceCatalogClient := GetClient(config)
-	classes, _ := getClusterServiceClasses(serviceCatalogClient)
+	classes, _ := GetClusterServiceClasses(serviceCatalogClient)
 	log.Info("List of services")
 	log.Info("================")
 
@@ -37,10 +37,11 @@ func List(config *restclient.Config, matching string) {
 	sort.Slice(filtered[:], func(i, j int) bool {
 		return filtered[i].Spec.ExternalName < filtered[j].Spec.ExternalName
 	})
-	printResults(filtered)
+
+	printListResults(filtered)
 }
 
-func printResults(classes []scv1beta1.ClusterServiceClass) {
+func printListResults(classes []scv1beta1.ClusterServiceClass) {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetRowLine(true)
 	table.SetHeader([]string{"Name", "Description", "Long Description"})
@@ -62,7 +63,7 @@ func printResults(classes []scv1beta1.ClusterServiceClass) {
 }
 
 // GetClusterServiceClasses queries the service service catalog to get available clusterServiceClasses
-func getClusterServiceClasses(scc *servicecatalogclienset.ServicecatalogV1beta1Client) ([]scv1beta1.ClusterServiceClass, error) {
+func GetClusterServiceClasses(scc *servicecatalogclienset.ServicecatalogV1beta1Client) ([]scv1beta1.ClusterServiceClass, error) {
 	classList, err := scc.ClusterServiceClasses().List(metav1.ListOptions{})
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to list cluster service classes")
