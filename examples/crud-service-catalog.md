@@ -81,7 +81,7 @@ The Service class to be selected from the catalog is specified within the MANIFE
 - Create a secret using the service's parameters and bind/mount them to the DeploymentConfig created during `sb init` step
 
 ```bash
-sb bind --secret <secret_name> --toInstance <name_of_the_service_instance>
+sb catalog bind --secret <secret_name> --toInstance <name_of_the_service_instance>
 ```
 
 where : `<name_of_the_service_instance>` corresponds to the service's instance name created previously `my-postgresql-db` and `<secret_name>` is the name of the secret (e.g my-postgresql-db-secret).
