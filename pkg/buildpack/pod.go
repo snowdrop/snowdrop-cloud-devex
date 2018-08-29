@@ -26,19 +26,15 @@ func WaitAndGetPod(c *kubernetes.Clientset, application types.Application) (*cor
 	}
 	defer w.Stop()
 
-	const timeoutInSeconds = 10
+	const timeoutInSeconds = 30
 	duration := timeoutInSeconds * time.Second
 	select {
 	case val := <-w.ResultChan():
+		log.Debugf("Received event of type %s", val.Type)
 		if e, ok := val.Object.(*corev1.Pod); ok {
-			log.Debugf("Status of %s pod is %s", e.Name, e.Status.Phase)
-			switch e.Status.Phase {
-			case corev1.PodRunning:
-				log.Debugf("Pod %s is running.", e.Name)
-				return e, nil
-			case corev1.PodFailed, corev1.PodUnknown:
-				return nil, errors.Errorf("pod %s status %s", e.Name, e.Status.Phase)
-			}
+			return e, nil
+		} else {
+			return nil, errors.Errorf("Unable to convert event object to Pod")
 		}
 	case <-time.After(duration):
 		bytes, e := json.Marshal(selector)
@@ -58,5 +54,6 @@ func WaitAndGetPod(c *kubernetes.Clientset, application types.Application) (*cor
 func podSelector(application types.Application) metav1.ListOptions {
 	return metav1.ListOptions{
 		LabelSelector: "app=" + application.Name,
+		FieldSelector: "status.phase=Running",
 	}
 }
