@@ -27,6 +27,7 @@ The prototype developed within this project aims to resolve the following user's
       * [Stop/start or restart the spring boot application](#stopstart-or-restart-the-spring-boot-application)
       * [Compile the maven project within the pod (optional)](#compile-the-maven-project-within-the-pod-optional)
       * [Clean up](#clean-up)
+      * [More examples](#more-examples)
    * [Technical ideas](#technical-ideas) 
 
 # Instructions
@@ -41,9 +42,9 @@ The prototype developed within this project aims to resolve the following user's
 - Execute within a terminal this curl command in order to download our Spring Boot go client 
 
   ```bash
-  sudo curl -L https://github.com/snowdrop/k8s-supervisor/releases/download/v0.7.0/sb-darwin-amd64 -o /usr/local/bin/sb
+  sudo curl -L https://github.com/snowdrop/k8s-supervisor/releases/download/v0.8.0/sb-darwin-amd64 -o /usr/local/bin/sb
   or 
-  sudo curl -L https://github.com/snowdrop/k8s-supervisor/releases/download/v0.7.0/sb-linux-amd64 -o /usr/local/bin/sb
+  sudo curl -L https://github.com/snowdrop/k8s-supervisor/releases/download/v0.8.0/sb-linux-amd64 -o /usr/local/bin/sb
   sudo chmod +x /usr/local/bin/sb
   ```
 
@@ -279,21 +280,24 @@ And next execute the compilation using this command
   oc rsh $(oc get pod -l app=my-spring-boot -o name) ls -l /deployments
   ```
   
-  
 ## Clean up
   
   ```bash
   sb clean
   ``` 
+
+## More examples
+
+Additional use cases are deveoped under the `examples` directory  
   
 # Technical ideas
 
-The following chapter describes how we have technically implemented such user stories:
+The technically consideration that we have investigated to implement the user stories are described hereafter :
 
-- pod of the application/component (created by odo) defined with a :
+- pod of the application designed with a :
   - initContainer : supervisord [1] where different commands are registered from ENV vars. E.g. start/stop the java runtime, debug or compile (= maven), ... 
   - container : created using Java S2I image
-  - shared volume 
+  - shared volume mounted to by example keep maven .m2 repository
 - commands can be executed remotely to trigger and action within the developer's pod -> supervisord ctl start|stop program1,....,programN
 - OpenShift Template -> converted into individual yaml files (= builder concept) and containing "{{.key}} to be processed by the go template engine
 - Developer's user preferences are stored into a MANIFEST yaml (as Cloudfoundry proposes too) which is parsed at bootstrap to create an "Application" struct object used next to process the template and replace the keys with their values
