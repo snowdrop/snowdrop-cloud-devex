@@ -54,8 +54,8 @@ func init() {
 			catalog.MountSecretAsEnvFrom(setup.RestConfig, setup.Application, secret)
 		},
 	}
-	catalogBindCmd.Flags().StringVarP(&secret, "secret", "s", "secret name", "Name of the secret to bind")
-	catalogBindCmd.Flags().StringVarP(&instance, "toInstance", "i", "instance name", "Instance name to bind the secret to")
+	catalogBindCmd.Flags().StringVarP(&secret, "secret", "s", "", "Name of the secret to bind")
+	catalogBindCmd.Flags().StringVarP(&instance, "toInstance", "i", "", "Instance name to bind the secret to")
 
 	catalogPlanCmd := &cobra.Command{
 		Use:     "plan",
