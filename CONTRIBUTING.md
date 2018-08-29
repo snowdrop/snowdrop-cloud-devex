@@ -233,35 +233,6 @@ docker tag $TAG_ID quay.io/snowdrop/supervisord
 docker login quai.io
 docker push quay.io/snowdrop/supervisord
 ```
-
-## HTTP Server generating Spring Boot Zip file  
-
-Execute this command at the root of the project
-```bash
-imagebuilder -t spring-boot-generator:latest -f docker/Dockerfile_generator .
-```
-  
-Tag the docker image and push it to `quay.io`
-
-```bash
-TAG_ID=$(docker images -q spring-boot-generator:latest)
-docker tag $TAG_ID quay.io/snowdrop/spring-boot-generator
-docker login quai.io
-docker push quay.io/snowdrop/spring-boot-generator
-```
-
-To test the docker image, execute this command to create a pod/service and route
-```bash
-oc new-project generator
-oc create -f docker/generator.yml
-```
-
-Grab the route of the service and next generate a project
-```bash
-sb create -t simple -i ocool -g org.acme.cool -v 1.0.0 -p me.snowdrop.cool -s 1.5.15.RELEASE -b 1.5.15.Final -u http://spring-boot-generator.192.168.65.2.nip.io/
-sb create -t simple -d web -i ocool -g org.acme.cool -v 1.0.0 -p me.snowdrop.cool -s 1.5.15.RELEASE -b 1.5.15.Final -u http://spring-boot-generator.192.168.65.2.nip.io/
-sb create -t simple -d cxf -i ocool -g org.acme.cool -v 1.0.0 -p me.snowdrop.cool -s 1.5.15.RELEASE -b 1.5.15.Final -u http://spring-boot-generator.192.168.65.2.nip.io/
-```
   
 ## Java S2I image
 

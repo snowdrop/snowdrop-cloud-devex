@@ -29,7 +29,6 @@ upload: prepare-release
 
 assets: $(VFSGENDEV)
 	@echo ">> writing assets"
-	cd $(PREFIX)/pkg/template && go generate
 	cd $(PREFIX)/pkg/buildpack && go generate
 
 $(VFSGENDEV):
