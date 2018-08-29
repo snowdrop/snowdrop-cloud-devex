@@ -48,7 +48,11 @@ func WaitAndGetPod(c *kubernetes.Clientset, application types.Application) (*cor
 		return nil, errors.Errorf("Waited %s but couldn't find pod matching '%s' selector", duration, string(bytes))
 	}
 
-	return nil, errors.Errorf("unknown error while waiting for pod matching '%s' selector", selector)
+	bytes, e := json.Marshal(selector)
+	if e != nil {
+		return nil, errors.Errorf("Couldn't marshall pod selector to JSON in unknown error code-path. JSON error is: %s", e)
+	}
+	return nil, errors.Errorf("Unknown error while waiting for pod matching '%s' selector", string(bytes))
 }
 
 func podSelector(application types.Application) metav1.ListOptions {
