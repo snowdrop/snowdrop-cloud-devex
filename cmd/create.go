@@ -2,7 +2,7 @@ package cmd
 
 import (
 	log "github.com/sirupsen/logrus"
-	"github.com/snowdrop/k8s-supervisor/pkg/scaffold"
+	"github.com/snowdrop/generator/pkg/scaffold"
 	"github.com/spf13/cobra"
 
 	"archive/zip"
