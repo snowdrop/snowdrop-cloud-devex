@@ -68,7 +68,7 @@ func init() {
 				parameters = "?" + parameters
 			}
 
-			u := strings.Join([]string{p.UrlService, "template", template}, "/") + parameters
+			u := strings.Join([]string{p.UrlService, "app"}, "/") + parameters
 			log.Infof("URL of the request calling the service is %s", u)
 			req, err := http.NewRequest(http.MethodGet, u, strings.NewReader(""))
 
