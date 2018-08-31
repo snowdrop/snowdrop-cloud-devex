@@ -22,7 +22,6 @@ type SpringForm struct {
 
 func init() {
 	var (
-		template  string
 		templates = []string{"simple", "rest", "crud"}
 		p         = scaffold.Project{}
 	)
@@ -36,20 +35,21 @@ func init() {
 		Run: func(cmd *cobra.Command, args []string) {
 			var valid bool
 			for _, t := range templates {
-				if template == t {
+				if p.Template == t {
 					valid = true
 				}
 			}
 
 			if !valid {
-				log.WithField("template", template).Fatal("The provided template is not supported: ")
+				log.WithField("template", p.Template).Fatal("The provided template is not supported: ")
 			}
 
-			log.Infof("Create command called with template '%s'", template)
+			log.Infof("Create command called")
 
 			client := http.Client{}
 
 			form := url.Values{}
+			form.Add("template", p.Template)
 			form.Add("groupId", p.GroupId)
 			form.Add("artifactId", p.ArtifactId)
 			form.Add("version", p.Version)
@@ -106,7 +106,7 @@ func init() {
 		},
 	}
 
-	createCmd.Flags().StringVarP(&template, "template", "t", "simple",
+	createCmd.Flags().StringVarP(&p.Template, "template", "t", "simple",
 		fmt.Sprintf("Template name used to select the project to be created. Supported templates are '%s'", strings.Join(templates, ",")))
 	createCmd.Flags().StringVarP(&p.UrlService, "urlService", "u", "http://spring-boot-generator.195.201.87.126.nip.io", "URL of the HTTP Server exposing the spring boot service")
 	createCmd.Flags().StringArrayVarP(&p.Dependencies, "dependencies", "d", []string{}, "Spring Boot starters/dependencies")
