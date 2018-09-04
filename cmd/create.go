@@ -2,7 +2,7 @@ package cmd
 
 import (
 	log "github.com/sirupsen/logrus"
-	"github.com/snowdrop/generator/pkg/scaffold"
+	"github.com/snowdrop/k8s-supervisor/pkg/scaffold"
 	"github.com/spf13/cobra"
 
 	"archive/zip"
@@ -50,16 +50,16 @@ func init() {
 
 			form := url.Values{}
 			form.Add("template", p.Template)
-			form.Add("groupId", p.GroupId)
-			form.Add("artifactId", p.ArtifactId)
+			form.Add("groupid", p.GroupId)
+			form.Add("artifactid", p.ArtifactId)
 			form.Add("version", p.Version)
-			form.Add("packageName", p.PackageName)
-			form.Add("bomVersion", p.SnowdropBomVersion)
-			form.Add("springbootVersion", p.SpringVersion)
-			form.Add("outDir", p.OutDir)
-			for _, v := range p.Dependencies {
+			form.Add("packagename", p.PackageName)
+			form.Add("snowdropbom", p.SnowdropBomVersion)
+			form.Add("springbootversion", p.SpringBootVersion)
+			form.Add("outdir", p.OutDir)
+			for _, v := range p.Modules {
 				if v != "" {
-					form.Add("dependencies", v)
+					form.Add("module", v)
 				}
 			}
 
@@ -108,14 +108,14 @@ func init() {
 
 	createCmd.Flags().StringVarP(&p.Template, "template", "t", "simple",
 		fmt.Sprintf("Template name used to select the project to be created. Supported templates are '%s'", strings.Join(templates, ",")))
-	createCmd.Flags().StringVarP(&p.UrlService, "urlService", "u", "http://spring-boot-generator.195.201.87.126.nip.io", "URL of the HTTP Server exposing the spring boot service")
-	createCmd.Flags().StringArrayVarP(&p.Dependencies, "dependencies", "d", []string{}, "Spring Boot starters/dependencies")
-	createCmd.Flags().StringVarP(&p.GroupId, "groupId", "g", "com.example", "Group ID")
-	createCmd.Flags().StringVarP(&p.ArtifactId, "artifactId", "i", "demo", "Artifact ID")
+	createCmd.Flags().StringVarP(&p.UrlService, "urlservice", "u", "http://spring-boot-generator.195.201.87.126.nip.io", "URL of the HTTP Server exposing the spring boot service")
+	createCmd.Flags().StringArrayVarP(&p.Modules, "module", "m", []string{}, "Spring Boot modules/starters")
+	createCmd.Flags().StringVarP(&p.GroupId, "groupid", "g", "com.example", "Group ID")
+	createCmd.Flags().StringVarP(&p.ArtifactId, "artifactid", "i", "demo", "Artifact ID")
 	createCmd.Flags().StringVarP(&p.Version, "version", "v", "1.0", "Version")
-	createCmd.Flags().StringVarP(&p.PackageName, "packageName", "p", "com.example.demo", "Package Name")
-	createCmd.Flags().StringVarP(&p.SpringVersion, "springbootVersion", "s", "1.5.15.RELEASE", "Spring Boot Version")
-	createCmd.Flags().StringVarP(&p.SnowdropBomVersion, "bomVersion", "b", "1.5.15.Final", "Snowdrop Bom Version")
+	createCmd.Flags().StringVarP(&p.PackageName, "packagename", "p", "com.example.demo", "Package Name")
+	createCmd.Flags().StringVarP(&p.SpringBootVersion, "springbootversion", "s", "1.5.15.RELEASE", "Spring Boot Version")
+	createCmd.Flags().StringVarP(&p.SnowdropBomVersion, "snowdropbom", "b", "1.5.15.Final", "Snowdrop Bom Version")
 
 	// Add a defined annotation in order to appear in the help menu
 	createCmd.Annotations = map[string]string{"command": "create"}

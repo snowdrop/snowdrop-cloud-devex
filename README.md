@@ -82,7 +82,7 @@ The prototype developed within this project aims to resolve the following user's
     -a, --application string   Application name (defaults to current directory name)
     -h, --help                 help for sb
     -k, --kubeconfig string    Path to a kubeconfig ($HOME/.kube/config). Only required if out-of-cluster.
-    -m, --masterurl string     The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.
+        --masterurl string     The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.
     -n, --namespace string     Namespace/project (defaults to current project)
   
   Use "sb [command] --help" for more information about a command.
@@ -288,7 +288,7 @@ And next execute the compilation using this command
 
 ## More examples
 
-Additional use cases are deveoped under the `examples` directory  
+Additional use cases are developed under the `examples` directory  
   
 # Technical ideas
 

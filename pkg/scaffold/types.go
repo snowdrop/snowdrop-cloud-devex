@@ -5,28 +5,12 @@ type Project struct {
 	ArtifactId         string
 	Version            string
 	PackageName        string
-	Dependencies	   []string
 	OutDir             string
+	Template 		   string       `yaml:"template"  json:"template"`
 
 	SnowdropBomVersion string
-	SpringVersion      string
-	Modules            []Module
+	SpringBootVersion  string
+	Modules            []string
 
 	UrlService  	   string
-}
-
-type Config struct {
-	Modules      []Module
-}
-
-type Module struct {
-	Name	     string
-	Description  string
-	Starters     []Starter
-}
-
-type Starter struct {
-	GroupId	     string
-	ArtifactId	 string
-	Scope	     string
 }
