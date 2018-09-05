@@ -3,6 +3,7 @@ GITCOMMIT   := $(shell git rev-parse --short HEAD 2>/dev/null)
 BUILD_FLAGS := -ldflags="-w -X $(PROJECT)/cmd.GITCOMMIT=$(GITCOMMIT) -X $(PROJECT)/cmd.VERSION=$(VERSION)"
 GO          ?= go
 GOFMT       ?= $(GO)fmt
+GOFILES     =  $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 
 # go get -u github.com/shurcooL/vfsgen/cmd/vfsgendev
 VFSGENDEV   := $(GOPATH)/bin/vfsgendev
@@ -36,6 +37,9 @@ $(VFSGENDEV):
 
 gofmt:
 	./scripts/check-gofmt.sh
+
+format:
+	@GOFMT -s -w $(GOFILES)
 
 version:
 	@echo $(VERSION)
