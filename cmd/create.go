@@ -106,16 +106,16 @@ func init() {
 		},
 	}
 
-	createCmd.Flags().StringVarP(&p.Template, "template", "t", "simple",
+	createCmd.Flags().StringVarP(&p.Template, "template", "t", "",
 		fmt.Sprintf("Template name used to select the project to be created. Supported templates are '%s'", strings.Join(templates, ",")))
 	createCmd.Flags().StringVarP(&p.UrlService, "urlservice", "u", "http://spring-boot-generator.195.201.87.126.nip.io", "URL of the HTTP Server exposing the spring boot service")
 	createCmd.Flags().StringArrayVarP(&p.Modules, "module", "m", []string{}, "Spring Boot modules/starters")
-	createCmd.Flags().StringVarP(&p.GroupId, "groupid", "g", "com.example", "Group ID")
-	createCmd.Flags().StringVarP(&p.ArtifactId, "artifactid", "i", "demo", "Artifact ID")
-	createCmd.Flags().StringVarP(&p.Version, "version", "v", "1.0", "Version")
-	createCmd.Flags().StringVarP(&p.PackageName, "packagename", "p", "com.example.demo", "Package Name")
-	createCmd.Flags().StringVarP(&p.SpringBootVersion, "springbootversion", "s", "1.5.15.RELEASE", "Spring Boot Version")
-	createCmd.Flags().StringVarP(&p.SnowdropBomVersion, "snowdropbom", "b", "1.5.15.Final", "Snowdrop Bom Version")
+	createCmd.Flags().StringVarP(&p.GroupId, "groupid", "g", "", "GroupoId : com.example")
+	createCmd.Flags().StringVarP(&p.ArtifactId, "artifactid", "i", "demo", "ArtifactId: demo")
+	createCmd.Flags().StringVarP(&p.Version, "version", "v", "", "Version: 0.0.1-SNAPSHOT")
+	createCmd.Flags().StringVarP(&p.PackageName, "packagename", "p", "", "Package Name: com.example.demo")
+	createCmd.Flags().StringVarP(&p.SpringBootVersion, "springbootversion", "s", "", "Spring Boot Version")
+	createCmd.Flags().StringVarP(&p.SnowdropBomVersion, "snowdropbom", "b", "", "Snowdrop Bom Version")
 
 	// Add a defined annotation in order to appear in the help menu
 	createCmd.Annotations = map[string]string{"command": "create"}
