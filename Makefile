@@ -3,7 +3,7 @@ GITCOMMIT   := $(shell git rev-parse --short HEAD 2>/dev/null)
 BUILD_FLAGS := -ldflags="-w -X $(PROJECT)/cmd.GITCOMMIT=$(GITCOMMIT) -X $(PROJECT)/cmd.VERSION=$(VERSION)"
 GO          ?= go
 GOFMT       ?= $(GO)fmt
-GOFILES     =  $(shell find . -type f -name '*.go' -not -path "./vendor/*")
+GOFILES     := $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 
 # go get -u github.com/shurcooL/vfsgen/cmd/vfsgendev
 VFSGENDEV   := $(GOPATH)/bin/vfsgendev
@@ -35,11 +35,13 @@ assets: $(VFSGENDEV)
 $(VFSGENDEV):
 	cd $(PREFIX)/vendor/github.com/shurcooL/vfsgen/ && go install ./cmd/vfsgendev/...
 
-gofmt:
-	./scripts/check-gofmt.sh
-
 format:
-	@GOFMT -s -w $(GOFILES)
+	@echo ">> checking code style"
+	@fmtRes=$$($(GOFMT) -d $$(find . -path ./vendor -prune -o -name '*.go' -print)); \
+	if [ -n "$${fmtRes}" ]; then \
+		echo "gofmt checking failed!"; echo "$${fmtRes}"; echo; \
+		exit 1; \
+	fi
 
 version:
 	@echo $(VERSION)
