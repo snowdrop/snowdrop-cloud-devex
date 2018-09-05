@@ -21,7 +21,7 @@ func CreateRouteTemplate(config *restclient.Config, application types.Applicatio
 		routeV1Client := getClient(config)
 
 		// Parse Route Template
-		tName := strings.Join([]string{builderPath,"route"},"/")
+		tName := strings.Join([]string{builderPath, "route"}, "/")
 		var b = ParseTemplate(tName, application)
 
 		// Create Route struct using the generated Route string

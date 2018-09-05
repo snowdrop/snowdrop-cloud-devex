@@ -1,8 +1,8 @@
 package config
 
 import (
-	"os/user"
 	log "github.com/sirupsen/logrus"
+	"os/user"
 )
 
 const (
@@ -10,8 +10,8 @@ const (
 )
 
 type Kube struct {
-	MasterURL  string
-	Config string
+	MasterURL string
+	Config    string
 }
 
 func NewKube() *Kube {
@@ -25,5 +25,3 @@ func HomeKubePath() string {
 	}
 	return usr.HomeDir + KUBECONFILE
 }
-
-

@@ -7,6 +7,7 @@ import (
 
 	"archive/zip"
 	"fmt"
+	"github.com/ghodss/yaml"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -14,7 +15,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"github.com/ghodss/yaml"
 )
 
 const (
@@ -137,7 +137,7 @@ func GetGeneratorServiceConfig() *scaffold.Config {
 	c := scaffold.Config{}
 
 	// Call the /config endpoint to get the configuration
-	URL := strings.Join([]string{SERVICE_ENDPOINT,"config"},"/")
+	URL := strings.Join([]string{SERVICE_ENDPOINT, "config"}, "/")
 	client := http.Client{}
 
 	req, err := http.NewRequest(http.MethodGet, URL, strings.NewReader(""))

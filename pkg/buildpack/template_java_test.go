@@ -1,9 +1,9 @@
 package buildpack_test
 
 import (
-	"os"
 	"fmt"
 	"net/http"
+	"os"
 	"testing"
 
 	"github.com/shurcooL/httpfs/vfsutil"
@@ -11,12 +11,12 @@ import (
 )
 
 var (
-	templateFiles   []string
-	project         = "java"
+	templateFiles []string
+	project       = "java"
 )
 
 func TestVfsBuildpack(t *testing.T) {
-	tExpectedFiles := []string {
+	tExpectedFiles := []string{
 		"java/imagestream",
 		"java/route",
 		"java/service",
@@ -45,7 +45,7 @@ func walkTree() []string {
 		}
 
 		fmt.Println(path)
-		templateFiles = append(templateFiles,path)
+		templateFiles = append(templateFiles, path)
 		return nil
 	})
 	return templateFiles

@@ -1,8 +1,8 @@
 package logger
 
 import (
-	"os"
 	log "github.com/sirupsen/logrus"
+	"os"
 )
 
 func EnableLogLevelDebug() {

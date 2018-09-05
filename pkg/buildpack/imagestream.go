@@ -35,7 +35,7 @@ func CreateImageStreamTemplate(config *restclient.Config, appConfig types.Applic
 			log.Infof("'%s' ImageStream already exists, skipping", img.Name)
 		} else {
 			// Parse ImageStream Template
-			tName := strings.Join([]string{builderPath,"imagestream"},"/")
+			tName := strings.Join([]string{builderPath, "imagestream"}, "/")
 			var b = ParseTemplate(tName, appCfg)
 
 			// Create ImageStream struct using the generated ImageStream string

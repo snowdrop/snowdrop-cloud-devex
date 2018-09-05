@@ -1,20 +1,20 @@
 package buildpack
 
 import (
-	"text/template"
 	"bytes"
 	"fmt"
-	"os"
-	log "github.com/sirupsen/logrus"
 	"github.com/shurcooL/httpfs/vfsutil"
+	log "github.com/sirupsen/logrus"
+	"os"
+	"text/template"
 
 	"github.com/snowdrop/k8s-supervisor/pkg/buildpack/types"
 )
 
 var (
-	assetsBuildPackTemplates  = Assets
-	templateBuildPackFiles    []string
-	templates                 = make(map[string]template.Template)
+	assetsBuildPackTemplates = Assets
+	templateBuildPackFiles   []string
+	templates                = make(map[string]template.Template)
 )
 
 const (
@@ -33,7 +33,7 @@ func init() {
 		}
 
 		log.Debugf("Path of the buildpack file to be added as template : %s" + path)
-		templateBuildPackFiles = append(templateBuildPackFiles,path)
+		templateBuildPackFiles = append(templateBuildPackFiles, path)
 		return nil
 	}
 
@@ -41,7 +41,6 @@ func init() {
 	if errW != nil {
 		panic(errW)
 	}
-
 
 	// Fill an array with our Builder's text/template
 	for i := range templateBuildPackFiles {
@@ -51,7 +50,7 @@ func init() {
 		t := template.New(templateBuildPackFiles[i])
 
 		// Read Template's content
-		data, err := vfsutil.ReadFile(assetsBuildPackTemplates,templateBuildPackFiles[i])
+		data, err := vfsutil.ReadFile(assetsBuildPackTemplates, templateBuildPackFiles[i])
 		if err != nil {
 			log.Error(err)
 		}

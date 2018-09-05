@@ -18,7 +18,7 @@ func CreateServiceTemplate(clientset *kubernetes.Clientset, dc *appsv1.Deploymen
 		log.Infof("'%s' Service already exists, skipping", application.Name)
 	} else {
 		// Parse Service Template
-		tName := strings.Join([]string{builderPath,"service"},"/")
+		tName := strings.Join([]string{builderPath, "service"}, "/")
 		var b = ParseTemplate(tName, application)
 
 		// Create Service struct using the generated Service string
