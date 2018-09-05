@@ -14,15 +14,19 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"github.com/ghodss/yaml"
 )
 
-type SpringForm struct {
-	GroupId string
-}
+const (
+	SERVICE_ENDPOINT = "http://spring-boot-generator.195.201.87.126.nip.io"
+)
 
 func init() {
+
+	config := GetGeneratorServiceConfig()
+
 	var (
-		templates = []string{"simple", "rest", "crud"}
+		templates = config.Templates
 		p         = scaffold.Project{}
 	)
 
@@ -108,7 +112,7 @@ func init() {
 
 	createCmd.Flags().StringVarP(&p.Template, "template", "t", "",
 		fmt.Sprintf("Template name used to select the project to be created. Supported templates are '%s'", strings.Join(templates, ",")))
-	createCmd.Flags().StringVarP(&p.UrlService, "urlservice", "u", "http://spring-boot-generator.195.201.87.126.nip.io", "URL of the HTTP Server exposing the spring boot service")
+	createCmd.Flags().StringVarP(&p.UrlService, "urlservice", "u", SERVICE_ENDPOINT, "URL of the HTTP Server exposing the spring boot service")
 	createCmd.Flags().StringArrayVarP(&p.Modules, "module", "m", []string{}, "Spring Boot modules/starters")
 	createCmd.Flags().StringVarP(&p.GroupId, "groupid", "g", "", "GroupoId : com.example")
 	createCmd.Flags().StringVarP(&p.ArtifactId, "artifactid", "i", "demo", "ArtifactId: demo")
@@ -121,6 +125,38 @@ func init() {
 	createCmd.Annotations = map[string]string{"command": "create"}
 
 	rootCmd.AddCommand(createCmd)
+}
+
+func GetGeneratorServiceConfig() *scaffold.Config {
+
+	c := scaffold.Config{}
+
+	// Call the /config endpoint to get the configuration
+	URL := strings.Join([]string{SERVICE_ENDPOINT,"config"},"/")
+	client := http.Client{}
+
+	req, err := http.NewRequest(http.MethodGet, URL, strings.NewReader(""))
+
+	if err != nil {
+		log.Error(err.Error())
+	}
+	addClientHeader(req)
+
+	res, err := client.Do(req)
+	if err != nil {
+		log.Error(err.Error())
+	}
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	err = yaml.Unmarshal(body, &c)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	return &c
 }
 
 func addClientHeader(req *http.Request) {
