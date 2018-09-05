@@ -38,10 +38,15 @@ func init() {
 		Args:    cobra.RangeArgs(0, 1),
 		Run: func(cmd *cobra.Command, args []string) {
 			var valid bool
-			for _, t := range templates {
-				if p.Template == t {
-					valid = true
+			if p.Template != "" {
+				for _, t := range templates {
+					if p.Template == t {
+						valid = true
+					}
 				}
+			} else {
+				p.Template = "simple"
+				valid = true
 			}
 
 			if !valid {
