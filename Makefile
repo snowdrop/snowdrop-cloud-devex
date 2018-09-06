@@ -12,10 +12,10 @@ PREFIX      ?= $(shell pwd)
 all: clean build
 
 clean:
-	@echo "> Remove build dir"
-	@rm -rf ./build
+	@echo "> Remove dist dir"
+	@rm -rf ./dist
 
-build: clean
+build:
 	@echo "> Build go application"
 	go build ${BUILD_FLAGS} -o sb main.go
 
