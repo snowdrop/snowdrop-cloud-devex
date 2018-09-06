@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- SB tool is installed (>= [0.9.1](https://github.com/snowdrop/k8s-supervisor/releases/tag/v0.12.0). See README.md 
+- SB tool is installed (>= [0.12.0](https://github.com/snowdrop/k8s-supervisor/releases/tag/v0.12.0)). See README.md 
 - Minishift (>= v1.23.0+91235ee) with Service Catalog feature enabled
 
 ## Step by step instructions
