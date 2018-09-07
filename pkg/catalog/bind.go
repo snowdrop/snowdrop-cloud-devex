@@ -13,8 +13,8 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/pkg/errors"
-	"github.com/snowdrop/k8s-supervisor/pkg/buildpack/types"
-	"github.com/snowdrop/k8s-supervisor/pkg/common/oc"
+	"github.com/snowdrop/spring-boot-cloud-devex/pkg/buildpack/types"
+	"github.com/snowdrop/spring-boot-cloud-devex/pkg/common/oc"
 	"k8s.io/apimachinery/pkg/util/uuid"
 )
 

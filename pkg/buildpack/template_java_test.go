@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/shurcooL/httpfs/vfsutil"
-	"github.com/snowdrop/k8s-supervisor/pkg/buildpack"
+	"github.com/snowdrop/spring-boot-cloud-devex/pkg/buildpack"
 )
 
 var (

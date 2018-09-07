@@ -4,7 +4,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"github.com/snowdrop/k8s-supervisor/pkg/buildpack"
+	"github.com/snowdrop/spring-boot-cloud-devex/pkg/buildpack"
 )
 
 func init() {

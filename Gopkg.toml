@@ -44,11 +44,11 @@ version = "1.6.2"
 name = "github.com/shurcooL/httpfs"
 
 [[constraint]]
-name = "github.com/kubernetes-incubator/service-catalog"
-version = "v0.1.29"
+name = "github.com/shurcooL/vfsgen"
 
 [[constraint]]
-name = "github.com/shurcooL/vfsgen"
+name = "github.com/kubernetes-incubator/service-catalog"
+version = "v0.1.29"
 
 [[constraint]]
   name = "github.com/pborman/uuid"

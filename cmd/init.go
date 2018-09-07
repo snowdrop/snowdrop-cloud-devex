@@ -5,7 +5,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/openshift/api/apps/v1"
-	"github.com/snowdrop/k8s-supervisor/pkg/buildpack"
+	"github.com/snowdrop/spring-boot-cloud-devex/pkg/buildpack"
 	"strings"
 )
 

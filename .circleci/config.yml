@@ -11,7 +11,7 @@ jobs:
     #### expecting it in the form of
     ####   /go/src/github.com/circleci/go-tool
     ####   /go/src/bitbucket.org/circleci/go-tool
-    working_directory: /go/src/github.com/snowdrop/k8s-supervisor
+    working_directory: /go/src/github.com/snowdrop/spring-boot-cloud-devex
 
     steps:
     # The checkout step will default to the working_directory we have already defined.
@@ -26,7 +26,7 @@ jobs:
     docker:
     - image: circleci/golang:1.9
 
-    working_directory: /go/src/github.com/k8s-supervisor/generator
+    working_directory: /go/src/github.com/spring-boot-cloud-devex/generator
 
     steps:
     - checkout

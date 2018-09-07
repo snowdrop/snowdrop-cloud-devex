@@ -2,7 +2,7 @@ package cmd
 
 import (
 	log "github.com/sirupsen/logrus"
-	"github.com/snowdrop/k8s-supervisor/pkg/scaffold"
+	"github.com/snowdrop/spring-boot-cloud-devex/pkg/scaffold"
 	"github.com/spf13/cobra"
 
 	"archive/zip"

@@ -3,7 +3,7 @@ package buildpack_test
 import (
 	"bytes"
 	"fmt"
-	"github.com/snowdrop/k8s-supervisor/pkg/buildpack/types"
+	"github.com/snowdrop/spring-boot-cloud-devex/pkg/buildpack/types"
 	"path"
 	"runtime"
 	"testing"

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/snowdrop/k8s-supervisor/cmd"
-	"github.com/snowdrop/k8s-supervisor/pkg/common/logger"
+	"github.com/snowdrop/spring-boot-cloud-devex/cmd"
+	"github.com/snowdrop/spring-boot-cloud-devex/pkg/common/logger"
 )
 
 func main() {

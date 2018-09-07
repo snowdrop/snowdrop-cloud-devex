@@ -1,7 +1,7 @@
 package catalog
 
 import (
-	"github.com/snowdrop/k8s-supervisor/pkg/buildpack/types"
+	"github.com/snowdrop/spring-boot-cloud-devex/pkg/buildpack/types"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	restclient "k8s.io/client-go/rest"
 

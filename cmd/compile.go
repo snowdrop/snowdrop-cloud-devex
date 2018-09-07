@@ -4,8 +4,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"github.com/snowdrop/k8s-supervisor/pkg/common/config"
-	"github.com/snowdrop/k8s-supervisor/pkg/common/oc"
+	"github.com/snowdrop/spring-boot-cloud-devex/pkg/common/config"
+	"github.com/snowdrop/spring-boot-cloud-devex/pkg/common/oc"
 )
 
 func init() {

@@ -8,8 +8,8 @@ import (
 	appsv1 "github.com/openshift/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/snowdrop/k8s-supervisor/pkg/buildpack/types"
-	"github.com/snowdrop/k8s-supervisor/pkg/common/oc"
+	"github.com/snowdrop/spring-boot-cloud-devex/pkg/buildpack/types"
+	"github.com/snowdrop/spring-boot-cloud-devex/pkg/common/oc"
 	"strings"
 )
 

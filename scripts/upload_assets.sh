@@ -7,7 +7,7 @@ for line in $CONFIG; do
 done
 
 owner="snowdrop"
-repo="k8s-supervisor"
+repo="spring-boot-cloud-devex"
 
 AUTH="Authorization: token $GITHUB_API_TOKEN"
 

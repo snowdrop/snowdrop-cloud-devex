@@ -1,4 +1,4 @@
-PROJECT     := github.com/snowdrop/k8s-supervisor
+PROJECT     := github.com/snowdrop/spring-boot-cloud-devex
 GITCOMMIT   := $(shell git rev-parse --short HEAD 2>/dev/null)
 BUILD_FLAGS := -ldflags="-w -X $(PROJECT)/cmd.GITCOMMIT=$(GITCOMMIT) -X $(PROJECT)/cmd.VERSION=$(VERSION)"
 GO          ?= go

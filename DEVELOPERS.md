@@ -24,12 +24,12 @@
 
 # Install the go project
 
-Download and install the `k8s-supervisor's github project` within your `$GOPATH`'s directory
+Download and install the `spring-boot-cloud-devex's github project` within your `$GOPATH`'s directory
 
 ```bash
 cd $GOPATH/src
-go get github.com/snowdrop/k8s-supervisor
-cd k8s-supervisor
+go get github.com/snowdrop/spring-boot-cloud-devex
+cd spring-boot-cloud-devex
 ```   
 
 # Build the supervisor and java s2i images
@@ -92,7 +92,7 @@ docker push quay.io/snowdrop/spring-boot-s2i
 ## Test 0 : Build executable and test it
 
 - Log on to an OpenShift cluster with an `admin` role
-- Open or create the following project : `k8s-supervisord`
+- Open or create the following project : `spring-boot-cloud-devexd`
 - Move under the `spring-boot` folder and run these commands
 
 ```bash
@@ -106,7 +106,7 @@ export CURRENT=$(pwd)
 cd spring-boot
 mvn clean package
 
-sb init -n k8s-supervisord
+sb init -n cloud-demo
 sb push --mode binary
 sb exec start
 sb exec stop
@@ -116,7 +116,7 @@ cd $CURRENT
 ## Test 1 : source -> compile -> run
 
 - Log on to an OpenShift cluster with an `admin` role
-- Open or create the following project : `k8s-supervisord`
+- Open or create the following project : `cloud-demo`
 - Move under the `spring-boot` folder and run these commands
 
 ```bash
@@ -128,7 +128,7 @@ export PATH=$PATH:$(pwd)
 export CURRENT=$(pwd)
 
 cd spring-boot
-sb init -n k8s-supervisord
+sb init -n cloud-demo
 sb push --mode source
 sb compile
 sb exec start
@@ -145,7 +145,7 @@ curl $URL/api/greeting
 ## Test 2 : binary -> run
 
 - Log on to an OpenShift cluster with an `admin` role
-- Open or create the following project : `k8s-supervisord`
+- Open or create the following project : `cloud-demo`
 - Move under the `spring-boot` folder and run these commands
 
 ```bash
@@ -159,7 +159,7 @@ export CURRENT=$(pwd)
 cd spring-boot
 
 mvn clean package
-sb init -n k8s-supervisord
+sb init -n cloud-demo
 sb push --mode binary
 sb exec start
 cd $CURRENT
@@ -175,7 +175,7 @@ curl $URL/api/greeting
 ## Test 3 : debug
 
 - Log on to an OpenShift cluster with an `admin` role
-- Open or create the following project : `k8s-supervisord`
+- Open or create the following project : `cloud-demo`
 - Move under the `spring-boot` folder and run these commands
 
 ```bash
@@ -187,7 +187,7 @@ export PATH=$PATH:$(pwd)
 export CURRENT=$(pwd)
  
 cd spring-boot
-sb init -n k8s-supervisord
+sb init -n cloud-demo
 sb push --mode binary
 sb exec stop
 sb debug
@@ -197,7 +197,7 @@ cd $CURRENT
 ## Test 4 : source -> compile -> kill pod -> compile again (m2 repo is back again)
 
 - Log on to an OpenShift cluster with an `admin` role
-- Open or create the following project : `k8s-supervisord`
+- Open or create the following project : `cloud-demo`
 - Move under the `spring-boot` folder and run these commands
 
 ```bash
@@ -210,7 +210,7 @@ export CURRENT=$(pwd)
 
 cd spring-boot
 
-sb init -n k8s-supervisord
+sb init -n cloud-demo
 sb push --mode source
 sb compile
 oc delete --grace-period=0 --force=true pod -l app=spring-boot-http 
@@ -223,7 +223,7 @@ cd $CURRENT
 ## Test 5 : build (code not yet finalized as image is build bit no deployment is available)
 
 - Log on to an OpenShift cluster with an `admin` role
-- Open or create the following project : `k8s-supervisord`
+- Open or create the following project : `cloud-demo`
 - Move under the `spring-boot` folder and run these commands
 
 ```bash
@@ -236,7 +236,7 @@ export CURRENT=$(pwd)
 
 cd spring-boot
 
-sb init -n k8s-supervisord
+sb init -n cloud-demo
 sb build
 cd $CURRENT
 ```

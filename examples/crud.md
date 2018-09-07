@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
- - SB tool is installed (>= [0.12.0](https://github.com/snowdrop/k8s-supervisor/releases/tag/v0.12.0)). See README.md 
+ - SB tool is installed (>= [0.12.0](https://github.com/snowdrop/spring-boot-cloud-devex/releases/tag/v0.12.0)). See README.md 
 
 ## Step by step instructions
 

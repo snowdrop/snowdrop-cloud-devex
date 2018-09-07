@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
-	"github.com/snowdrop/k8s-supervisor/pkg/catalog"
+	"github.com/snowdrop/spring-boot-cloud-devex/pkg/catalog"
 	"github.com/spf13/cobra"
 )
 

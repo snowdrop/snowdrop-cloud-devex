@@ -42,9 +42,9 @@ The prototype developed within this project aims to resolve the following user's
 - Execute within a terminal this curl command in order to download our Spring Boot go client 
 
   ```bash
-  sudo curl -L https://github.com/snowdrop/k8s-supervisor/releases/download/v0.12.0/sb-darwin-amd64 -o /usr/local/bin/sb
+  sudo curl -L https://github.com/snowdrop/spring-boot-cloud-devex/releases/download/v0.12.0/sb-darwin-amd64 -o /usr/local/bin/sb
   or 
-  sudo curl -L https://github.com/snowdrop/k8s-supervisor/releases/download/v0.12.0/sb-linux-amd64 -o /usr/local/bin/sb
+  sudo curl -L https://github.com/snowdrop/spring-boot-cloud-devex/releases/download/v0.12.0/sb-linux-amd64 -o /usr/local/bin/sb
   sudo chmod +x /usr/local/bin/sb
   ```
 
@@ -60,7 +60,7 @@ The prototype developed within this project aims to resolve the following user's
   
   Examples:
       # Creating and deploying a spring Boot application
-      git clone https://github.com/snowdrop/k8s-supervisor.git && cd k8s-supervisor/spring-boot
+      git clone https://github.com/snowdrop/spring-boot-cloud-devex.git && cd spring-boot-cloud-devex/spring-boot
       sb init -n namespace
       sb push
       sb compile
