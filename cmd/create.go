@@ -40,7 +40,7 @@ func init() {
 			var valid bool
 			if p.Template != "" {
 				for _, t := range templates {
-					if p.Template == t {
+					if p.Template == t.Name {
 						valid = true
 					}
 				}
@@ -116,7 +116,7 @@ func init() {
 	}
 
 	createCmd.Flags().StringVarP(&p.Template, "template", "t", "",
-		fmt.Sprintf("Template name used to select the project to be created. Supported templates are '%s'", strings.Join(templates, ",")))
+		fmt.Sprintf("Template name used to select the project to be created. Supported templates are '%s'", templates))
 	createCmd.Flags().StringVarP(&p.UrlService, "urlservice", "u", SERVICE_ENDPOINT, "URL of the HTTP Server exposing the spring boot service")
 	createCmd.Flags().StringArrayVarP(&p.Modules, "module", "m", []string{}, "Spring Boot modules/starters")
 	createCmd.Flags().StringVarP(&p.GroupId, "groupid", "g", "", "GroupId : com.example")
@@ -154,6 +154,10 @@ func GetGeneratorServiceConfig() *scaffold.Config {
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		log.Error(err.Error())
+	}
+
+	if strings.Contains(string(body),"Application is not available") {
+		log.Fatal("Generator service is not available to get the config !")
 	}
 
 	err = yaml.Unmarshal(body, &c)
