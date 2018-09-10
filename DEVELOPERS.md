@@ -32,7 +32,14 @@ go get github.com/snowdrop/spring-boot-cloud-devex
 cd spring-boot-cloud-devex
 ```   
 
-# Build the supervisor and java s2i images
+# Build locally the tool
+
+```bash
+make build
+sudo cp sb /usr/local/bin
+```
+
+# Build the supervisor & java s2i images
 
 ## Common step
  

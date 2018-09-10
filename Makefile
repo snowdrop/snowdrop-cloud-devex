@@ -1,6 +1,8 @@
 PROJECT     := github.com/snowdrop/spring-boot-cloud-devex
 GITCOMMIT   := $(shell git rev-parse --short HEAD 2>/dev/null)
 BUILD_FLAGS := -ldflags="-w -X $(PROJECT)/cmd.GITCOMMIT=$(GITCOMMIT) -X $(PROJECT)/cmd.VERSION=$(VERSION)"
+
+VERSION     ?= 0.666.0
 GO          ?= go
 GOFMT       ?= $(GO)fmt
 GOFILES     := $(shell find . -type f -name '*.go' -not -path "./vendor/*")

@@ -16,9 +16,14 @@ type Project struct {
 }
 
 type Config struct {
-	Templates []string `yaml:"templates"    json:"templates"`
-	Boms      []Bom    `yaml:"bomversions"  json:"bomversions"`
-	Modules   []Module `yaml:"modules"      json:"modules"`
+	Templates []Template `yaml:"templates"    json:"templates"`
+	Boms      []Bom      `yaml:"bomversions"  json:"bomversions"`
+	Modules   []Module   `yaml:"modules"      json:"modules"`
+}
+
+type Template struct {
+	Name        string `yaml:"name"                     json:"name"`
+	Description string `yaml:"description"              json:"description"`
 }
 
 type Bom struct {
