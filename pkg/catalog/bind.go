@@ -22,15 +22,12 @@ func Bind(config *restclient.Config, application types.Application, instance str
 	serviceCatalogClient := GetClient(config)
 
 	log.Infof("Let's generate a secret containing the parameters to be used by the application")
-	bind(serviceCatalogClient, application.Namespace, instance, secret, nil, nil)
+	createSecret(serviceCatalogClient, application.Namespace, instance, secret, nil, nil)
 }
 
-// Bind an instance to a secret.
-func bind(scc *servicecatalogclienset.ServicecatalogV1beta1Client, namespace, instanceName, secretName string,
+// Create a secret within the namespace of the service instance created using the service's parameters.
+func createSecret(scc *servicecatalogclienset.ServicecatalogV1beta1Client, namespace, instanceName, secretName string,
 	params interface{}, secrets map[string]string) error {
-
-	// automatically create a binding name from the instance
-	bindingName := instanceName + "-binding"
 
 	// Generate UUID otherwise the binding's creation will fail if we use the same id as the instanceName, bindingName
 	// todo: check I think this is needed since external id is optional
@@ -39,7 +36,7 @@ func bind(scc *servicecatalogclienset.ServicecatalogV1beta1Client, namespace, in
 	_, err := scc.ServiceBindings(namespace).Create(
 		&scv1beta1.ServiceBinding{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      bindingName,
+				Name:      instanceName,
 				Namespace: namespace,
 			},
 			Spec: scv1beta1.ServiceBindingSpec{
