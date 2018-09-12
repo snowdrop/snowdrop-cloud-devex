@@ -10,18 +10,19 @@
 - sb to scaffold the project and create the DeploymentConfig
 
 ```bash
-sudo curl -L https://github.com/snowdrop/spring-boot-cloud-devex/releases/download/vv0.14.0/sb-darwin-amd64 -o /usr/local/bin/sb
+sudo curl -L https://github.com/snowdrop/spring-boot-cloud-devex/releases/download/v0.14.0/sb-darwin-amd64 -o /usr/local/bin/sb
 or 
-sudo curl -L https://github.com/snowdrop/spring-boot-cloud-devex/releases/download/vv0.14.0/sb-linux-amd64 -o /usr/local/bin/sb
+sudo curl -L https://github.com/snowdrop/spring-boot-cloud-devex/releases/download/v0.14.0/sb-linux-amd64 -o /usr/local/bin/sb
 sudo chmod +x /usr/local/bin/sb
 ```
 
 - odo's tool to create the service from the catalog
 
 ```bash
-cd $GOPATH/src/redhat-developer
+cd $GOPATH/src/github.com/redhat-developer
 git clone https://github.com/redhat-developer/odo.git && cd odo
 git fetch origin pull/622/head:pr-622
+git checkout pr-622
 make install && sudo cp $GOPATH/bin/odo /usr/local/bin
 ```
 
