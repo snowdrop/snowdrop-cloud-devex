@@ -1,8 +1,8 @@
-# Scaffold a Spring Boot project using the JPA template and connect to a Database using a Service of the Catalog
+# Scaffold a Spring Boot application using JPA's module and connect it to a Database deployed as a service
 
 ## Prerequisites
 
-- SB tool is installed (>= [0.12.0](https://github.com/snowdrop/spring-boot-cloud-devex/releases/tag/vv0.14.0)). See README.md 
+- SB tool is installed (>= [0.14.0](https://github.com/snowdrop/spring-boot-cloud-devex/releases/tag/v0.14.0)). See README.md 
 - Minishift (>= v1.23.0+91235ee) with Service Catalog feature enabled
 
 ## Install tools
