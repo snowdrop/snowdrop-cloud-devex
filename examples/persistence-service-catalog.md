@@ -26,11 +26,16 @@ git checkout pr-622
 make install && sudo cp $GOPATH/bin/odo /usr/local/bin
 ```
 
-- Steps to follow to play the scenario
+- Create a Minishift's vm running okd 3.10 and service catalog 
 
 ```bash
 MINISHIFT_ENABLE_EXPERIMENTAL=y minishift start --extra-clusterup-flags="--enable=service-catalog,automation-service-broker" 
 oc login -u admin -p admin
+```
+
+## Steps to follow to play the scenario
+
+```bash
 oc new-project odo
 
 cd /Temp/my-spring-boot
