@@ -30,7 +30,7 @@ oc new-app \
   --name=my-database
 ```
 
-- Create a `MANIFEST`'s project file within thr current folder containing the ENV vars used by the spring's boot application to be authenticated with the Database and to use the Openshift's profile 
+- Create a `MANIFEST`'s project file within the current folder containing the ENV vars used by the spring's boot application to be authenticated with the Database and to use the Openshift's profile 
  which supports `Postgresql`'s database
 
 ```yaml
