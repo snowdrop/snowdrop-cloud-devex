@@ -63,15 +63,22 @@ func init() {
 						panic(err)
 					}
 
-					uberJarFile := ""
+					archiveFile := ""
+					destinationFile := ""
 					for _, f := range filesInTarget {
 						if filepath.Ext(f.Name()) == ".jar" {
-							uberJarFile = targetDir + f.Name()
+							archiveFile = targetDir + f.Name()
+							destinationFile = ":/deployments/app.jar"
+						}
+
+						if filepath.Ext(f.Name()) == ".war" {
+							archiveFile = targetDir + f.Name()
+							destinationFile = ":/deployments/app.war"
 						}
 					}
 
-					if uberJarFile != "" {
-						args := []string{"cp", uberJarFile, podName + ":/deployments/app.jar", "-c", containerName}
+					if archiveFile != "" {
+						args := []string{"cp", archiveFile, podName + destinationFile, "-c", containerName}
 						log.Infof("Copy cmd : %s", args)
 						oc.ExecCommand(oc.Command{Args: args})
 					} else {
