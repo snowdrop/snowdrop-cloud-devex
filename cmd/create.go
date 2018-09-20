@@ -15,20 +15,24 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"bytes"
+)
+
+var (
+	c 		  = &scaffold.Config{}
+	p         = scaffold.Project{}
 )
 
 const (
 	SERVICE_ENDPOINT = "http://spring-boot-generator.195.201.87.126.nip.io"
+	//SERVICE_ENDPOINT = "http://localhost:8000"
 )
 
 func init() {
 
-	config := GetGeneratorServiceConfig()
-
-	var (
-		templates = config.Templates
-		p         = scaffold.Project{}
-	)
+	// Call the service at this address SERVICE_ENDPOINT
+	// to get the configuration
+	GetGeneratorServiceConfig()
 
 	createCmd := &cobra.Command{
 		Use:     "create [flags]",
@@ -37,9 +41,10 @@ func init() {
 		Example: ` sb create`,
 		Args:    cobra.RangeArgs(0, 1),
 		Run: func(cmd *cobra.Command, args []string) {
+
 			var valid bool
 			if p.Template != "" {
-				for _, t := range templates {
+				for _, t := range c.Templates {
 					if p.Template == t.Name {
 						valid = true
 					}
@@ -116,7 +121,7 @@ func init() {
 	}
 
 	createCmd.Flags().StringVarP(&p.Template, "template", "t", "",
-		fmt.Sprintf("Template name used to select the project to be created. Supported templates are '%s'", templates))
+		fmt.Sprintf("Template name used to select the project to be created. Supported templates are '%s'", getTemplatesFromList()))
 	createCmd.Flags().StringVarP(&p.UrlService, "urlservice", "u", SERVICE_ENDPOINT, "URL of the HTTP Server exposing the spring boot service")
 	createCmd.Flags().StringArrayVarP(&p.Modules, "module", "m", []string{}, "Spring Boot modules/starters")
 	createCmd.Flags().StringVarP(&p.GroupId, "groupid", "g", "", "GroupId : com.example")
@@ -132,12 +137,10 @@ func init() {
 	rootCmd.AddCommand(createCmd)
 }
 
-func GetGeneratorServiceConfig() *scaffold.Config {
-
-	c := scaffold.Config{}
-
+func GetGeneratorServiceConfig() {
 	// Call the /config endpoint to get the configuration
 	URL := strings.Join([]string{SERVICE_ENDPOINT, "config"}, "/")
+	fmt.Println("URL: ",URL)
 	client := http.Client{}
 
 	req, err := http.NewRequest(http.MethodGet, URL, strings.NewReader(""))
@@ -157,21 +160,30 @@ func GetGeneratorServiceConfig() *scaffold.Config {
 	}
 
 	if strings.Contains(string(body),"Application is not available") {
-		log.Fatal("Generator service is not available to get the config !")
+		log.Fatal("Generator service is not able to find the config !")
 	}
 
 	err = yaml.Unmarshal(body, &c)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-
-	return &c
 }
 
 func addClientHeader(req *http.Request) {
 	// TODO Define a version
 	userAgent := "sb/1.0"
 	req.Header.Set("User-Agent", userAgent)
+}
+
+func getTemplatesFromList() string {
+	var buffer bytes.Buffer
+	for i, t := range c.Templates {
+		buffer.WriteString(t.Name)
+		if i < len(c.Templates)-1 {
+			buffer.WriteString(" ")
+		}
+	}
+	return buffer.String()
 }
 
 func Unzip(src, dest string) error {
