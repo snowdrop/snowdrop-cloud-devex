@@ -218,19 +218,31 @@ func javaDeploymentConfig(application types.Application, commands string) *appsv
 func populateEnvVar(application types.Application) []corev1.EnvVar {
 	envs := []corev1.EnvVar{}
 
+	// Add default values
+	envs = append(envs,
+		corev1.EnvVar{Name: "JAVA_APP_DIR", Value: "/deployments"},
+		corev1.EnvVar{Name: "JAVA_DEBUG", Value: "true"},
+		corev1.EnvVar{Name: "JAVA_DEBUG_PORT", Value: "5005"})
+
 	// enrich with User's env var from MANIFEST
 	for _, e := range application.Env {
 		envs = append(envs, corev1.EnvVar{Name: e.Name, Value: e.Value})
 	}
 
-	// Add default values
-	envs = append(envs,
-		corev1.EnvVar{Name: "JAVA_APP_DIR", Value: "/deployments"},
-		corev1.EnvVar{Name: "JAVA_APP_JAR", Value: "app.jar"},
-		corev1.EnvVar{Name: "JAVA_DEBUG", Value: "true"},
-		corev1.EnvVar{Name: "JAVA_DEBUG_PORT", Value: "5005"})
+	if ! contains(envs,"JAVA_APP_JAR") {
+		envs = append(envs, corev1.EnvVar{Name: "JAVA_APP_JAR", Value: "app.jar"})
+	}
 
 	return envs
+}
+
+func contains(envs []corev1.EnvVar, key string) bool {
+	for _, env := range envs {
+		if env.Name == key {
+			return true
+		}
+	}
+	return false
 }
 
 func supervisordInitContainer(name string, commands string) *corev1.Container {
