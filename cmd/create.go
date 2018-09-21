@@ -140,7 +140,6 @@ func init() {
 func GetGeneratorServiceConfig() {
 	// Call the /config endpoint to get the configuration
 	URL := strings.Join([]string{SERVICE_ENDPOINT, "config"}, "/")
-	fmt.Println("URL: ",URL)
 	client := http.Client{}
 
 	req, err := http.NewRequest(http.MethodGet, URL, strings.NewReader(""))
