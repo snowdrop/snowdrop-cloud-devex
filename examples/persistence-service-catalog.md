@@ -39,7 +39,7 @@ oc login -u admin -p admin
 oc new-project odo
 
 cd /Temp/my-spring-boot
-# rm -rf {src,target} && rm -rf *.{iml,xml,zip}
+# rm -rf {src,target,MANIFEST} && rm -rf *.{iml,xml,zip}
 # Scaffold a JPA Persistence Spring Boot Project
 sb create -t crud -i my-spring-boot
 mvn clean package
