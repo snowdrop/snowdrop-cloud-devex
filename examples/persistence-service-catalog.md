@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- SB tool is installed (>= [0.14.0](https://github.com/snowdrop/spring-boot-cloud-devex/releases/tag/v0.14.0)). See README.md 
+- SB tool is installed (>= [0.15.0](https://github.com/snowdrop/spring-boot-cloud-devex/releases/tag/v0.15.0)). See README.md 
 - Minishift (>= v1.23.0+91235ee) with Service Catalog feature enabled
 
 ## Install tools
@@ -10,9 +10,9 @@
 - sb to scaffold the project and create the DeploymentConfig
 
 ```bash
-sudo curl -L https://github.com/snowdrop/spring-boot-cloud-devex/releases/download/v0.14.0/sb-darwin-amd64 -o /usr/local/bin/sb
+sudo curl -L https://github.com/snowdrop/spring-boot-cloud-devex/releases/download/v0.15.0/sb-darwin-amd64 -o /usr/local/bin/sb
 or 
-sudo curl -L https://github.com/snowdrop/spring-boot-cloud-devex/releases/download/v0.14.0/sb-linux-amd64 -o /usr/local/bin/sb
+sudo curl -L https://github.com/snowdrop/spring-boot-cloud-devex/releases/download/v0.15.0/sb-linux-amd64 -o /usr/local/bin/sb
 sudo chmod +x /usr/local/bin/sb
 ```
 
@@ -21,8 +21,8 @@ sudo chmod +x /usr/local/bin/sb
 ```bash
 cd $GOPATH/src/github.com/redhat-developer
 git clone https://github.com/redhat-developer/odo.git && cd odo
-git fetch origin pull/622/head:pr-622
-git checkout pr-622
+git fetch origin pull/622/head:pr-723
+git checkout pr-723
 make install && sudo cp $GOPATH/bin/odo /usr/local/bin
 ```
 
@@ -43,6 +43,9 @@ cd /Temp/my-spring-boot
 # Scaffold a JPA Persistence Spring Boot Project
 sb create -t crud -i my-spring-boot
 mvn clean package
+
+echo "name: my-spring-boot\nenv:\n  - name: SPRING_PROFILES_ACTIVE\n    value: openshift-catalog" >  MANIFEST 
+
 
 # Create the Development's Pod (= supervisord)
 sb init
