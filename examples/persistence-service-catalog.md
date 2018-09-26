@@ -108,4 +108,30 @@ X-Application-Context: application:openshift-catalog
 ]
 ```
 
+## All Steps
+
+```bash
+cd /path/to/project
+
+oc delete project cmoullia && oc project default
+oc new-project cmoullia
+
+rm -rf {src,target,MANIFEST} && rm -rf *.{iml,xml,zip}
+
+
+sb create -t crud -i my-spring-boot
+mvn clean package
+
+echo "name: my-spring-boot\nenv:\n  - name: SPRING_PROFILES_ACTIVE\n    value: openshift-catalog" >  MANIFEST 
+
+sb init
+odo service create dh-postgresql-apb/dev -p postgresql_user=luke -p postgresql_password=secret -p postgresql_database=my_data -p postgresql_version=9.6
+odo service link dh-postgresql-apb my-spring-boot
+
+sb push --mode binary
+sb exec start
+
+http my-spring-boot-cmoullia.195.201.87.126.nip.io/api/fruits
+```
+
 
