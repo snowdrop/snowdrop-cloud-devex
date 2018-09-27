@@ -1,0 +1,29 @@
+application:
+  name: myApplication
+  description: A Spring Boot application
+  owner: Snowdrop's team
+  labels: organization=middleware,department=runtime,app=spring-boot
+  flow: “from(componentA).to(serviceA)”
+  release: development // development (= innerloop) | production (= outerloop)
+  components:
+    - name: componentA
+      packaging: jar         // jar | war (= they will be used on openshift to configure packaging/deployment)
+      type: application      // application | service | job
+      runtime: spring-boot   // spring-boot | vert.x | tornthail | ...
+      source: local          // local | git | binary
+      git:
+        repo:
+        branch:
+    - name: serviceA
+      type: service
+      class: dh-postgresql-apb // APB Service Class (= service instance)
+      plan: dev
+      parameters:
+      - name: postgresql_user
+        value: luke
+      - name: postgresql_password
+        value: secret
+      - name: postgresql_database
+        value: my_data
+      - name: postgresql_version
+        value: 9.6
