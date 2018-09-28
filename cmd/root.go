@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/c-bata/go-prompt"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/snowdrop/spring-boot-cloud-devex/pkg/buildpack"
@@ -18,9 +19,14 @@ import (
 )
 
 var (
-	namespace string
-	appName   string
+	namespace  string
+	appName    string
+	Suggesters = make(map[string]Suggester)
 )
+
+type Suggester interface {
+	Suggest(d prompt.Document) []prompt.Suggest
+}
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -46,10 +52,22 @@ func init() {
 	//rootCmd.MarkPersistentFlagRequired("namespace")
 }
 
+func RootCmd() *cobra.Command {
+	return rootCmd
+}
+
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		checkError(err, "Root execution")
 	}
+}
+
+func GetCommandSuggesterName(command *cobra.Command) string {
+	return command.Name()
+}
+
+func GetFlagSuggesterName(command *cobra.Command, flag string) string {
+	return command.Name() + "_" + flag
 }
 
 // checkError prints the cause of the given error and exits the code with an

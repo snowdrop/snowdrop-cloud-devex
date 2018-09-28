@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  name = "github.com/c-bata/go-prompt"
+  packages = ["."]
+  revision = "c52492ff1b386e5c0ba5271b5eaad165fab09eca"
+  version = "v0.2.2"
+
+[[projects]]
   name = "github.com/ghodss/yaml"
   packages = ["."]
   revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
@@ -89,10 +95,28 @@
   version = "v0.1.29"
 
 [[projects]]
+  name = "github.com/mattn/go-colorable"
+  packages = ["."]
+  revision = "167de6bfdfba052fa6b2d3664c8f5272e23c9072"
+  version = "v0.0.9"
+
+[[projects]]
+  name = "github.com/mattn/go-isatty"
+  packages = ["."]
+  revision = "6ca4dbf54d38eea1a992b3c722a76a5d1c4cb25c"
+  version = "v0.0.4"
+
+[[projects]]
   name = "github.com/mattn/go-runewidth"
   packages = ["."]
   revision = "ce7b0b5c7b45a81508558cd1dba6bb1e4ddb51bb"
   version = "v0.0.3"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/mattn/go-tty"
+  packages = ["."]
+  revision = "13ff1204f104d52c3f7645ec027ecbcf9026429e"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"
@@ -151,6 +175,12 @@
   packages = ["."]
   revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
   version = "v0.8.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/pkg/term"
+  packages = ["termios"]
+  revision = "bffc007b7fd5a70e20e28f5b7649bb84671ef436"
 
 [[projects]]
   branch = "master"
@@ -379,6 +409,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "07f20e5f9a511dbbb08bcbee7ea8bb300163ffcf9a50eeb5e985d727dd1a6567"
+  inputs-digest = "c17d56440be2f09b24f5836472cc2704ece28daec9a8f490d1c0b63f10fc18ce"
   solver-name = "gps-cdcl"
   solver-version = 1

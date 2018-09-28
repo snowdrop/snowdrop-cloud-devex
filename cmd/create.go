@@ -1,11 +1,13 @@
 package cmd
 
 import (
+	"github.com/c-bata/go-prompt"
 	log "github.com/sirupsen/logrus"
 	"github.com/snowdrop/spring-boot-cloud-devex/pkg/scaffold"
 	"github.com/spf13/cobra"
 
 	"archive/zip"
+	"bytes"
 	"fmt"
 	"github.com/ghodss/yaml"
 	"io"
@@ -15,17 +17,15 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"bytes"
 )
 
 var (
-	c 		  = &scaffold.Config{}
-	p         = scaffold.Project{}
+	c = &scaffold.Config{}
+	p = scaffold.Project{}
 )
 
 const (
 	SERVICE_ENDPOINT = "http://spring-boot-generator.195.201.87.126.nip.io"
-	//SERVICE_ENDPOINT = "http://localhost:8000"
 )
 
 func init() {
@@ -135,6 +135,61 @@ func init() {
 	createCmd.Annotations = map[string]string{"command": "create"}
 
 	rootCmd.AddCommand(createCmd)
+	Suggesters[GetFlagSuggesterName(createCmd, "snowdropbom")] = bomSuggester{}
+	Suggesters[GetFlagSuggesterName(createCmd, "module")] = moduleSuggester{}
+	Suggesters[GetFlagSuggesterName(createCmd, "template")] = templateSuggester{}
+}
+
+type bomSuggester struct {
+}
+
+func (i bomSuggester) Suggest(d prompt.Document) []prompt.Suggest {
+	var suggestions []prompt.Suggest
+
+	if strings.HasPrefix(d.GetWordBeforeCursorWithSpace(), "--snowdrop") || strings.HasPrefix(d.GetWordBeforeCursorWithSpace(), "-b") {
+		var bomSuggestions []prompt.Suggest
+		for _, bom := range c.Boms {
+			sbVersion := bom.Community[:strings.LastIndex(bom.Community, ".")]
+			bomSuggestions = append(bomSuggestions, prompt.Suggest{Text: sbVersion, Description: sbVersion + " Community"})
+			bomSuggestions = append(bomSuggestions, prompt.Suggest{Text: sbVersion, Description: sbVersion + " Snowdrop"})
+		}
+
+		suggestions = append(suggestions, bomSuggestions...)
+	}
+
+	return prompt.FilterHasPrefix(suggestions, d.GetWordBeforeCursor(), true)
+}
+
+type moduleSuggester struct {
+}
+
+func (i moduleSuggester) Suggest(d prompt.Document) []prompt.Suggest {
+	var suggestions []prompt.Suggest
+
+	if strings.HasPrefix(d.GetWordBeforeCursorWithSpace(), "--module") || strings.HasPrefix(d.GetWordBeforeCursorWithSpace(), "-m") {
+		for _, mod := range c.Modules {
+			suggestions = append(suggestions, prompt.Suggest{Text: mod.Name, Description: mod.Description})
+		}
+
+	}
+
+	return prompt.FilterHasPrefix(suggestions, d.GetWordBeforeCursor(), true)
+}
+
+type templateSuggester struct {
+}
+
+func (i templateSuggester) Suggest(d prompt.Document) []prompt.Suggest {
+	var suggestions []prompt.Suggest
+
+	if strings.HasPrefix(d.GetWordBeforeCursorWithSpace(), "--template") || strings.HasPrefix(d.GetWordBeforeCursorWithSpace(), "-t") {
+		for _, template := range c.Templates {
+			suggestions = append(suggestions, prompt.Suggest{Text: template.Name, Description: template.Description})
+		}
+
+	}
+
+	return prompt.FilterHasPrefix(suggestions, d.GetWordBeforeCursor(), true)
 }
 
 func GetGeneratorServiceConfig() {
@@ -158,7 +213,7 @@ func GetGeneratorServiceConfig() {
 		log.Error(err.Error())
 	}
 
-	if strings.Contains(string(body),"Application is not available") {
+	if strings.Contains(string(body), "Application is not available") {
 		log.Fatal("Generator service is not able to find the config !")
 	}
 
