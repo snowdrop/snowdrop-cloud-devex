@@ -12,7 +12,7 @@ func init() {
 		Use:     "clean [flags]",
 		Short:   "Remove development pod for the component",
 		Long:    `Remove development pod for the component.`,
-		Example: ` sb clean`,
+		Example: ` sd clean`,
 		Args:    cobra.RangeArgs(0, 1),
 		Run: func(cmd *cobra.Command, args []string) {
 

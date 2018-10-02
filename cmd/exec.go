@@ -21,7 +21,7 @@ func newCommandWith(action string, toExec func(podName string, action string)) *
 		Use:     action,
 		Short:   capitalizedAction + " your SpringBoot application.",
 		Long:    capitalizedAction + ` your SpringBoot application.`,
-		Example: `  sb exec ` + action,
+		Example: `  sd exec ` + action,
 		Args:    cobra.RangeArgs(0, 1),
 		Run: func(cmd *cobra.Command, args []string) {
 
@@ -62,7 +62,7 @@ func init() {
 	})
 
 	execDebugCmd.Flags().StringVarP(&ports, "ports", "p", "5005:5005", "Local and remote ports to be used to forward traffic between the dev pod and your machine.")
-	execDebugCmd.Example = "  sb exec debug -p5005:8080"
+	execDebugCmd.Example = "  sd exec debug -p5005:8080"
 
 	exeCmd := &cobra.Command{
 		Use:   "exec [options]",

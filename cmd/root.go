@@ -24,17 +24,17 @@ var (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "sb",
-	Short: "sb (ODO's Spring Boot prototype)",
+	Use:   "sd",
+	Short: "snowdrop's client tool",
 
-	Long: `sb (ODO's Spring Boot prototype) is a prototype project experimenting supervisord and MANIFEST concepts`,
+	Long: `snowdrop's client tool to scaffold a spring boot application on kubernetes/openshift'`,
 
 	Example: `    # Creating and deploying a spring Boot application
     git clone github.com/snowdrop/spring-boot-cloud-devex && cd spring-boot-cloud-devex/spring-boot
-    sb init -n namespace
-    sb push
-    sb compile
-    sb run`,
+    sd init -n namespace
+    sd push
+    sd compile
+    sd run`,
 }
 
 func init() {

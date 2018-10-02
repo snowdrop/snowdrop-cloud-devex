@@ -13,7 +13,7 @@ func init() {
 		Use:     "compile",
 		Short:   "Compile local project within the development pod",
 		Long:    `Compile local project within the development pod.`,
-		Example: ` sb compile`,
+		Example: ` sd compile`,
 		Args:    cobra.RangeArgs(0, 1),
 		Run: func(cmd *cobra.Command, args []string) {
 

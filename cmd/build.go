@@ -18,7 +18,7 @@ func init() {
 		Use:     "build [flags]",
 		Short:   "Build an image of the application",
 		Long:    `Build an image of the application.`,
-		Example: ` sb build`,
+		Example: ` sd build`,
 		Args:    cobra.RangeArgs(0, 1),
 		Run: func(cmd *cobra.Command, args []string) {
 

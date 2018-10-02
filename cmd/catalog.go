@@ -13,7 +13,7 @@ func init() {
 		Use:     "list",
 		Short:   "List all available services from the catalog",
 		Long:    "List all available services from the Service Catalog's broker.",
-		Example: ` sb catalog list [-s <part of service name>]`,
+		Example: ` sd catalog list [-s <part of service name>]`,
 		Run: func(cmd *cobra.Command, args []string) {
 			log.Info("Catalog list command called")
 			setup := Setup()
@@ -27,7 +27,7 @@ func init() {
 		Use:     "create",
 		Short:   "Create a service instance",
 		Long:    "Create a service instance and install it in a namespace.",
-		Example: ` sb catalog create <instance name>`,
+		Example: ` sd catalog create <instance name>`,
 		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			log.Info("Catalog select command called")
@@ -45,7 +45,7 @@ func init() {
 		Use:     "bind",
 		Short:   "Bind a service to a secret's namespace",
 		Long:    "Bind a service to a secret's namespace.",
-		Example: ` sb catalog bind --secret foo --toInstance instance`,
+		Example: ` sd catalog bind --secret foo --toInstance instance`,
 		Run: func(cmd *cobra.Command, args []string) {
 			log.Info("Catalog Bind command called")
 			setup := Setup()
@@ -61,7 +61,7 @@ func init() {
 		Use:     "plan",
 		Short:   "Show the plans of a service",
 		Long:    "Show the plans of a ClusterServiceClass",
-		Example: ` sb catalog plan <class name>`,
+		Example: ` sd catalog plan <class name>`,
 		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			log.Info("Catalog plan command called")

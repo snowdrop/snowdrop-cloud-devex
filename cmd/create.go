@@ -38,7 +38,7 @@ func init() {
 		Use:     "create [flags]",
 		Short:   "Create a Spring Boot maven project",
 		Long:    `Create a Spring Boot maven project.`,
-		Example: ` sb create`,
+		Example: ` sd create`,
 		Args:    cobra.RangeArgs(0, 1),
 		Run: func(cmd *cobra.Command, args []string) {
 

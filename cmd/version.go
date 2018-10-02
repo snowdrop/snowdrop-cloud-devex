@@ -18,9 +18,9 @@ var (
 func init() {
 	versionCmd := &cobra.Command{
 		Use:     "version",
-		Short:   "Show sb client version",
-		Long:    `Show sb client version.`,
-		Example: ` sb version`,
+		Short:   "Show sd client version",
+		Long:    `Show sd client version.`,
+		Example: ` sd version`,
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println(rootCmd.Use + " v" + VERSION + " (" + GITCOMMIT + ")")
 		},

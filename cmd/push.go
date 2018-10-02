@@ -23,7 +23,7 @@ func init() {
 		Use:     "push",
 		Short:   "Push local code to the development pod",
 		Long:    `Push local code to the development pod.`,
-		Example: ` sb push`,
+		Example: ` sd push`,
 		Args:    cobra.RangeArgs(0, 1),
 		Run: func(cmd *cobra.Command, args []string) {
 			var valid bool
