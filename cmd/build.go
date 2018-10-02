@@ -44,7 +44,7 @@ func init() {
 
 			// Start the build
 			args = []string{"start-build", setup.Application.Name, "--from-dir=" + oc.Client.Pwd, "--follow"}
-			log.Infof("Starr-build cmd : %s", args)
+			log.Infof("Start-build cmd : %s", args)
 			oc.ExecCommand(oc.Command{Args: args})
 		},
 	}
