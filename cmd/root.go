@@ -161,7 +161,10 @@ func createApplicationName(nameInManifest string) string {
 		log.Infof("Using application name '%s' that was set in MANIFEST", nameInManifest)
 		return nameInManifest
 	}
-	existingDCs := oc.GetNamesByLabel("dc", buildpack.OdoLabelName, buildpack.OdoLabelValue)
+	existingDCs, err := oc.GetNamesByLabel("dc", buildpack.OdoLabelName, buildpack.OdoLabelValue)
+	if err != nil {
+		log.Fatalf("Error retrieving DeploymentConfig labeled %s=%s. Are you logged in?", buildpack.OdoLabelName, buildpack.OdoLabelValue)
+	}
 	if len(existingDCs) != 0 {
 		//use the name of the first matching DeploymentConfig
 		dcName := existingDCs[0]

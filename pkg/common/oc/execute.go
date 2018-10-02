@@ -46,7 +46,10 @@ func ExecCommand(command Command) {
 	cmd := exec.Command(Client.Path, command.Args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	cmd.Run()
+	err := cmd.Run()
+	if err != nil {
+		panic(err)
+	}
 }
 
 func Exists(kind string, name string) bool {
@@ -58,13 +61,11 @@ func Exists(kind string, name string) bool {
 	}
 }
 
-func GetNamesByLabel(kind string, labelName string, labelValue string) []string {
+func GetNamesByLabel(kind string, labelName string, labelValue string) ([]string, error) {
 	s, err := ExecCommandAndReturn(Command{Args: []string{"get", kind, "-l", labelName + "=" + labelValue, "-o", "jsonpath={.items[*].metadata.name}"}})
-	if err != nil {
-		panic(err)
-	} else if len(s) == 0 {
-		return make([]string, 0)
+	if err != nil || len(s) == 0 {
+		return make([]string, 0), err
 	} else {
-		return strings.Fields(s)
+		return strings.Fields(s), nil
 	}
 }
