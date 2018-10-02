@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	appsv1 "github.com/openshift/api/apps/v1"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/snowdrop/spring-boot-cloud-devex/pkg/buildpack"
@@ -89,7 +90,7 @@ func Setup() config.Tool {
 	tool.RestConfig = createKubeRestconfig(tool.KubeConfig)
 	tool.Clientset = createClientSet(tool.KubeConfig, tool.RestConfig)
 
-	tool.Application.Name = createApplicationName(tool.Application.Name)
+	finishSetupAndSetApplicationName(tool)
 
 	return *tool
 }
@@ -152,15 +153,8 @@ func createKubeRestconfig(kubeCfg config.Kube) *restclient.Config {
 	return kubeRestClient
 }
 
-func createApplicationName(nameInManifest string) string {
-	// if we specified an application name, use it and override any set value
-	if len(appName) > 0 {
-		log.Infof("Using explicit application name '%s'", appName)
-		return appName
-	} else if len(nameInManifest) > 0 { //the value was already set in the Manifest so use it
-		log.Infof("Using application name '%s' that was set in MANIFEST", nameInManifest)
-		return nameInManifest
-	}
+func finishSetupAndSetApplicationName(setup *config.Tool) {
+	// check if we already have the DC set up, in which case use it for the name of the application
 	existingDCs, err := oc.GetNamesByLabel("dc", buildpack.OdoLabelName, buildpack.OdoLabelValue)
 	if err != nil {
 		log.Fatalf("Error retrieving DeploymentConfig labeled %s=%s. Are you logged in?", buildpack.OdoLabelName, buildpack.OdoLabelValue)
@@ -169,12 +163,42 @@ func createApplicationName(nameInManifest string) string {
 		//use the name of the first matching DeploymentConfig
 		dcName := existingDCs[0]
 		log.Infof("Using application name '%s' from the existing DeploymentConfig labeled with '%s=%s'", dcName, "io.openshift.odo", "inject-supervisord")
-		return dcName
-	}
+		setup.Application.Name = dcName
+	} else {
+		// otherwise, if no DeploymentConfig exists already, we need to set the development pod up
+		log.Info("Setting up the development pod")
 
-	// use the name of the current directory
-	current, _ := os.Getwd()
-	directoryName := path.Base(current)
-	log.Infof("Using (default) application name '%s' which is the name the project's directory", directoryName)
-	return directoryName
+		// if we specified an application name via the invoked command, use it
+		if len(appName) > 0 {
+			log.Infof("Using explicit application name '%s'", appName)
+			setup.Application.Name = appName
+		} else if len(setup.Application.Name) > 0 {
+			// if a value was already set in the Manifest, use it
+			log.Infof("Using application name '%s' that was set in MANIFEST", setup.Application.Name)
+		} else {
+			// otherwise, use the name of the current directory as the application name
+			current, _ := os.Getwd()
+			directoryName := path.Base(current)
+			log.Infof("Using (default) application name '%s' which is the name the project's directory", directoryName)
+			setup.Application.Name = directoryName
+		}
+
+		// Create ImageStreams
+		log.Info("Create ImageStreams for Supervisord and Java S2I Image of SpringBoot")
+		buildpack.CreateDefaultImageStreams(setup.RestConfig, setup.Application)
+
+		// Create PVC
+		log.Info("Create PVC to store m2 repo")
+		buildpack.CreatePVC(setup.Clientset, setup.Application, "1Gi")
+
+		var dc *appsv1.DeploymentConfig
+		log.Info("Create or retrieve DeploymentConfig using Supervisord and Java S2I Image of SpringBoot")
+		dc = buildpack.CreateOrRetrieveDeploymentConfig(setup.RestConfig, setup.Application, "")
+
+		log.Info("Create Service using Template")
+		buildpack.CreateServiceTemplate(setup.Clientset, dc, setup.Application)
+
+		log.Info("Create Route using Template")
+		buildpack.CreateRouteTemplate(setup.RestConfig, setup.Application)
+	}
 }
