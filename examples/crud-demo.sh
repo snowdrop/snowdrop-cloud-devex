@@ -45,43 +45,48 @@ echo -e "\n#####################################"
 echo "# 4. Create Dev's pod - supervisord #"
 echo "#####################################"
 sd init
-sleep 5
+sleep 10
 
 echo -e "\n##############################################"
 echo "# 5. Create Postgresql Service using Catalog #"
 echo "##############################################"
-sd catalog create my-postgresql-db
+sd catalog create my-postgresql-db -n $project_name
 sleep 10
 
 echo -e "\n#####################################################"
 echo "# 6. Inject secret as ENV vars within the dev's pod #"
 echo "#####################################################"
-sd catalog bind --secret my-postgresql-db-secret --toInstance my-postgresql-db
+sd catalog bind --secret my-postgresql-db-secret --toInstance my-postgresql-db -n $project_name
 sleep 10
 
-echo -e "\n##########################################################"
-echo "# 7. Scaffold project using CRUD template and compile it #"
-echo "##########################################################"
+echo -e "\n#######################################################################"
+echo "# 7. Scaffold a Spring Boot project using CRUD template and compile it #"
+echo "########################################################################"
 sd create -t crud -i my-spring-boot
-mvn clean package
-sleep 10
+mvn clean package -DskipTests=true
+sleep 5
 
-echo -e "\n#########################################"
+echo -e "\n##############################################"
 echo "# 8. Push the uber jar file to the dev's pod #"
 echo "##############################################"
 sd push --mode binary -n $project_name
-sleep 5
 
 echo -e "\n#################################################"
 echo "# 9. Start the Spring Boot Application remotely #"
 echo "#################################################"
-sd exec start -n $project_name
+sd exec start -n $project_name > /dev/null 2>&1 &
 
-echo "##################################################"
-echo "# 10. Curl the route of the service exposed #"
-echo "#############################################"
+echo "######################################################################################"
+echo "# 10. Curl the route of the service exposed to get the fruits using /api/fruits #"
+echo "#################################################################################"
 export SERVICE=$(oc get route/my-spring-boot --template='{{.spec.host}}')
-curl http://$SERVICE//api/fruits
+for run in {1..5}
+do
+  sleep 5
+  echo -e "\n# Call the endpoint /api/fruits"
+  curl -s http://$SERVICE/api/fruits | json
+  echo -e "\n"
+done
 
 echo "#######################"
 echo "# 11. Clean up #"

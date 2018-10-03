@@ -4,6 +4,6 @@ dist/
 .DS_Store
 
 */target
-sb
+sd
 
 .goreleaser.yml
