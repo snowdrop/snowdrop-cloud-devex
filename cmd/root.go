@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/manifoldco/promptui"
 	appsv1 "github.com/openshift/api/apps/v1"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -20,7 +21,6 @@ import (
 
 var (
 	namespace string
-	appName   string
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -32,7 +32,6 @@ var rootCmd = &cobra.Command{
 
 	Example: `    # Creating and deploying a spring Boot application
     git clone github.com/snowdrop/spring-boot-cloud-devex && cd spring-boot-cloud-devex/spring-boot
-    sd init -n namespace
     sd push
     sd compile
     sd run`,
@@ -43,8 +42,6 @@ func init() {
 	rootCmd.PersistentFlags().StringP("masterurl", "", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 	// Global flag(s)
 	rootCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "", "Namespace/project (defaults to current project)")
-	rootCmd.PersistentFlags().StringVarP(&appName, "application", "a", "", "Application name (defaults to current directory name)")
-	//rootCmd.MarkPersistentFlagRequired("namespace")
 }
 
 func Execute() {
@@ -154,7 +151,7 @@ func createKubeRestconfig(kubeCfg config.Kube) *restclient.Config {
 }
 
 func finishSetupAndSetApplicationName(setup *config.Tool) {
-	// check if we already have the DC set up, in which case use it for the name of the application
+	// check if we already have the DC set up, in which case use the name of the application is already set and use that
 	existingDCs, err := oc.GetNamesByLabel("dc", buildpack.OdoLabelName, buildpack.OdoLabelValue)
 	if err != nil {
 		log.Fatalf("Error retrieving DeploymentConfig labeled %s=%s. Are you logged in?", buildpack.OdoLabelName, buildpack.OdoLabelValue)
@@ -168,19 +165,33 @@ func finishSetupAndSetApplicationName(setup *config.Tool) {
 		// otherwise, if no DeploymentConfig exists already, we need to set the development pod up
 		log.Info("Setting up the development pod")
 
-		// if we specified an application name via the invoked command, use it
-		if len(appName) > 0 {
-			log.Infof("Using explicit application name '%s'", appName)
-			setup.Application.Name = appName
-		} else if len(setup.Application.Name) > 0 {
-			// if a value was already set in the Manifest, use it
+		// if a value was already set in the Manifest, use it
+		if len(setup.Application.Name) > 0 {
 			log.Infof("Using application name '%s' that was set in MANIFEST", setup.Application.Name)
 		} else {
-			// otherwise, use the name of the current directory as the application name
+			// otherwise, offer the name of the current directory as the application name
 			current, _ := os.Getwd()
 			directoryName := path.Base(current)
-			log.Infof("Using (default) application name '%s' which is the name the project's directory", directoryName)
-			setup.Application.Name = directoryName
+
+			prompt := promptui.Prompt{
+				Label:     "In order to finish the setup procedure, we need a name for your application (defaults to current directory name):",
+				Default:   directoryName,
+				AllowEdit: true,
+			}
+
+			result, err := prompt.Run()
+
+			defaultMsg := ""
+			applicationName := directoryName
+			if err != nil {
+				log.Infof("Prompt failed %v\n", err)
+				defaultMsg = "(default)"
+			} else {
+				applicationName = result
+			}
+
+			log.Infof("Using %s application name '%s'", defaultMsg, applicationName)
+			setup.Application.Name = applicationName
 		}
 
 		// Create ImageStreams
