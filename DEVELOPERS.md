@@ -48,7 +48,7 @@ Export the Docker ENV var (`DOCKER_HOST, ....`) to access the docker daemon
 eval $(minishift docker-env)
 ```
   
-## Supervisord image  
+## Supervisord image
 
 To build the `copy-supervisord` docker image containing the `go supervisord` application, then follow these instructions
 
@@ -99,21 +99,20 @@ docker push quay.io/snowdrop/spring-boot-s2i
 ## Test 0 : Build executable and test it
 
 - Log on to an OpenShift cluster with an `admin` role
-- Open or create the following project : `spring-boot-cloud-devexd`
+- Select or create an OpenShift project to work with
 - Move under the `spring-boot` folder and run these commands
 
 ```bash
 oc delete --force --grace-period=0 all --all
 oc delete pvc/m2-data
 
-go build -o sd *.go
+make
 export PATH=$PATH:$(pwd)
 export CURRENT=$(pwd)
 
 cd spring-boot
 mvn clean package
 
-sd init -n cloud-demo
 sd push --mode binary
 sd exec start
 sd exec stop
@@ -123,19 +122,18 @@ cd $CURRENT
 ## Test 1 : source -> compile -> run
 
 - Log on to an OpenShift cluster with an `admin` role
-- Open or create the following project : `cloud-demo`
+- Select or create an OpenShift project to work with
 - Move under the `spring-boot` folder and run these commands
 
 ```bash
 oc delete --force --grace-period=0 all --all
 oc delete pvc/m2-data
 
-go build -o sd *.go
+make
 export PATH=$PATH:$(pwd)
 export CURRENT=$(pwd)
 
 cd spring-boot
-sd init -n cloud-demo
 sd push --mode source
 sd compile
 sd exec start
@@ -152,21 +150,20 @@ curl $URL/api/greeting
 ## Test 2 : binary -> run
 
 - Log on to an OpenShift cluster with an `admin` role
-- Open or create the following project : `cloud-demo`
+- Select or create an OpenShift project to work with
 - Move under the `spring-boot` folder and run these commands
 
 ```bash
 oc delete --force --grace-period=0 all --all
 oc delete pvc/m2-data
 
-go build -o sd *.go
+make
 export PATH=$PATH:$(pwd)
 export CURRENT=$(pwd)
 
 cd spring-boot
 
 mvn clean package
-sd init -n cloud-demo
 sd push --mode binary
 sd exec start
 cd $CURRENT
@@ -182,19 +179,18 @@ curl $URL/api/greeting
 ## Test 3 : debug
 
 - Log on to an OpenShift cluster with an `admin` role
-- Open or create the following project : `cloud-demo`
+- Select or create an OpenShift project to work with
 - Move under the `spring-boot` folder and run these commands
 
 ```bash
 oc delete --force --grace-period=0 all --all
 oc delete pvc/m2-data
 
-go build -o sd *.go
+make
 export PATH=$PATH:$(pwd)
 export CURRENT=$(pwd)
  
 cd spring-boot
-sd init -n cloud-demo
 sd push --mode binary
 sd exec stop
 sd debug
@@ -204,20 +200,18 @@ cd $CURRENT
 ## Test 4 : source -> compile -> kill pod -> compile again (m2 repo is back again)
 
 - Log on to an OpenShift cluster with an `admin` role
-- Open or create the following project : `cloud-demo`
+- Select or create an OpenShift project to work with
 - Move under the `spring-boot` folder and run these commands
 
 ```bash
 oc delete --force --grace-period=0 all --all
 oc delete pvc/m2-data
 
-go build -o sd *.go
+make
 export PATH=$PATH:$(pwd)
 export CURRENT=$(pwd)
 
 cd spring-boot
-
-sd init -n cloud-demo
 sd push --mode source
 sd compile
 oc delete --grace-period=0 --force=true pod -l app=spring-boot-http 
@@ -230,20 +224,19 @@ cd $CURRENT
 ## Test 5 : build (code not yet finalized as image is build bit no deployment is available)
 
 - Log on to an OpenShift cluster with an `admin` role
-- Open or create the following project : `cloud-demo`
+- Select or create an OpenShift project to work with
 - Move under the `spring-boot` folder and run these commands
 
 ```bash
 oc delete --force --grace-period=0 all --all
 oc delete pvc/m2-data
 
-go build -o sd *.go
+make
 export PATH=$PATH:$(pwd)
 export CURRENT=$(pwd)
 
 cd spring-boot
 
-sd init -n cloud-demo
 sd build
 cd $CURRENT
 ```
@@ -251,11 +244,10 @@ cd $CURRENT
 ## Test 6 : Scaffold a project
 
 ```bash
-go build -o sd *.go
+make
 export PATH=$PATH:$(pwd)
 export CURRENT=$(pwd)
 
-cd pkg/generator && go run server.go
 mkdir -p ~/Temp/springboot-simple && cd  ~/Temp/springboot-simple
 sd create -t simple
 ls -la

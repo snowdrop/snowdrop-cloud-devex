@@ -28,12 +28,6 @@ env:
     value: '*.war'
 ```  
 
-- Initialize the Development's pod 
-
-```bash
-sd init
-``` 
-
 - Scaffold the project using as artifactId - `my-spring-boot` name and the template jsp `jsp`
 
 ```bash

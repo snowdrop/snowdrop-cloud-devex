@@ -63,12 +63,6 @@ EOF
 sd create -t crud -i my-spring-boot
 ```
 
-- Initialize the Development's pod and pass as parameter the namespace to be used
-
-```bash
-sd init -n crud-catalog
-```
-
 - Create a service's instance using our service instance name `my-postgresql-db`
 
 ```bash
@@ -78,7 +72,7 @@ sd catalog create <name_of_the_service_instance>
 where `<name_of_the_service_instance>` is the name to be defined for th service that we will create using the command (e.g my-postgresql-apb).
 The Service class to be selected from the catalog is specified within the MANIFEST using the field services/class `db-postgresql-apb` 
 
-- Create a secret using the service's parameters and bind/mount them to the DeploymentConfig created during `sd init` step
+- Create a secret using the service parameters and bind/mount them to the DeploymentConfig that `sd` automatically created for you
 
 ```bash
 sd catalog bind --secret <secret_name> --toInstance <name_of_the_service_instance>

@@ -60,7 +60,6 @@ The prototype developed within this project aims to resolve the following user's
   Examples:
       # Creating and deploying a spring Boot application
       git clone https://github.com/snowdrop/spring-boot-cloud-devex.git && cd spring-boot-cloud-devex/spring-boot
-      sd init -n namespace
       sd push
       sd compile
       sd run
@@ -73,17 +72,14 @@ The prototype developed within this project aims to resolve the following user's
     debug       Debug your SpringBoot application
     exec        Stop, start or restart your SpringBoot application.
     help        Help about any command
-    init        Create a development's pod for the component
     push        Push local code to the development pod
     version     Show sd  client version
   
   Flags:
-    -a, --application string   Application name (defaults to current directory name)
     -h, --help                 help for sb
     -k, --kubeconfig string    Path to a kubeconfig ($HOME/.kube/config). Only required if out-of-cluster.
         --masterurl string     The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.
-    -n, --namespace string     Namespace/project (defaults to current project)
-  
+    
   Use "sd [command] --help" for more information about a command.
   ```
 
@@ -114,16 +110,11 @@ Execute the following command to create a Maven project containing the Spring co
   **REMARK** : The parameter `-i` will configure the `artifactId` to use the same name as the folder of your project. The command will populate a project using default values for the GAV, package name, Spring Boot version. That could be of course tailored using
   the different parameters proposed by the command `sd create -h`  
 
-## Create the development's pod
+## Development pod
 
-In order to run the Spring Boot application on OpenShift, we will install a Development's pod that our tool will use to interact in order to 
-install the application, compile it (optional), debug or start/stop it. Execute then this `init` command.
-
-  ```bash
-  sd init
-  ```
-  
-- After a few moment, verify that development's pod is up and running and logs the following messages
+In order to run the Spring Boot application on OpenShift, we will install a development pod that our tool will use to interact in order to 
+install the application, compile it (optional), debug or start/stop it. This development pod is automatically created on demand the 
+first time you issue an `sd` command. You can check the logs as follows:
 
   ```bash
   $oc logs $(oc get pod -l app=my-spring-boot -o name)

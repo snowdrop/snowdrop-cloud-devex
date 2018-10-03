@@ -44,12 +44,6 @@ env:
     value: openshift
 ```
 
-- Initialize the Development's pod 
-
-```bash
-sd init -n crud
-```
-
 - Scaffold the CRUD project using as artifactId - `my-spring-boot` name
 
 ```bash

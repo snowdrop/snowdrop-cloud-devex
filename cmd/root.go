@@ -19,13 +19,12 @@ import (
 	"path"
 )
 
-
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "sd",
-	Short: "snowdrop's client tool",
+	Short: "snowdrop client tool",
 
-	Long: `snowdrop's client tool to scaffold a spring boot application on kubernetes/openshift'`,
+	Long: `snowdrop client tool to scaffold a spring boot application on kubernetes/openshift'`,
 
 	Example: `    # Creating and deploying a spring Boot application
     git clone github.com/snowdrop/spring-boot-cloud-devex && cd spring-boot-cloud-devex/spring-boot

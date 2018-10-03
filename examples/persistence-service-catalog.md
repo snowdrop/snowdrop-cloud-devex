@@ -47,9 +47,6 @@ mvn clean package
 echo "name: my-spring-boot\nenv:\n  - name: SPRING_PROFILES_ACTIVE\n    value: openshift-catalog" >  MANIFEST 
 
 
-# Create the Development's Pod (= supervisord)
-sd init
-
 # Create a service's instance using the OABroker and postgresql DB + secret. Next bind/link the secret to the DC and restart it
 odo service create dh-postgresql-apb/dev -p postgresql_user=luke -p postgresql_password=secret -p postgresql_database=my_data -p postgresql_version=9.6
 odo service link dh-postgresql-apb my-spring-boot
@@ -124,7 +121,6 @@ mvn clean package
 
 echo "name: my-spring-boot\nenv:\n  - name: SPRING_PROFILES_ACTIVE\n    value: openshift-catalog" >  MANIFEST 
 
-sd init
 odo service create dh-postgresql-apb/dev -p postgresql_user=luke -p postgresql_password=secret -p postgresql_database=my_data -p postgresql_version=9.6
 odo service link dh-postgresql-apb my-spring-boot
 
