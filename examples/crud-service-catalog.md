@@ -136,27 +136,6 @@ curl -H "Content-Type: application/json" -X POST -d '{"name":"pear"}' http://MY_
 ## Asciinema recording
 
 ```bash
-cd /path/to/project
-
-oc delete project odo-demo && oc project default
-oc new-project odo-demo
-
-rm -rf {src,target,MANIFEST} && rm -rf *.{iml,xml,zip}
-
-
-sd create -t crud -i my-spring-boot
-mvn clean package
-
-echo "name: my-spring-boot\nenv:\n  - name: SPRING_PROFILES_ACTIVE\n    value: openshift-catalog" >  MANIFEST 
-
-sd init
-odo service create dh-postgresql-apb/dev -p postgresql_user=luke -p postgresql_password=secret -p postgresql_database=my_data -p postgresql_version=9.6
-odo service link dh-postgresql-apb my-spring-boot
-
-sd push --mode binary
-sd exec start
-
-http my-spring-boot-cmoullia.195.201.87.126.nip.io/api/fruits
-
+asciinema rec -c './demo.sh' demo.cast && asciinema play demo.cast
 ```
-rm -f demo.cast && asciinema rec -c './demo.sh' demo.cast && asciinema play demo.cast
+
