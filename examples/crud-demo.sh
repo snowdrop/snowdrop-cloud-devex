@@ -9,16 +9,15 @@ echo -e "\n#################################################################"
 echo -e "# Creation of Spring Boot CRUD cloud application using innerloop "
 echo -e "# Steps :   "
 echo -e "#  1. Create OpenShift project "
-echo -e "#  2. Download the sd's client and install it locally "
+echo -e "#  2. Download the sd client and install it locally "
 echo -e "#  3. Create component yaml config containing parameters for the CRUD service "
-echo -e "#  4. Create a Dev's supervisord pod - innerloop "
-echo -e "#  5. Create Postgresql Database using OAB Broker "
-echo -e "#  6. Create a secret containing the parameters to access the database and inject them within the Dev's pod "
-echo -e "#  7. Scaffold a Spring Boot application using as template - CRUD "
-echo -e "#  8. Compile it to create the uber jar file "
-echo -e "#  9. Push it to the Dev's pod "
-echo -e "# 10. Launch remotely the Spring Boot application "
-echo -e "# 11. Curl the /api/fruit endpoint "
+echo -e "#  4. Create Postgresql Database using OAB Broker "
+echo -e "#  5. Create a secret containing the parameters to access the database and inject them within the Dev's pod "
+echo -e "#  6. Scaffold a Spring Boot application using as template - CRUD "
+echo -e "#  6. Compile it to create the uber jar file "
+echo -e "#  8. Push it to the Dev's pod "
+echo -e "#  9. Launch remotely the Spring Boot application "
+echo -e "# 10. Access the /api/fruit endpoint (requires httpie)"
 echo -e "#################################################################"
 sleep 10
 clear
@@ -87,32 +86,24 @@ EOF
 sleep 10
 clear
 
-echo -e "\n#####################################"
-echo "# 4. Create Dev's pod - supervisord #"
-echo "#####################################"
-echo -e "sd init\n"
-sd init
-sleep 10
-clear
-
 echo -e "\n##############################################"
-echo "# 5. Create Postgresql Service using Catalog #"
+echo "# 4. Create Postgresql Service using Catalog #"
 echo "##############################################"
-echo -e "sd catalog create my-postgresql-db -n $project_name\n"
-sd catalog create my-postgresql-db -n $project_name
+echo -e "sd catalog create my-postgresql-db\n"
+sd catalog create my-postgresql-db
 sleep 10
 clear
 
 echo -e "\n#####################################################"
-echo "# 6. Inject secret as ENV vars within the dev's pod #"
+echo "# 5. Inject secret as ENV vars within the dev's pod #"
 echo "#####################################################"
-echo -e "sd catalog bind --secret my-postgresql-db-secret --toInstance my-postgresql-db -n $project_name\n"
-sd catalog bind --secret my-postgresql-db-secret --toInstance my-postgresql-db -n $project_name
+echo -e "sd catalog bind --secret my-postgresql-db-secret --toInstance my-postgresql-db\n"
+sd catalog bind --secret my-postgresql-db-secret --toInstance my-postgresql-db
 sleep 10
 clear
 
 echo -e "\n#######################################################################"
-echo "# 7. Scaffold a Spring Boot project using CRUD template and compile it #"
+echo "# 6. Scaffold a Spring Boot project using CRUD template and compile it #"
 echo "########################################################################"
 echo -e "sd create -t crud -i my-spring-boot"
 echo -e "mvn clean package -DskipTests=true\n"
@@ -122,23 +113,23 @@ sleep 5
 clear
 
 echo -e "\n##############################################"
-echo "# 8. Push the uber jar file to the dev's pod #"
+echo "# 7. Push the uber jar file to the dev's pod #"
 echo "##############################################"
-echo -e "sd push --mode binary -n $project_name\n"
-sd push --mode binary -n $project_name
+echo -e "sd push --mode binary\n"
+sd push --mode binary
 sleep 5
 clear
 
 echo -e "\n#################################################"
-echo "# 9. Start the Spring Boot Application remotely #"
+echo "# 8. Start the Spring Boot Application remotely #"
 echo "#################################################"
-echo -e "sd exec start -n $project_name\n"
-sd exec start -n $project_name > /dev/null 2>&1 &
+echo -e "sd exec start\n"
+sd exec start > /dev/null 2>&1 &
 sleep 15
 clear
 
 echo -e "\n#################################################################################"
-echo "# 10. Curl the route of the service exposed to get the fruits using /api/fruits #"
+echo "# 9. Curl the route of the service exposed to get the fruits using /api/fruits #"
 echo "#################################################################################"
 echo -e "export SERVICE=$(oc get route/my-spring-boot --template='{{.spec.host}}')\n"
 export SERVICE=$(oc get route/my-spring-boot --template='{{.spec.host}}')
@@ -151,7 +142,7 @@ do
 done
 
 echo "######################"
-echo "# 11. Clean up #"
+echo "# 10. Clean up #"
 echo "################"
 cd $default_dir
 rm -rf $tmpdir

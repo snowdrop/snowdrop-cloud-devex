@@ -19,9 +19,6 @@ import (
 	"path"
 )
 
-var (
-	namespace string
-)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -40,8 +37,6 @@ var rootCmd = &cobra.Command{
 func init() {
 	rootCmd.PersistentFlags().StringP("kubeconfig", "k", "", "Path to a kubeconfig ($HOME/.kube/config). Only required if out-of-cluster.")
 	rootCmd.PersistentFlags().StringP("masterurl", "", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
-	// Global flag(s)
-	rootCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "", "Namespace/project (defaults to current project)")
 }
 
 func Execute() {
@@ -75,8 +70,8 @@ func Setup() config.Tool {
 	// Get K8s' config file
 	tool.KubeConfig = getK8Config(*rootCmd)
 
-	// Switch to namespace if specified or retrieve the current one if not
-	currentNs, err := oc.ExecCommandAndReturn(oc.Command{Args: []string{"project", "-q", namespace}})
+	// Retrieve the current namespace
+	currentNs, err := oc.ExecCommandAndReturn(oc.Command{Args: []string{"project", "-q"}})
 	if err != nil {
 		log.Fatal(err)
 	}
