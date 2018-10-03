@@ -135,7 +135,14 @@ curl -H "Content-Type: application/json" -X POST -d '{"name":"pear"}' http://MY_
 
 ## Asciinema recording
 
+- Record the video using the demo script
 ```bash
-asciinema rec -c './demo.sh' demo.cast && asciinema play demo.cast
+asciinema rec -c './examples/crud-demo.sh' crud-demo.cast
+```
+
+- Play it locally
+
+```bash
+asciinema play crud-demo.cast
 ```
 
