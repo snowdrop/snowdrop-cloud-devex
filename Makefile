@@ -20,7 +20,7 @@ clean:
 
 build:
 	@echo "> Build go application"
-	go build ${BUILD_FLAGS} -o sb main.go
+	go build ${BUILD_FLAGS} -o sd main.go
 
 cross: clean
 	gox -osarch="darwin/amd64 linux/amd64" -output="dist/bin/{{.OS}}-{{.Arch}}/sb" $(BUILD_FLAGS)

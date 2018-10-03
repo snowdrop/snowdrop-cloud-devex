@@ -36,7 +36,7 @@ cd spring-boot-cloud-devex
 
 ```bash
 make build
-sudo cp sb /usr/local/bin
+sudo cp sd /usr/local/bin
 ```
 
 # Build the supervisor & java s2i images
@@ -106,17 +106,17 @@ docker push quay.io/snowdrop/spring-boot-s2i
 oc delete --force --grace-period=0 all --all
 oc delete pvc/m2-data
 
-go build -o sb *.go
+go build -o sd *.go
 export PATH=$PATH:$(pwd)
 export CURRENT=$(pwd)
 
 cd spring-boot
 mvn clean package
 
-sb init -n cloud-demo
-sb push --mode binary
-sb exec start
-sb exec stop
+sd init -n cloud-demo
+sd push --mode binary
+sd exec start
+sd exec stop
 cd $CURRENT
 ```
 
@@ -130,15 +130,15 @@ cd $CURRENT
 oc delete --force --grace-period=0 all --all
 oc delete pvc/m2-data
 
-go build -o sb *.go
+go build -o sd *.go
 export PATH=$PATH:$(pwd)
 export CURRENT=$(pwd)
 
 cd spring-boot
-sb init -n cloud-demo
-sb push --mode source
-sb compile
-sb exec start
+sd init -n cloud-demo
+sd push --mode source
+sd compile
+sd exec start
 cd $CURRENT
 ```
 
@@ -159,16 +159,16 @@ curl $URL/api/greeting
 oc delete --force --grace-period=0 all --all
 oc delete pvc/m2-data
 
-go build -o sb *.go
+go build -o sd *.go
 export PATH=$PATH:$(pwd)
 export CURRENT=$(pwd)
 
 cd spring-boot
 
 mvn clean package
-sb init -n cloud-demo
-sb push --mode binary
-sb exec start
+sd init -n cloud-demo
+sd push --mode binary
+sd exec start
 cd $CURRENT
 ```
 
@@ -189,15 +189,15 @@ curl $URL/api/greeting
 oc delete --force --grace-period=0 all --all
 oc delete pvc/m2-data
 
-go build -o sb *.go
+go build -o sd *.go
 export PATH=$PATH:$(pwd)
 export CURRENT=$(pwd)
  
 cd spring-boot
-sb init -n cloud-demo
-sb push --mode binary
-sb exec stop
-sb debug
+sd init -n cloud-demo
+sd push --mode binary
+sd exec stop
+sd debug
 cd $CURRENT
 ```
 
@@ -211,19 +211,19 @@ cd $CURRENT
 oc delete --force --grace-period=0 all --all
 oc delete pvc/m2-data
 
-go build -o sb *.go
+go build -o sd *.go
 export PATH=$PATH:$(pwd)
 export CURRENT=$(pwd)
 
 cd spring-boot
 
-sb init -n cloud-demo
-sb push --mode source
-sb compile
+sd init -n cloud-demo
+sd push --mode source
+sd compile
 oc delete --grace-period=0 --force=true pod -l app=spring-boot-http 
-sb push --mode source
-sb compile
-sb exec start
+sd push --mode source
+sd compile
+sd exec start
 cd $CURRENT
 ```
 
@@ -237,27 +237,27 @@ cd $CURRENT
 oc delete --force --grace-period=0 all --all
 oc delete pvc/m2-data
 
-go build -o sb *.go
+go build -o sd *.go
 export PATH=$PATH:$(pwd)
 export CURRENT=$(pwd)
 
 cd spring-boot
 
-sb init -n cloud-demo
-sb build
+sd init -n cloud-demo
+sd build
 cd $CURRENT
 ```
 
 ## Test 6 : Scaffold a project
 
 ```bash
-go build -o sb *.go
+go build -o sd *.go
 export PATH=$PATH:$(pwd)
 export CURRENT=$(pwd)
 
 cd pkg/generator && go run server.go
 mkdir -p ~/Temp/springboot-simple && cd  ~/Temp/springboot-simple
-sb create -t simple
+sd create -t simple
 ls -la
 cd $CURRENT
 ```

@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- SB tool is installed (>= [0.12.0](https://github.com/snowdrop/spring-boot-cloud-devex/releases/tag/v0.15.0)). See README.md 
+- SD tool is installed (>= [0.15.0](https://github.com/snowdrop/spring-boot-cloud-devex/releases/tag/v0.15.0)). See README.md 
 - Minishift (>= v1.23.0+91235ee) with Service Catalog feature enabled
 
 ## Step by step instructions
@@ -132,3 +132,7 @@ X-Application-Context: application:openshift
 ```bash
 curl -H "Content-Type: application/json" -X POST -d '{"name":"pear"}' http://MY_APP_NAME-MY_PROJECT_NAME.OPENSHIFT_HOSTNAME/api/fruits
 ```
+
+## Asciinema recording
+
+rm -f demo.cast && asciinema rec -c './demo.sh' demo.cast && asciinema play demo.cast

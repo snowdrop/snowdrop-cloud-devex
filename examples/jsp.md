@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
- - SB tool is installed (>= [0.12.0](https://github.com/snowdrop/spring-boot-cloud-devex/releases/tag/v0.15.0)). See README.md 
+ - SD tool is installed (>= [0.15.0](https://github.com/snowdrop/spring-boot-cloud-devex/releases/tag/v0.15.0)). See README.md 
 
 ## Step by step instructions
 

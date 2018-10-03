@@ -42,29 +42,28 @@ The prototype developed within this project aims to resolve the following user's
 - Execute within a terminal this curl command in order to download our Spring Boot go client 
 
   ```bash
-  sudo curl -L https://github.com/snowdrop/spring-boot-cloud-devex/releases/download/v0.15.0/sb-darwin-amd64 -o /usr/local/bin/sb
+  sudo curl -L https://github.com/snowdrop/spring-boot-cloud-devex/releases/download/v0.15.0/sb-darwin-amd64 -o /usr/local/bin/sd
   or 
-  sudo curl -L https://github.com/snowdrop/spring-boot-cloud-devex/releases/download/v0.15.0/sb-linux-amd64 -o /usr/local/bin/sb
-  sudo chmod +x /usr/local/bin/sb
+  sudo curl -L https://github.com/snowdrop/spring-boot-cloud-devex/releases/download/v0.15.0/sb-linux-amd64 -o /usr/local/bin/sd
+  sudo chmod +x /usr/local/bin/sd
   ```
 
 - Test it to check that you can access the commands proposed within your terminal 
 
   ```bash
-  $sb -h
+  $sd -h
   
-  sb (ODO's Spring Boot prototype) is a prototype project experimenting supervisord and MANIFEST concepts
-  
+  snowdrop's client tool to scaffold a spring boot application on kubernetes/openshift
   Usage:
-    sb [command]
+    sd [command]
   
   Examples:
       # Creating and deploying a spring Boot application
       git clone https://github.com/snowdrop/spring-boot-cloud-devex.git && cd spring-boot-cloud-devex/spring-boot
-      sb init -n namespace
-      sb push
-      sb compile
-      sb run
+      sd init -n namespace
+      sd push
+      sd compile
+      sd run
   
   Available Commands:
     build       Build an image of the application
@@ -76,7 +75,7 @@ The prototype developed within this project aims to resolve the following user's
     help        Help about any command
     init        Create a development's pod for the component
     push        Push local code to the development pod
-    version     Show sb  client version
+    version     Show sd  client version
   
   Flags:
     -a, --application string   Application name (defaults to current directory name)
@@ -85,7 +84,7 @@ The prototype developed within this project aims to resolve the following user's
         --masterurl string     The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.
     -n, --namespace string     Namespace/project (defaults to current project)
   
-  Use "sb [command] --help" for more information about a command.
+  Use "sd [command] --help" for more information about a command.
   ```
 
 ## Create a project
@@ -109,11 +108,11 @@ Within your terminal, move to the folder where you would like to create a Spring
 Execute the following command to create a Maven project containing the Spring code exposing a REST Endpoint `/api/greeting`
 
   ```bash
-  sb create -t rest -i my-spring-boot
+  sd create -t rest -i my-spring-boot
   ```
 
   **REMARK** : The parameter `-i` will configure the `artifactId` to use the same name as the folder of your project. The command will populate a project using default values for the GAV, package name, Spring Boot version. That could be of course tailored using
-  the different parameters proposed by the command `sb create -h`  
+  the different parameters proposed by the command `sd create -h`  
 
 ## Create the development's pod
 
@@ -121,7 +120,7 @@ In order to run the Spring Boot application on OpenShift, we will install a Deve
 install the application, compile it (optional), debug or start/stop it. Execute then this `init` command.
 
   ```bash
-  sb init
+  sd init
   ```
   
 - After a few moment, verify that development's pod is up and running and logs the following messages
@@ -144,7 +143,7 @@ As the development's pod has been created and is running the `supervisord` serve
 To use the created `uberjar` file located under `/target/<application-name-version>.jar`, then run this command :
   
   ```bash
-  sb push --mode binary
+  sd push --mode binary
   ```
   
 ## Start the java application
@@ -152,7 +151,7 @@ To use the created `uberjar` file located under `/target/<application-name-versi
 - Launch the Spring Boot Application
 
   ```bash
-  sb exec start
+  sd exec start
   ime="2018-07-13T11:06:26Z" level=debug msg="succeed to find process:run-java"
   time="2018-07-13T11:06:26Z" level=info msg="try to start program" program=run-java
   time="2018-07-13T11:06:26Z" level=info msg="success to start program" program=run-java
@@ -189,14 +188,14 @@ Access the endpoint of the Spring Boot application using curl and the route expo
 
 - The Spring Boot Application can be stopped, started or restarted using respectively these commands:
   ```bash
-  sb exec stop
-  sb exec start
-  sb exec restart
+  sd exec stop
+  sd exec start
+  sd exec restart
   ```
 - You can also debug your application by forwarding the traffic between the pod and your machine using the following command : 
   ```bash
-  sb exec debug
-  INFO[0000] sb exec start command called                        
+  sd exec debug
+  INFO[0000] sd exec start command called                        
   INFO[0000] [Step 1] - Parse MANIFEST of the project if it exists 
   INFO[0000] [Step 2] - Get K8s config file               
   INFO[0000] [Step 3] - Create kube Rest config client using config's file of the developer's machine 
@@ -208,7 +207,7 @@ Access the endpoint of the Spring Boot application using curl and the route expo
   Forwarding from 127.0.0.1:5005 -> 5005
   ```
   
-  **Remark** : You can change the local/remote ports to be used by passing the parameter `-p`. E.g `sb exec debug -p 9009:9009`
+  **Remark** : You can change the local/remote ports to be used by passing the parameter `-p`. E.g `sd exec debug -p 9009:9009`
 
 
 ## Compile the maven project within the pod (optional)
@@ -217,14 +216,14 @@ if you want or prefer to compile the project using the development's pod which c
 responsible to copy the following resources within the pod : `pom.xml, src/ folder`
              
   ```bash
-  sb push --mode source
+  sd push --mode source
   ```
     
 And next execute the compilation using this command
     
   ```bash
-  sb compile
-  INFO[0000] sb Compile command called                    
+  sd compile
+  INFO[0000] sd Compile command called                    
   INFO[0000] [Step 1] - Parse MANIFEST of the project if it exists 
   INFO[0000] [Step 2] - Get K8s config file               
   INFO[0000] [Step 3] - Create kube Rest config client using config's file of the developer's machine 
@@ -283,7 +282,7 @@ And next execute the compilation using this command
 ## Clean up
   
   ```bash
-  sb clean
+  sd clean
   ``` 
 
 ## More examples
