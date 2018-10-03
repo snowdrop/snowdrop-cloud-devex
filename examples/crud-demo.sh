@@ -5,10 +5,27 @@ tmpdir=$(mktemp -d)
 project_name=odo-$RANDOM
 cd $tmpdir
 
+echo -e "\n#######################################################################"
+echo -e "# Creation of Spring Boot CRUD cloud application using innerloop \n"
+echo -e "# Steps :   \n"
+echo -e "#  1. Create OpenShift project \n"
+echo -e "#  2. Download the sd's client and install it locally \n"
+echo -e "#  3. Create component yaml config containing parameters for the CRUD service \n"
+echo -e "#  4. Create a Dev's supervisord pod - innerloop \n"
+echo -e "#  5. Create Postgresql Database using OAB Broker \n"
+echo -e "#  6. Create a secret containing the parameters to access the database and inject them within the Dev's pod \n"
+echo -e "#  7. Scaffold a Spring Boot application using as template - CRUD \n"
+echo -e "#  8. Compile it to create the uber jar file \n"
+echo -e "#  9. Push it to the Dev's pod \n"
+echo -e "# 10. Launch remotely the Spring Boot application \n"
+echo -e "# 11. Curl the /api/fruit endpoint \n"
 echo -e "\n####################################################"
-echo "# 1. Log on tpo the cluster and create a namespace #"
+sleep 20
+
+echo -e "\n####################################################"
+echo "# 1. Log on to the cluster and create a namespace #"
 echo "####################################################"
-oc login https://192.168.99.50:8443 -u admin -p admin
+oc login https://192.168.99.50:8443 -u admin -p admin > /dev/null 2>&1
 oc new-project $project_name
 
 echo -e "\n##########################################################"
@@ -76,15 +93,15 @@ echo "# 9. Start the Spring Boot Application remotely #"
 echo "#################################################"
 sd exec start -n $project_name > /dev/null 2>&1 &
 
-echo "######################################################################################"
+echo -e "\n######################################################################################"
 echo "# 10. Curl the route of the service exposed to get the fruits using /api/fruits #"
 echo "#################################################################################"
 export SERVICE=$(oc get route/my-spring-boot --template='{{.spec.host}}')
-for run in {1..5}
+for run in {1..3}
 do
   sleep 5
   echo -e "\n# Call the endpoint /api/fruits"
-  curl -s http://$SERVICE/api/fruits | json
+  curl http://$SERVICE/api/fruits
   echo -e "\n"
 done
 
