@@ -47,26 +47,26 @@ env:
 - Initialize the Development's pod 
 
 ```bash
-sb init -n crud
+sd init -n crud
 ```
 
 - Scaffold the CRUD project using as artifactId - `my-spring-boot` name
 
 ```bash
-sb create -t crud -i my-spring-boot
+sd create -t crud -i my-spring-boot
 ```
 
 - Generate the binary uber jar file and push it
 
 ```bash
 mvn clean package
-sb push --mode binary
+sd push --mode binary
 ```
 
 - Start the Spring Boot application
 
 ```bash
-sb exec start
+sd exec start
 ```
 
 - Use `curl` or `httpie` tool to fetch the records using the Spring Boot CRUD endpoint exposed

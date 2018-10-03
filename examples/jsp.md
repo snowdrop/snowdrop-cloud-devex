@@ -31,26 +31,26 @@ env:
 - Initialize the Development's pod 
 
 ```bash
-sb init
+sd init
 ``` 
 
 - Scaffold the project using as artifactId - `my-spring-boot` name and the template jsp `jsp`
 
 ```bash
-sb create -t jsp -i my-spring-boot
+sd create -t jsp -i my-spring-boot
 ```
 
 - Generate the `war` file and push it
 
 ```bash
 mvn clean package
-sb push --mode binary
+sd push --mode binary
 ```
 
 - Start the Spring Boot application
 
 ```bash
-sb exec start
+sd exec start
 ```
 
 - Open the Openshift's route within your web browser. Execute this request within your terminal to get the host address and next copy/paste it

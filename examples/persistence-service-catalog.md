@@ -7,7 +7,7 @@
 
 ## Install tools
 
-- sb to scaffold the project and create the DeploymentConfig
+- sd to scaffold the project and create the DeploymentConfig
 
 ```bash
 sudo curl -L https://github.com/snowdrop/spring-boot-cloud-devex/releases/download/v0.15.0/sb-darwin-amd64 -o /usr/local/bin/sb
@@ -41,22 +41,22 @@ oc new-project odo
 cd /Temp/my-spring-boot
 # rm -rf {src,target,MANIFEST} && rm -rf *.{iml,xml,zip}
 # Scaffold a JPA Persistence Spring Boot Project
-sb create -t crud -i my-spring-boot
+sd create -t crud -i my-spring-boot
 mvn clean package
 
 echo "name: my-spring-boot\nenv:\n  - name: SPRING_PROFILES_ACTIVE\n    value: openshift-catalog" >  MANIFEST 
 
 
 # Create the Development's Pod (= supervisord)
-sb init
+sd init
 
 # Create a service's instance using the OABroker and postgresql DB + secret. Next bind/link the secret to the DC and restart it
 odo service create dh-postgresql-apb/dev -p postgresql_user=luke -p postgresql_password=secret -p postgresql_database=my_data -p postgresql_version=9.6
 odo service link dh-postgresql-apb my-spring-boot
 
 # Push the uber jar file and start the supervisord's run command
-sb push --mode binary
-sb exec start
+sd push --mode binary
+sd exec start
 018-09-12 13:56:54.582  INFO 32 --- [           main] o.s.b.a.e.mvc.EndpointHandlerMapping     : Mapped "{[/heapdump || /heapdump.json],methods=[GET],produces=[application/octet-stream]}" onto public void org.springframework.boot.actuate.endpoint.mvc.HeapdumpMvcEndpoint.invoke(boolean,javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse) throws java.io.IOException,javax.servlet.ServletException
 2018-09-12 13:56:54.583  INFO 32 --- [           main] o.s.b.a.e.mvc.EndpointHandlerMapping     : Mapped "{[/configprops || /configprops.json],methods=[GET],produces=[application/vnd.spring-boot.actuator.v1+json || application/json]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.mvc.EndpointMvcAdapter.invoke()
 2018-09-12 13:56:54.585  INFO 32 --- [           main] o.s.b.a.e.mvc.EndpointHandlerMapping     : Mapped "{[/auditevents || /auditevents.json],methods=[GET],produces=[application/vnd.spring-boot.actuator.v1+json || application/json]}" onto public org.springframework.http.ResponseEntity<?> org.springframework.boot.actuate.endpoint.mvc.AuditEventsMvcEndpoint.findByPrincipalAndAfterAndType(java.lang.String,java.util.Date,java.lang.String)
@@ -119,17 +119,17 @@ oc new-project cmoullia
 rm -rf {src,target,MANIFEST} && rm -rf *.{iml,xml,zip}
 
 
-sb create -t crud -i my-spring-boot
+sd create -t crud -i my-spring-boot
 mvn clean package
 
 echo "name: my-spring-boot\nenv:\n  - name: SPRING_PROFILES_ACTIVE\n    value: openshift-catalog" >  MANIFEST 
 
-sb init
+sd init
 odo service create dh-postgresql-apb/dev -p postgresql_user=luke -p postgresql_password=secret -p postgresql_database=my_data -p postgresql_version=9.6
 odo service link dh-postgresql-apb my-spring-boot
 
-sb push --mode binary
-sb exec start
+sd push --mode binary
+sd exec start
 
 http my-spring-boot-cmoullia.195.201.87.126.nip.io/api/fruits
 ```

@@ -60,28 +60,28 @@ EOF
 - Scaffold the CRUD project using as artifactId the `my-spring-boot` name specified within the MANIFEST 
 
 ```bash
-sb create -t crud -i my-spring-boot
+sd create -t crud -i my-spring-boot
 ```
 
 - Initialize the Development's pod and pass as parameter the namespace to be used
 
 ```bash
-sb init -n crud-catalog
+sd init -n crud-catalog
 ```
 
 - Create a service's instance using our service instance name `my-postgresql-db`
 
 ```bash
-sb catalog create <name_of_the_service_instance>
+sd catalog create <name_of_the_service_instance>
 ```
 
 where `<name_of_the_service_instance>` is the name to be defined for th service that we will create using the command (e.g my-postgresql-apb).
 The Service class to be selected from the catalog is specified within the MANIFEST using the field services/class `db-postgresql-apb` 
 
-- Create a secret using the service's parameters and bind/mount them to the DeploymentConfig created during `sb init` step
+- Create a secret using the service's parameters and bind/mount them to the DeploymentConfig created during `sd init` step
 
 ```bash
-sb catalog bind --secret <secret_name> --toInstance <name_of_the_service_instance>
+sd catalog bind --secret <secret_name> --toInstance <name_of_the_service_instance>
 ```
 
 where : `<name_of_the_service_instance>` corresponds to the service's instance name created previously `my-postgresql-db` and `<secret_name>` is the name of the secret (e.g my-postgresql-db-secret).
@@ -90,13 +90,13 @@ where : `<name_of_the_service_instance>` corresponds to the service's instance n
 
 ```bash
 mvn clean package
-sb push --mode binary
+sd push --mode binary
 ```
 
 - Start the Spring Boot application
 
 ```bash
-sb exec start
+sd exec start
 ```
 
 - Use `curl` or `httpie` tool to fetch the records using the Spring Boot CRUD endpoint exposed
@@ -135,4 +135,28 @@ curl -H "Content-Type: application/json" -X POST -d '{"name":"pear"}' http://MY_
 
 ## Asciinema recording
 
+```bash
+cd /path/to/project
+
+oc delete project odo-demo && oc project default
+oc new-project odo-demo
+
+rm -rf {src,target,MANIFEST} && rm -rf *.{iml,xml,zip}
+
+
+sd create -t crud -i my-spring-boot
+mvn clean package
+
+echo "name: my-spring-boot\nenv:\n  - name: SPRING_PROFILES_ACTIVE\n    value: openshift-catalog" >  MANIFEST 
+
+sd init
+odo service create dh-postgresql-apb/dev -p postgresql_user=luke -p postgresql_password=secret -p postgresql_database=my_data -p postgresql_version=9.6
+odo service link dh-postgresql-apb my-spring-boot
+
+sd push --mode binary
+sd exec start
+
+http my-spring-boot-cmoullia.195.201.87.126.nip.io/api/fruits
+
+```
 rm -f demo.cast && asciinema rec -c './demo.sh' demo.cast && asciinema play demo.cast
