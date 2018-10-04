@@ -1,5 +1,7 @@
 package scaffold
 
+import "strings"
+
 type Project struct {
 	GroupId     string
 	ArtifactId  string
@@ -30,6 +32,10 @@ type Bom struct {
 	Community string `yaml:"community" json:"community"`
 	Snowdrop  string `yaml:"snowdrop"  json:"snowdrop"`
 	Default   bool   `yaml:"default"  json:"default"`
+}
+
+func (bom Bom) GetSpringBootVersion() string {
+	return bom.Snowdrop[:strings.LastIndex(bom.Snowdrop, ".")]
 }
 
 type Module struct {

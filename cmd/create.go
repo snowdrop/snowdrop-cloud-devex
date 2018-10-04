@@ -1,16 +1,13 @@
 package cmd
 
 import (
-	"github.com/posener/complete"
+	"archive/zip"
+	"fmt"
+	"github.com/ghodss/yaml"
+	"github.com/manifoldco/promptui"
 	log "github.com/sirupsen/logrus"
 	"github.com/snowdrop/spring-boot-cloud-devex/pkg/scaffold"
 	"github.com/spf13/cobra"
-	"sort"
-
-	"archive/zip"
-	"bytes"
-	"fmt"
-	"github.com/ghodss/yaml"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -22,11 +19,15 @@ import (
 
 var (
 	c = &scaffold.Config{}
-	p = scaffold.Project{}
+	p = scaffold.Project{
+		GroupId:    "com.example",
+		ArtifactId: "demo",
+		Version:    "0.0.1-SNAPSHOT",
+	}
 )
 
 const (
-	SERVICE_ENDPOINT = "http://spring-boot-generator.195.201.87.126.nip.io"
+	ServiceEndpoint = "http://spring-boot-generator.195.201.87.126.nip.io"
 )
 
 func init() {
@@ -43,40 +44,159 @@ func init() {
 		Args:    cobra.RangeArgs(0, 1),
 		Run: func(cmd *cobra.Command, args []string) {
 
-			var valid bool
-			if p.Template != "" {
-				for _, t := range c.Templates {
-					if p.Template == t.Name {
-						valid = true
-					}
-				}
-			} else {
-				p.Template = "simple"
-				valid = true
+			form := url.Values{}
+
+			prompt := promptui.Select{
+				Label: "Which type of project do you want to create?",
+				Items: []string{"Template", "Custom"},
 			}
 
-			if !valid {
-				log.WithField("template", p.Template).Fatal("The provided template is not supported: ")
+			i, _, err := prompt.Run()
+			if i == 0 {
+				templates := &promptui.SelectTemplates{
+					Active:   "\U0001F3ED {{ .Name | cyan }}",
+					Inactive: "  {{ .Name | cyan }}",
+					Selected: "\U0001F3ED {{ .Name | red | cyan }}",
+					Details: `
+--------- Template ----------
+{{ "Name:" | faint }}	{{ .Name }}
+{{ "Description:" | faint }}	{{ .Description }}`,
+				}
+
+				uiTemplates := getUiTemplates()
+				prompt = promptui.Select{
+					Label:     "Which template should we use?",
+					Items:     uiTemplates,
+					Templates: templates,
+				}
+
+				i, _, _ := prompt.Run()
+
+				form.Add("template", uiTemplates[i].Name)
+
+			} else {
+				var lastSelected string
+				var selectedModules []string
+				for {
+					templates := &promptui.SelectTemplates{
+						Active:   "\U0001F680 {{ .Name | cyan }}",
+						Inactive: "  {{ .Name | cyan }}",
+						Selected: "\U0001F680 {{ .Name | red | cyan }}",
+						Help:     fmt.Sprintf("Selected modules: %s. Select 'Done' when done.", selectedModules),
+						Details: `
+--------- Module ----------
+{{ "Name:" | faint }}	{{ .Name }}
+{{ "Description:" | faint }}	{{ .Description }}`,
+					}
+					modules := getUiModules(selectedModules)
+					prompt = promptui.Select{
+						Label:     "Which module(s) should we use?",
+						Items:     modules,
+						Templates: templates,
+					}
+					i, _, _ := prompt.Run()
+
+					lastSelected = modules[i].Name
+
+					if lastSelected == "Done" {
+						break
+					} else {
+						selectedModules = append(selectedModules, lastSelected)
+						form.Add("module", lastSelected)
+					}
+				}
 			}
+
+			artifactName := p.ArtifactId
+
+			prompt = promptui.Select{
+				Label: "Do you want to further customize your project?",
+				Items: []string{"Yes", "No"},
+			}
+			_, answer, _ := prompt.Run()
+			if answer == "Yes" {
+				templates := &promptui.SelectTemplates{
+					Active:   "\U0001F343 {{ .SpringBootVersion | cyan }}",
+					Inactive: "  {{ .SpringBootVersion | cyan }}",
+					Selected: "\U0001F343 {{ .SpringBootVersion | red | cyan }}",
+					Details: `
+---------  Spring Boot Version ----------
+{{ "Name:" | faint }}	{{ .SpringBootVersion }}
+{{ "Community:" | faint }}	{{ .Community }}
+{{ "Snowdrop:" | faint }}	{{ .Snowdrop }}`,
+				}
+
+				prompt = promptui.Select{
+					Label:     "Which Spring Boot version should we use?",
+					Items:     getUiBoms(),
+					Templates: templates,
+				}
+
+				result, _, err := prompt.Run()
+				if err != nil {
+					panic(err)
+				}
+				sb := c.Boms[result]
+
+				boms := []string{sb.Community, sb.Snowdrop}
+				prompt = promptui.Select{
+					Label: "What flavor do you want to use?",
+					Items: boms,
+				}
+
+				_, bom, _ := prompt.Run()
+				form.Add("snowdropbom", bom)
+
+				var entry promptui.Prompt
+				var chosen string
+				var packageName string
+
+				entry = promptui.Prompt{
+					Label:     "Group Id",
+					Default:   p.GroupId,
+					AllowEdit: true,
+				}
+				chosen, _ = entry.Run()
+				packageName += chosen
+				form.Add("groupid", chosen)
+
+				entry = promptui.Prompt{
+					Label:     "Artifact Id",
+					Default:   artifactName,
+					AllowEdit: true,
+				}
+				artifactName, _ = entry.Run()
+				packageName += "." + artifactName
+				form.Add("artifactid", artifactName)
+
+				entry = promptui.Prompt{
+					Label:     "Version",
+					Default:   p.Version,
+					AllowEdit: true,
+				}
+				chosen, _ = entry.Run()
+				form.Add("version", chosen)
+
+				entry = promptui.Prompt{
+					Label:     "Package name",
+					Default:   packageName,
+					AllowEdit: true,
+				}
+				chosen, _ = entry.Run()
+				form.Add("packagename", chosen)
+			}
+
+			currentDir, _ := os.Getwd()
+			entry := promptui.Prompt{
+				Label:     "Where should the project be created from the current directory?",
+				Default:   artifactName,
+				AllowEdit: true,
+			}
+			outDir, _ := entry.Run()
 
 			log.Infof("Create command called")
 
 			client := http.Client{}
-
-			form := url.Values{}
-			form.Add("template", p.Template)
-			form.Add("groupid", p.GroupId)
-			form.Add("artifactid", p.ArtifactId)
-			form.Add("version", p.Version)
-			form.Add("packagename", p.PackageName)
-			form.Add("snowdropbom", p.SnowdropBomVersion)
-			form.Add("springbootversion", p.SpringBootVersion)
-			form.Add("outdir", p.OutDir)
-			for _, v := range p.Modules {
-				if v != "" {
-					form.Add("module", v)
-				}
-			}
 
 			parameters := form.Encode()
 			if parameters != "" {
@@ -101,8 +221,7 @@ func init() {
 				log.Error(err.Error())
 			}
 
-			currentDir, _ := os.Getwd()
-			dir := filepath.Join(currentDir, p.OutDir)
+			dir := filepath.Join(currentDir, outDir)
 			zipFile := dir + ".zip"
 
 			err = ioutil.WriteFile(zipFile, body, 0644)
@@ -121,58 +240,37 @@ func init() {
 		},
 	}
 
-	createCmd.Flags().StringVarP(&p.Template, "template", "t", "",
-		fmt.Sprintf("Template name used to select the project to be created. Supported templates are '%s'", getTemplatesFromList()))
-	createCmd.Flags().StringVarP(&p.UrlService, "urlservice", "u", SERVICE_ENDPOINT, "URL of the HTTP Server exposing the spring boot service")
-	createCmd.Flags().StringArrayVarP(&p.Modules, "module", "m", []string{}, "Spring Boot modules/starters")
-	createCmd.Flags().StringVarP(&p.GroupId, "groupid", "g", "", "GroupId : com.example")
-	createCmd.Flags().StringVarP(&p.ArtifactId, "artifactid", "i", "", "ArtifactId: demo")
-	createCmd.Flags().StringVarP(&p.Version, "version", "v", "", "Version: 0.0.1-SNAPSHOT")
-	createCmd.Flags().StringVarP(&p.PackageName, "packagename", "p", "", "Package Name: com.example.demo")
-	createCmd.Flags().StringVarP(&p.SpringBootVersion, "springbootversion", "s", "", "Spring Boot Version")
-	createCmd.Flags().StringVarP(&p.SnowdropBomVersion, "snowdropbom", "b", "", "Snowdrop Bom Version")
+	createCmd.Flags().StringVarP(&p.UrlService, "urlservice", "u", ServiceEndpoint, "URL of the HTTP Server exposing the spring boot service")
 
 	// Add a defined annotation in order to appear in the help menu
 	createCmd.Annotations = map[string]string{"command": "create"}
 
 	rootCmd.AddCommand(createCmd)
-	Suggesters[GetFlagSuggesterName(createCmd, "snowdropbom")] = bomSuggester{}
-	Suggesters[GetFlagSuggesterName(createCmd, "module")] = moduleSuggester{}
-	Suggesters[GetFlagSuggesterName(createCmd, "template")] = templateSuggester{}
 }
 
-type bomSuggester struct {
+func getUiTemplates() []scaffold.Template {
+	return templatesExceptNamed("custom")
 }
 
-func (i bomSuggester) Predict(args complete.Args) []string {
-	var suggestions []string
+func getUiModules(selectedModules []string) []scaffold.Module {
+	modules := modulesExceptNamed(selectedModules...)
+	return append(modules, scaffold.Module{Name: "Done", Description: "Select when done"})
+}
+
+type uiBom struct {
+	scaffold.Bom
+	SpringBootVersion string
+}
+
+func getUiBoms() (boms []uiBom) {
 	for _, bom := range c.Boms {
-		sbVersion := bom.Community[:strings.LastIndex(bom.Community, ".")]
-		suggestions = append(suggestions, sbVersion+".Community")
-		suggestions = append(suggestions, sbVersion+".Snowdrop")
+		boms = append(boms, uiBom{
+			bom,
+			bom.GetSpringBootVersion(),
+		})
 	}
 
-	return suggestions
-}
-
-type moduleSuggester struct {
-}
-
-func (i moduleSuggester) Predict(args complete.Args) []string {
-	var suggestions []string
-	if strings.ContainsRune(args.Last, ',') {
-		names := strings.Split(args.Last, ",")
-		for _, mod := range modulesExceptNamed(names...) {
-			suggestions = append(suggestions, args.Last+mod.Name)
-		}
-	} else {
-		for _, mod := range c.Modules {
-			suggestions = append(suggestions, mod.Name)
-		}
-	}
-
-	sort.Strings(suggestions)
-	return suggestions
+	return boms
 }
 
 func modulesExceptNamed(names ...string) (modules []scaffold.Module) {
@@ -197,21 +295,31 @@ func modulesExceptNamed(names ...string) (modules []scaffold.Module) {
 	return modules
 }
 
-type templateSuggester struct {
-}
+func templatesExceptNamed(names ...string) (templates []scaffold.Template) {
+	excluded := make(map[string]bool)
 
-func (i templateSuggester) Predict(args complete.Args) []string {
-	var suggestions []string
-	for _, template := range c.Templates {
-		suggestions = append(suggestions, template.Name)
+	for _, name := range names {
+		if len(name) > 0 {
+			for _, template := range c.Templates {
+				if name == template.Name {
+					excluded[name] = true
+				}
+			}
+		}
 	}
 
-	return suggestions
+	for _, template := range c.Templates {
+		if !excluded[template.Name] {
+			templates = append(templates, template)
+		}
+	}
+
+	return templates
 }
 
 func GetGeneratorServiceConfig() {
 	// Call the /config endpoint to get the configuration
-	URL := strings.Join([]string{SERVICE_ENDPOINT, "config"}, "/")
+	URL := strings.Join([]string{ServiceEndpoint, "config"}, "/")
 	client := http.Client{}
 	req, err := http.NewRequest(http.MethodGet, URL, strings.NewReader(""))
 	if err != nil {
@@ -239,17 +347,6 @@ func addClientHeader(req *http.Request) {
 	// TODO Define a version
 	userAgent := "sb/1.0"
 	req.Header.Set("User-Agent", userAgent)
-}
-
-func getTemplatesFromList() string {
-	var buffer bytes.Buffer
-	for i, t := range c.Templates {
-		buffer.WriteString(t.Name)
-		if i < len(c.Templates)-1 {
-			buffer.WriteString(" ")
-		}
-	}
-	return buffer.String()
 }
 
 func Unzip(src, dest string) error {
