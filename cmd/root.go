@@ -5,6 +5,7 @@ import (
 	"github.com/manifoldco/promptui"
 	appsv1 "github.com/openshift/api/apps/v1"
 	"github.com/pkg/errors"
+	"github.com/posener/complete"
 	log "github.com/sirupsen/logrus"
 	"github.com/snowdrop/spring-boot-cloud-devex/pkg/buildpack"
 	"github.com/snowdrop/spring-boot-cloud-devex/pkg/buildpack/types"
@@ -18,6 +19,8 @@ import (
 	"os"
 	"path"
 )
+
+var Suggesters = make(map[string]complete.Predictor)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -36,6 +39,17 @@ var rootCmd = &cobra.Command{
 func init() {
 	rootCmd.PersistentFlags().StringP("kubeconfig", "k", "", "Path to a kubeconfig ($HOME/.kube/config). Only required if out-of-cluster.")
 	rootCmd.PersistentFlags().StringP("masterurl", "", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
+}
+
+func RootCmd() *cobra.Command {
+	return rootCmd
+}
+
+func GetCommandSuggesterName(command *cobra.Command) string {
+	return command.Name()
+}
+func GetFlagSuggesterName(command *cobra.Command, flag string) string {
+	return command.Name() + "_" + flag
 }
 
 func Execute() {

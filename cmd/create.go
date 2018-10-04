@@ -1,11 +1,14 @@
 package cmd
 
 import (
+	"github.com/posener/complete"
 	log "github.com/sirupsen/logrus"
 	"github.com/snowdrop/spring-boot-cloud-devex/pkg/scaffold"
 	"github.com/spf13/cobra"
+	"sort"
 
 	"archive/zip"
+	"bytes"
 	"fmt"
 	"github.com/ghodss/yaml"
 	"io"
@@ -15,17 +18,15 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"bytes"
 )
 
 var (
-	c 		  = &scaffold.Config{}
-	p         = scaffold.Project{}
+	c = &scaffold.Config{}
+	p = scaffold.Project{}
 )
 
 const (
 	SERVICE_ENDPOINT = "http://spring-boot-generator.195.201.87.126.nip.io"
-	//SERVICE_ENDPOINT = "http://localhost:8000"
 )
 
 func init() {
@@ -135,20 +136,88 @@ func init() {
 	createCmd.Annotations = map[string]string{"command": "create"}
 
 	rootCmd.AddCommand(createCmd)
+	Suggesters[GetFlagSuggesterName(createCmd, "snowdropbom")] = bomSuggester{}
+	Suggesters[GetFlagSuggesterName(createCmd, "module")] = moduleSuggester{}
+	Suggesters[GetFlagSuggesterName(createCmd, "template")] = templateSuggester{}
+}
+
+type bomSuggester struct {
+}
+
+func (i bomSuggester) Predict(args complete.Args) []string {
+	var suggestions []string
+	for _, bom := range c.Boms {
+		sbVersion := bom.Community[:strings.LastIndex(bom.Community, ".")]
+		suggestions = append(suggestions, sbVersion+".Community")
+		suggestions = append(suggestions, sbVersion+".Snowdrop")
+	}
+
+	return suggestions
+}
+
+type moduleSuggester struct {
+}
+
+func (i moduleSuggester) Predict(args complete.Args) []string {
+	var suggestions []string
+	if strings.ContainsRune(args.Last, ',') {
+		names := strings.Split(args.Last, ",")
+		for _, mod := range modulesExceptNamed(names...) {
+			suggestions = append(suggestions, args.Last+mod.Name)
+		}
+	} else {
+		for _, mod := range c.Modules {
+			suggestions = append(suggestions, mod.Name)
+		}
+	}
+
+	sort.Strings(suggestions)
+	return suggestions
+}
+
+func modulesExceptNamed(names ...string) (modules []scaffold.Module) {
+	excluded := make(map[string]bool)
+
+	for _, name := range names {
+		if len(name) > 0 {
+			for _, mod := range c.Modules {
+				if name == mod.Name {
+					excluded[name] = true
+				}
+			}
+		}
+	}
+
+	for _, mod := range c.Modules {
+		if !excluded[mod.Name] {
+			modules = append(modules, mod)
+		}
+	}
+
+	return modules
+}
+
+type templateSuggester struct {
+}
+
+func (i templateSuggester) Predict(args complete.Args) []string {
+	var suggestions []string
+	for _, template := range c.Templates {
+		suggestions = append(suggestions, template.Name)
+	}
+
+	return suggestions
 }
 
 func GetGeneratorServiceConfig() {
 	// Call the /config endpoint to get the configuration
 	URL := strings.Join([]string{SERVICE_ENDPOINT, "config"}, "/")
 	client := http.Client{}
-
 	req, err := http.NewRequest(http.MethodGet, URL, strings.NewReader(""))
-
 	if err != nil {
 		log.Error(err.Error())
 	}
 	addClientHeader(req)
-
 	res, err := client.Do(req)
 	if err != nil {
 		log.Error(err.Error())
@@ -157,11 +226,9 @@ func GetGeneratorServiceConfig() {
 	if err != nil {
 		log.Error(err.Error())
 	}
-
-	if strings.Contains(string(body),"Application is not available") {
+	if strings.Contains(string(body), "Application is not available") {
 		log.Fatal("Generator service is not able to find the config !")
 	}
-
 	err = yaml.Unmarshal(body, &c)
 	if err != nil {
 		log.Fatal(err.Error())
