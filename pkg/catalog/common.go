@@ -1,10 +1,13 @@
 package catalog
 
 import (
+	"github.com/pkg/errors"
 	restclient "k8s.io/client-go/rest"
+	"strings"
 
 	scv1beta1 "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	servicecatalogclienset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	log "github.com/sirupsen/logrus"
 
@@ -19,6 +22,26 @@ func GetClient(config *restclient.Config) *servicecatalogclienset.Servicecatalog
 		log.Fatal("error creating service catalog Clientset", err.Error())
 	}
 	return serviceCatalogV1Client
+}
+
+// GetClusterServiceClasses queries the service service catalog to get available clusterServiceClasses
+func GetClusterServiceClasses(scc *servicecatalogclienset.ServicecatalogV1beta1Client) ([]scv1beta1.ClusterServiceClass, error) {
+	classList, err := scc.ClusterServiceClasses().List(metav1.ListOptions{})
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to list cluster service classes")
+	}
+	itemsFromAutomationBroker := make([]scv1beta1.ClusterServiceClass, 0)
+	for _, class := range classList.Items {
+		// we are only interested in services from the automation-service-broker
+		// this broker however could have various names depending on the setup
+		if strings.Contains(class.Spec.ClusterServiceBrokerName, "ansible-service-broker") ||
+			strings.Contains(class.Spec.ClusterServiceBrokerName, "openshift-automation-service-broker") ||
+			strings.Contains(class.Spec.ClusterServiceBrokerName, "automation-broker") {
+
+			itemsFromAutomationBroker = append(itemsFromAutomationBroker, class)
+		}
+	}
+	return itemsFromAutomationBroker, nil
 }
 
 // BuildParameters converts a map of variable assignments to a byte encoded json document,
