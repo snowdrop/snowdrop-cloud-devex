@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	scv1beta1 "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/manifoldco/promptui"
 	"github.com/posener/complete"
 	log "github.com/sirupsen/logrus"
 	"github.com/snowdrop/spring-boot-cloud-devex/pkg/catalog"
@@ -18,7 +20,7 @@ func init() {
 		Run: func(cmd *cobra.Command, args []string) {
 			log.Info("Catalog list command called")
 
-			catalog.List(getK8RestConfig(), matching)
+			catalog.List(GetK8RestConfig(), matching)
 		},
 	}
 	catalogListCmd.Flags().StringVarP(&matching, "search", "s", "", "Only return services whose name matches the specified text")
@@ -28,12 +30,55 @@ func init() {
 		Short:   "Create a service instance",
 		Long:    "Create a service instance and install it in a namespace.",
 		Example: ` sd catalog create <instance name>`,
-		Args:    cobra.ExactArgs(1),
+		//Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			log.Info("Catalog select command called")
-			setup := Setup()
+			log.Info("Catalog create command called")
 
-			catalog.Create(setup.RestConfig, setup.Application, args[0])
+			client := catalog.GetClient(GetK8RestConfig())
+			classesByCategory, _ := catalog.GetServiceClassesByCategory(client)
+
+			prompt := promptui.Select{
+				Label: "Which kind of service do you wish to create?",
+				Items: catalog.GetServiceClassesCategories(classesByCategory),
+			}
+
+			_, category, _ := prompt.Run()
+
+			templates := &promptui.SelectTemplates{
+				Active:   "\U00002620 {{ .Name | cyan }}",
+				Inactive: "  {{ .Name | cyan }}",
+				Selected: "\U00002620 {{ .Name | red | cyan }}",
+				Details: `
+--------- Service Class ----------
+{{ "Name:" | faint }}	{{ .Name }}
+{{ "Description:" | faint }}	{{ .Description }}
+{{ "Long:" | faint }}	{{ .LongDescription }}`,
+			}
+
+			uiClasses := getUiServiceClasses(classesByCategory[category])
+			prompt = promptui.Select{
+				Label:     "Which " + category + " service class should we use?",
+				Items:     uiClasses,
+				Templates: templates,
+			}
+
+			i, _, _ := prompt.Run()
+			class := uiClasses[i].Class
+
+			plans, _ := catalog.GetMatchingPlans(client, class)
+			prompt = promptui.Select{
+				Label: "Which service plan should we use?",
+				Items: catalog.GetServicePlanNames(plans),
+			}
+
+			_, planName, _ := prompt.Run()
+
+			plan := plans[planName]
+
+			log.Infof("Selected %s", plan)
+			/*setup := Setup()
+
+			catalog.Create(setup.RestConfig, setup.Application, args[0])*/
 		},
 	}
 
@@ -66,7 +111,7 @@ func init() {
 		Run: func(cmd *cobra.Command, args []string) {
 			log.Info("Catalog plan command called")
 
-			catalog.Plan(getK8RestConfig(), args[0])
+			catalog.Plan(GetK8RestConfig(), args[0])
 		},
 	}
 	Suggesters[GetCommandSuggesterName(catalogPlanCmd)] = classSuggester{}
@@ -91,10 +136,18 @@ func init() {
 	rootCmd.AddCommand(catalogCmd)
 }
 
+func getUiServiceClasses(classes []scv1beta1.ClusterServiceClass) (uiClasses []catalog.UIClusterServiceClass) {
+	for _, v := range classes {
+		uiClasses = append(uiClasses, catalog.ConvertToUI(v))
+	}
+
+	return uiClasses
+}
+
 type classSuggester struct{}
 
 func (i classSuggester) Predict(args complete.Args) []string {
-	serviceCatalogClient := catalog.GetClient(getK8RestConfig())
+	serviceCatalogClient := catalog.GetClient(GetK8RestConfig())
 	classes, err := catalog.GetClusterServiceClasses(serviceCatalogClient)
 
 	if err != nil {

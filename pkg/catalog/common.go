@@ -44,6 +44,50 @@ func GetClusterServiceClasses(scc *servicecatalogclienset.ServicecatalogV1beta1C
 	return itemsFromAutomationBroker, nil
 }
 
+func GetServicePlanNames(stringMap map[string]scv1beta1.ClusterServicePlan) (keys []string) {
+	keys = make([]string, len(stringMap))
+
+	i := 0
+	for k := range stringMap {
+		keys[i] = k
+		i++
+	}
+
+	return keys
+}
+
+func GetServiceClassesCategories(categories map[string][]scv1beta1.ClusterServiceClass) (keys []string) {
+	keys = make([]string, len(categories))
+
+	i := 0
+	for k := range categories {
+		keys[i] = k
+		i++
+	}
+
+	return keys
+}
+
+func GetServiceClassesByCategory(scc *servicecatalogclienset.ServicecatalogV1beta1Client) (categories map[string][]scv1beta1.ClusterServiceClass, err error) {
+	categories = make(map[string][]scv1beta1.ClusterServiceClass)
+	classes, err := GetClusterServiceClasses(scc)
+
+	for _, class := range classes {
+		tags := class.Spec.Tags
+		var meta map[string]interface{}
+		json.Unmarshal(class.Spec.ExternalMetadata.Raw, &meta)
+		category := "other"
+		if len(tags) > 0 {
+			category = tags[0]
+		}
+		if len(category) > 0 {
+			categories[category] = append(categories[category], class)
+		}
+	}
+
+	return categories, err
+}
+
 // BuildParameters converts a map of variable assignments to a byte encoded json document,
 // which is what the ServiceCatalog API consumes.
 func BuildParameters(params interface{}) *runtime.RawExtension {

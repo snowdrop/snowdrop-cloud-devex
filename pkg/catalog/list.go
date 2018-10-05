@@ -38,6 +38,28 @@ func List(config *restclient.Config, matching string) {
 	printListResults(filtered)
 }
 
+func ConvertToUI(class scv1beta1.ClusterServiceClass) UIClusterServiceClass {
+	var meta map[string]interface{}
+	json.Unmarshal(class.Spec.ExternalMetadata.Raw, &meta)
+	longDescription := ""
+	if val, ok := meta["longDescription"]; ok {
+		longDescription = val.(string)
+	}
+	return UIClusterServiceClass{
+		Name:            class.Spec.ExternalName,
+		Description:     class.Spec.Description,
+		LongDescription: longDescription,
+		Class:           class,
+	}
+}
+
+type UIClusterServiceClass struct {
+	Name            string
+	Description     string
+	LongDescription string
+	Class           scv1beta1.ClusterServiceClass
+}
+
 func printListResults(classes []scv1beta1.ClusterServiceClass) {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetRowLine(true)
@@ -47,13 +69,8 @@ func printListResults(classes []scv1beta1.ClusterServiceClass) {
 	table.SetColumnSeparator("‡")
 	table.SetRowSeparator("-")
 	for _, class := range classes {
-		var meta map[string]interface{}
-		json.Unmarshal(class.Spec.ExternalMetadata.Raw, &meta)
-		longDescription := ""
-		if val, ok := meta["longDescription"]; ok {
-			longDescription = val.(string)
-		}
-		row := []string{class.Spec.ExternalName, class.Spec.Description, longDescription}
+		uiClass := ConvertToUI(class)
+		row := []string{uiClass.Name, uiClass.Description, uiClass.LongDescription}
 		table.Append(row)
 	}
 	table.Render()

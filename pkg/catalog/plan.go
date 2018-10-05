@@ -51,37 +51,38 @@ func Plan(config *restclient.Config, className string) {
 }
 
 func getMatchingPlans(scc *servicecatalogclienset.ServicecatalogV1beta1Client, className string) ([]scv1beta1.ClusterServicePlan, error) {
-	clusterServiceClasses, err := GetClusterServiceClasses(scc)
-	if err != nil {
-		log.Fatalf("Unable to list ClusterServiceClasses")
-		return nil, errors.Wrap(err, "Unable to list ClusterServiceClasses")
-	}
+	class, err := GetServiceClass(scc, className)
 
-	var matchingClusterServiceClass *scv1beta1.ClusterServiceClass
-	for _, c := range clusterServiceClasses {
-		if c.Spec.ExternalName == className {
-			matchingClusterServiceClass = &c
-			break
-		}
-	}
-	if matchingClusterServiceClass == nil {
+	planList, err := scc.ClusterServicePlans().List(metav1.ListOptions{
+		FieldSelector: "spec.clusterServiceClassRef.name==" + class.Spec.ExternalID,
+	})
+
+	return planList.Items, err
+}
+
+func GetServiceClass(client *servicecatalogclienset.ServicecatalogV1beta1Client, className string) (class scv1beta1.ClusterServiceClass, err error) {
+	classes, err := client.ClusterServiceClasses().List(metav1.ListOptions{
+		FieldSelector: "spec.externalName==" + className,
+	})
+
+	if len(classes.Items) != 1 {
 		log.Fatalf("Unable to locate ClusterServiceClasses with name '%s'", className)
-		return nil, errors.Wrapf(err, "Unable to locate ClusterServiceClasses with name '%s'", className)
+		return class, errors.Wrapf(err, "Unable to locate ClusterServiceClasses with name '%s'", className)
 	}
 
-	planList, err := scc.ClusterServicePlans().List(metav1.ListOptions{})
-	if err != nil {
-		log.Fatalf("Unable to list ClusterServicePlans")
-	}
+	return classes.Items[0], err
+}
 
-	matchingPlans := make([]scv1beta1.ClusterServicePlan, 0)
-	for _, p := range planList.Items {
-		if p.Spec.ClusterServiceClassRef.Name == matchingClusterServiceClass.Spec.ExternalID {
-			matchingPlans = append(matchingPlans, p)
-		}
-	}
+func GetMatchingPlans(client *servicecatalogclienset.ServicecatalogV1beta1Client, class scv1beta1.ClusterServiceClass) (plans map[string]scv1beta1.ClusterServicePlan, err error) {
+	planList, err := client.ClusterServicePlans().List(metav1.ListOptions{
+		FieldSelector: "spec.clusterServiceClassRef.name==" + class.Spec.ExternalID,
+	})
 
-	return matchingPlans, nil
+	plans = make(map[string]scv1beta1.ClusterServicePlan)
+	for _, v := range planList.Items {
+		plans[v.Spec.ExternalName] = v
+	}
+	return plans, err
 }
 
 func getProperties(plan *scv1beta1.ClusterServicePlan) ([]propertyOut, error) {
@@ -90,7 +91,7 @@ func getProperties(plan *scv1beta1.ClusterServicePlan) ([]propertyOut, error) {
 
 	err := json.Unmarshal(paramBytes, &schema)
 	if err != nil {
-		return nil, errors.Wrapf(err, "Unable unmashal response: %s", string(paramBytes[:]))
+		return nil, errors.Wrapf(err, "Unable unmarshal response: %s", string(paramBytes[:]))
 	}
 
 	result := make([]propertyOut, 0)
