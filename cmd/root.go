@@ -21,6 +21,7 @@ import (
 )
 
 var Suggesters = make(map[string]complete.Predictor)
+var restConfig *restclient.Config
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -92,7 +93,7 @@ func Setup() config.Tool {
 	tool.Application.Namespace = currentNs
 
 	// Create Kube Rest's Config Client
-	tool.RestConfig = createKubeRestconfig(tool.KubeConfig)
+	tool.RestConfig = getK8RestConfig()
 	tool.Clientset = createClientSet(tool.KubeConfig, tool.RestConfig)
 
 	finishSetupAndSetApplicationName(tool)
@@ -120,7 +121,7 @@ func parseManifest() types.Application {
 }
 
 func getK8Config(kubeCfgPath string) config.Kube {
-	log.Info("Get K8s config file")
+	log.Debug("Get K8s config file")
 	var kubeCfg = config.Kube{}
 	if kubeCfgPath == "" {
 		kubeCfg.Config = config.HomeKubePath()
@@ -139,7 +140,7 @@ func createClientSet(kubeCfg config.Kube, optionalRestCfg ...*restclient.Config)
 	} else {
 		kubeRestClient = createKubeRestconfig(kubeCfg)
 	}
-	log.Info("Create k8s Clientset")
+	log.Debug("Create k8s Clientset")
 	clientset, errclientset := kubernetes.NewForConfig(kubeRestClient)
 	if errclientset != nil {
 		log.Fatalf("Error building kubernetes clientset: %s", errclientset.Error())
@@ -147,9 +148,17 @@ func createClientSet(kubeCfg config.Kube, optionalRestCfg ...*restclient.Config)
 	return clientset
 }
 
+func getK8RestConfig() *restclient.Config {
+	if restConfig == nil {
+		restConfig = createKubeRestconfig(getK8Config(""))
+	}
+
+	return restConfig
+}
+
 // Create Kube Rest's Config Client
 func createKubeRestconfig(kubeCfg config.Kube) *restclient.Config {
-	log.Info("Create k8s Rest config client using the developer's machine config file")
+	log.Debug("Create k8s Rest config client using the developer's machine config file")
 	kubeRestClient, err := clientcmd.BuildConfigFromFlags(kubeCfg.MasterURL, kubeCfg.Config)
 	if err != nil {
 		log.Fatalf("Error building kubeconfig: %s", err.Error())
