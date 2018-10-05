@@ -93,7 +93,7 @@ func Setup() config.Tool {
 	tool.Application.Namespace = currentNs
 
 	// Create Kube Rest's Config Client
-	tool.RestConfig = getK8RestConfig()
+	tool.RestConfig = GetK8RestConfig()
 	tool.Clientset = createClientSet(tool.KubeConfig, tool.RestConfig)
 
 	finishSetupAndSetApplicationName(tool)
@@ -148,7 +148,7 @@ func createClientSet(kubeCfg config.Kube, optionalRestCfg ...*restclient.Config)
 	return clientset
 }
 
-func getK8RestConfig() *restclient.Config {
+func GetK8RestConfig() *restclient.Config {
 	if restConfig == nil {
 		restConfig = createKubeRestconfig(getK8Config(""))
 	}
