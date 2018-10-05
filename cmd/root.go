@@ -81,7 +81,7 @@ func Setup() config.Tool {
 	tool.Application = parseManifest()
 
 	// Get K8s' config file
-	tool.KubeConfig = getK8Config(*rootCmd)
+	tool.KubeConfig = getK8Config(rootCmd.Flag("kubeconfig").Value.String())
 
 	// Retrieve the current namespace
 	currentNs, err := oc.ExecCommandAndReturn(oc.Command{Args: []string{"project", "-q"}})
@@ -119,10 +119,9 @@ func parseManifest() types.Application {
 	return buildpack.ParseManifest(current + "/MANIFEST")
 }
 
-func getK8Config(cmd cobra.Command) config.Kube {
+func getK8Config(kubeCfgPath string) config.Kube {
 	log.Info("Get K8s config file")
 	var kubeCfg = config.Kube{}
-	kubeCfgPath := cmd.Flag("kubeconfig").Value.String()
 	if kubeCfgPath == "" {
 		kubeCfg.Config = config.HomeKubePath()
 	} else {
