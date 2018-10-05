@@ -17,9 +17,8 @@ func init() {
 		Example: ` sd catalog list [-s <part of service name>]`,
 		Run: func(cmd *cobra.Command, args []string) {
 			log.Info("Catalog list command called")
-			setup := Setup()
 
-			catalog.List(setup.RestConfig, matching)
+			catalog.List(getK8RestConfig(), matching)
 		},
 	}
 	catalogListCmd.Flags().StringVarP(&matching, "search", "s", "", "Only return services whose name matches the specified text")
