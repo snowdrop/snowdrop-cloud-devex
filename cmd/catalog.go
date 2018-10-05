@@ -65,9 +65,8 @@ func init() {
 		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			log.Info("Catalog plan command called")
-			setup := Setup()
 
-			catalog.Plan(setup.RestConfig, args[0])
+			catalog.Plan(getK8RestConfig(), args[0])
 		},
 	}
 
