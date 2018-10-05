@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/posener/complete"
 	log "github.com/sirupsen/logrus"
 	"github.com/snowdrop/spring-boot-cloud-devex/pkg/catalog"
 	"github.com/spf13/cobra"
@@ -69,6 +70,7 @@ func init() {
 			catalog.Plan(getK8RestConfig(), args[0])
 		},
 	}
+	Suggesters[GetCommandSuggesterName(catalogPlanCmd)] = classSuggester{}
 
 	catalogCmd := &cobra.Command{
 		Use:   "catalog [options]",
@@ -88,4 +90,22 @@ func init() {
 
 	catalogCmd.Annotations = map[string]string{"command": "catalog"}
 	rootCmd.AddCommand(catalogCmd)
+}
+
+type classSuggester struct{}
+
+func (i classSuggester) Predict(args complete.Args) []string {
+	serviceCatalogClient := catalog.GetClient(getK8RestConfig())
+	classes, err := catalog.GetClusterServiceClasses(serviceCatalogClient)
+
+	if err != nil {
+		log.Error(err)
+	}
+
+	var suggestions []string
+	for _, class := range classes {
+		suggestions = append(suggestions, class.Spec.ExternalName)
+	}
+
+	return suggestions
 }
