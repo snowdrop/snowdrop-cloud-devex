@@ -112,9 +112,7 @@ Execute the following command to create a Maven project containing the Spring co
 
 ## Development pod
 
-In order to run the Spring Boot application on OpenShift, we will install a development pod that our tool will use to interact in order to 
-install the application, compile it (optional), debug or start/stop it. This development pod is automatically created on demand the 
-first time you issue an `sd` command. You can check the logs as follows:
+In order to install the application, compile it (optional), debug or start/stop it. This development pod is automatically created on demand the first time you issue an `sd` command. You can check the logs as follows:
 
   ```bash
   $oc logs $(oc get pod -l app=my-spring-boot -o name)
