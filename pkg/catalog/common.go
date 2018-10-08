@@ -3,6 +3,7 @@ package catalog
 import (
 	"github.com/pkg/errors"
 	restclient "k8s.io/client-go/rest"
+	"sort"
 	"strings"
 
 	scv1beta1 "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
@@ -53,6 +54,8 @@ func GetServicePlanNames(stringMap map[string]scv1beta1.ClusterServicePlan) (key
 		i++
 	}
 
+	sort.Strings(keys)
+
 	return keys
 }
 
@@ -64,6 +67,8 @@ func GetServiceClassesCategories(categories map[string][]scv1beta1.ClusterServic
 		keys[i] = k
 		i++
 	}
+
+	sort.Strings(keys)
 
 	return keys
 }

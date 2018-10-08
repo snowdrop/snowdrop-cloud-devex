@@ -20,14 +20,14 @@ func Create(config *restclient.Config, application types.Application, instanceNa
 	if e != nil {
 		log.Errorf("No such service definition '%s' found in MANIFEST", instanceName)
 	} else {
-		createServiceInstance(serviceCatalogClient, application.Namespace, instanceName, service.Class, service.Plan, service.ExternalId, service.ParametersAsMap())
+		CreateServiceInstance(serviceCatalogClient, application.Namespace, instanceName, service.Class, service.Plan, service.ExternalId, service.ParametersAsMap())
 		log.Infof("Service instance created")
 	}
 
 }
 
 // CreateServiceInstance creates service instance from service catalog
-func createServiceInstance(scc *servicecatalogclienset.ServicecatalogV1beta1Client, ns string, instanceName string, className string, plan string, externalID string, params interface{}) error {
+func CreateServiceInstance(scc *servicecatalogclienset.ServicecatalogV1beta1Client, ns string, instanceName string, className string, plan string, externalID string, params interface{}) error {
 
 	// Creating Service Instance
 	_, err := scc.ServiceInstances(ns).Create(

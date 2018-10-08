@@ -10,6 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	restclient "k8s.io/client-go/rest"
 	"os"
+	"sort"
 	"strconv"
 )
 
@@ -24,12 +25,30 @@ type property struct {
 	Description string
 }
 
-type propertyOut struct {
+type UiProperty struct {
 	Name        string
 	Title       string
 	Description string
 	Type        string
 	Required    bool
+}
+
+type UiProperties []UiProperty
+
+func (props UiProperties) Len() int {
+	return len(props)
+}
+
+func (props UiProperties) Less(i, j int) bool {
+	if props[i].Required == props[j].Required {
+		return props[i].Name < props[j].Name
+	} else {
+		return props[i].Required && !props[j].Required
+	}
+}
+
+func (props UiProperties) Swap(i, j int) {
+	props[i], props[j] = props[j], props[i]
 }
 
 func Plan(config *restclient.Config, className string) {
@@ -39,9 +58,9 @@ func Plan(config *restclient.Config, className string) {
 		log.Fatal(err)
 	}
 
-	results := make(map[string][]propertyOut)
+	results := make(map[string][]UiProperty)
 	for _, plan := range matchingPlans {
-		properties, err := getProperties(&plan)
+		properties, err := GetProperties(plan)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -85,27 +104,28 @@ func GetMatchingPlans(client *servicecatalogclienset.ServicecatalogV1beta1Client
 	return plans, err
 }
 
-func getProperties(plan *scv1beta1.ClusterServicePlan) ([]propertyOut, error) {
+func GetProperties(plan scv1beta1.ClusterServicePlan) (properties UiProperties, err error) {
 	paramBytes := plan.Spec.CommonServicePlanSpec.ServiceInstanceCreateParameterSchema.Raw
 	schema := serviceInstanceCreateParameterSchema{}
 
-	err := json.Unmarshal(paramBytes, &schema)
+	err = json.Unmarshal(paramBytes, &schema)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Unable unmarshal response: %s", string(paramBytes[:]))
 	}
 
-	result := make([]propertyOut, 0)
+	properties = make([]UiProperty, 0, len(schema.Properties))
 	for k, v := range schema.Properties {
-		propertyOut := propertyOut{}
+		propertyOut := UiProperty{}
 		propertyOut.Name = k
 		propertyOut.Title = v.Title
 		propertyOut.Description = v.Description
 		propertyOut.Type = v.Type
 		propertyOut.Required = isRequired(schema.Required, k)
-		result = append(result, propertyOut)
+		properties = append(properties, propertyOut)
 	}
 
-	return result, nil
+	sort.Sort(properties)
+	return properties, err
 }
 
 func isRequired(required []string, name string) bool {
@@ -117,7 +137,7 @@ func isRequired(required []string, name string) bool {
 	return false
 }
 
-func printPlanResults(results map[string][]propertyOut) {
+func printPlanResults(results map[string][]UiProperty) {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetRowLine(true)
 	table.SetHeader([]string{"Plan", "Property Name", "Required", "Type", "Description", "Long Description"})

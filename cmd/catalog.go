@@ -8,6 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/snowdrop/spring-boot-cloud-devex/pkg/catalog"
 	"github.com/spf13/cobra"
+	"sort"
 )
 
 func init() {
@@ -63,7 +64,9 @@ func init() {
 			}
 
 			i, _, _ := prompt.Run()
-			class := uiClasses[i].Class
+			uiClass := uiClasses[i]
+			className := uiClass.Name
+			class := uiClass.Class
 
 			plans, _ := catalog.GetMatchingPlans(client, class)
 			prompt = promptui.Select{
@@ -75,10 +78,42 @@ func init() {
 
 			plan := plans[planName]
 
-			log.Infof("Selected %s", plan)
-			/*setup := Setup()
+			properties, _ := catalog.GetProperties(plan)
 
-			catalog.Create(setup.RestConfig, setup.Application, args[0])*/
+			i = 0
+			values := make(map[string]string)
+			for i < len(properties) && properties[i].Required {
+				prop := properties[i]
+				prompt := promptui.Prompt{
+					Label:     fmt.Sprintf("Enter a value for %s property %s", prop.Type, prop.Title),
+					AllowEdit: true,
+				}
+
+				result, _ := prompt.Run()
+				values[prop.Name] = result
+				i++
+			}
+
+			// if we have non-required properties, ask if user wants to provide values
+			if i < len(properties)-1 {
+				// todo
+			}
+
+			instancePrompt := promptui.Prompt{
+				Label:     "Finally, how should we name your service",
+				AllowEdit: true,
+			}
+
+			instance, _ := instancePrompt.Run()
+
+			setup := Setup()
+
+			err := catalog.CreateServiceInstance(client, setup.Application.Namespace, instance, className, planName, "", values)
+			if err != nil {
+				panic(err)
+			}
+
+			log.Infof("Service %s using class %s has been created!", instance, className)
 		},
 	}
 
@@ -136,11 +171,26 @@ func init() {
 	rootCmd.AddCommand(catalogCmd)
 }
 
-func getUiServiceClasses(classes []scv1beta1.ClusterServiceClass) (uiClasses []catalog.UIClusterServiceClass) {
+type uiServiceClasses []catalog.UIClusterServiceClass
+
+func (classes uiServiceClasses) Len() int {
+	return len(classes)
+}
+
+func (classes uiServiceClasses) Less(i, j int) bool {
+	return classes[i].Name < classes[j].Name
+}
+
+func (classes uiServiceClasses) Swap(i, j int) {
+	classes[i], classes[j] = classes[j], classes[i]
+}
+func getUiServiceClasses(classes []scv1beta1.ClusterServiceClass) (uiClasses uiServiceClasses) {
+	uiClasses = make(uiServiceClasses, 0, len(classes))
 	for _, v := range classes {
 		uiClasses = append(uiClasses, catalog.ConvertToUI(v))
 	}
 
+	sort.Sort(uiClasses)
 	return uiClasses
 }
 
