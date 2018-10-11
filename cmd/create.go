@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 	"io"
 	"io/ioutil"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
 	"net/url"
 	"os"
@@ -237,6 +238,48 @@ func init() {
 				log.Errorf(err.Error())
 			}
 
+			/*
+						apiVersion: component.k8s.io/v1alpha1
+			kind: Component
+			metadata:
+			  name: my-spring-boot
+			spec:
+			  deployment: innerloop
+			  runtime: springboot
+			  version: 1.5.16
+			  envs:
+			  - name: SPRING_PROFILES_ACTIVE
+			    value: openshift-catalog
+			*/
+
+			component := Component{
+				TypeMeta: metav1.TypeMeta{
+					Kind:       "Component",
+					APIVersion: "component.k8s.io/v1alpha1",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "my-spring-boot",
+				},
+				Spec: ComponentSpec{
+					DeploymentMode: "innerloop",
+					Runtime:        "springboot",
+					Version:        "1.5.16",
+					Envs: []Env{
+						{
+							Name:  "SPRING_PROFILES_ACTIVE",
+							Value: "openshift-catalog",
+						},
+					},
+				},
+			}
+			b, err := yaml.Marshal(component)
+			if err != nil {
+				log.Fatal(err)
+			}
+			err = ioutil.WriteFile("component.yml", b, 0644)
+			if err != nil {
+				log.Fatal(err)
+			}
 		},
 	}
 

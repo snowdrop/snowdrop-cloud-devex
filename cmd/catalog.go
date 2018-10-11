@@ -2,14 +2,57 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/ghodss/yaml"
 	scv1beta1 "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/manifoldco/promptui"
 	"github.com/posener/complete"
 	log "github.com/sirupsen/logrus"
 	"github.com/snowdrop/spring-boot-cloud-devex/pkg/catalog"
 	"github.com/spf13/cobra"
+	"io/ioutil"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sort"
 )
+
+// A component represents
+type Component struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata"`
+	Spec              ComponentSpec `json:"spec"`
+}
+
+type ComponentSpec struct {
+	Services []Service `json:"services,omitempty"`
+	// DeploymentMode indicates the strategy to be adopted to install the resources into a namespace
+	// and next to create a pod. 2 strategies are currently supported; inner and outer loop
+	// where outer loop refers to a build of the code and the packaging of the application into a container's image
+	// while the inner loop will install a pod's running a supervisord daemon used to trigger actions such as : assemble, run, ...
+	DeploymentMode string `json:"deployment,omitempty"`
+	// Runtime is the framework used to start within the container the application
+	// It corresponds to one of the following values: spring-boot, vertx, tornthail, nodejs
+	Runtime string `json:"runtime,omitempty"`
+	Version string `json:"version,omitempty"`
+	// Array of env variables containing extra/additional info to be used to configure the runtime
+	Envs []Env `json:"envs,omitempty"`
+}
+
+type Service struct {
+	Class      string      `json:"class,omitempty"`
+	Name       string      `json:"name,omitempty"`
+	Plan       string      `json:"plan,omitempty"`
+	ExternalId string      `json:"externalid,omitempty"`
+	Parameters []Parameter `json:"parameters,omitempty"`
+}
+
+type Parameter struct {
+	Name  string `json:"name,omitempty"`
+	Value string `json:"value,omitempty"`
+}
+
+type Env struct {
+	Name  string `json:"name,omitempty"`
+	Value string `json:"value,omitempty"`
+}
 
 func init() {
 	var matching string
@@ -82,6 +125,7 @@ func init() {
 
 			i = 0
 			values := make(map[string]string)
+			parameters := make([]Parameter, 0, len(properties))
 			for i < len(properties) && properties[i].Required {
 				prop := properties[i]
 				prompt := promptui.Prompt{
@@ -91,6 +135,10 @@ func init() {
 
 				result, _ := prompt.Run()
 				values[prop.Name] = result
+				parameters = append(parameters, Parameter{
+					Name:  prop.Name,
+					Value: result,
+				})
 				i++
 			}
 
@@ -106,11 +154,58 @@ func init() {
 
 			instance, _ := instancePrompt.Run()
 
-			setup := Setup()
+			//setup := Setup()
 
-			err := catalog.CreateServiceInstance(client, setup.Application.Namespace, instance, className, planName, "", values)
+			/*err := catalog.CreateServiceInstance(client, setup.Application.Namespace, instance, className, planName, "", values)
 			if err != nil {
 				panic(err)
+			}*/
+
+			/*
+			apiVersion: component.k8s.io/v1alpha1
+			kind: Component
+			metadata:
+			  name: my-spring-boot-service
+			spec:
+			  services:
+			    - name: my-postgresql-db   # Name of the instance to be created within the namespace
+			      class: dh-postgresql-apb # Class or name of the service selected from the catalog
+			      plan: dev                # Plan selected : dev, ....
+			      parameters:
+			      - name: postgresql_user
+			        value: "luke"
+			      - name: postgresql_password
+			        value: "secret"
+			      - name: postgresql_database
+			        value: "my_data"
+			      - name: postgresql_version
+			        value: "9.6"
+			*/
+			component := Component{
+				TypeMeta: metav1.TypeMeta{
+					Kind:       "Component",
+					APIVersion: "component.k8s.io/v1alpha1",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "my-spring-boot-service",
+				},
+				Spec: ComponentSpec{
+					Services: []Service{
+						{Name: instance,
+							Class:      className,
+							Plan:       planName,
+							Parameters: parameters,
+						},
+					},
+				},
+			}
+			b, err := yaml.Marshal(component)
+			if err != nil {
+				log.Fatal(err)
+			}
+			err = ioutil.WriteFile("component-service.yml", b, 0644)
+			if err != nil {
+				log.Fatal(err)
 			}
 
 			log.Infof("Service %s using class %s has been created!", instance, className)
