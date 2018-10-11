@@ -53,7 +53,7 @@ func WaitAndGetPod(c *kubernetes.Clientset, application types.Application) (*cor
 
 func podSelector(application types.Application) metav1.ListOptions {
 	return metav1.ListOptions{
-		LabelSelector: "app=" + application.Name,
+		LabelSelector: "app=" + "my-spring-boot",
 		FieldSelector: "status.phase=Running",
 	}
 }
