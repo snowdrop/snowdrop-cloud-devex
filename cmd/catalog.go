@@ -22,7 +22,9 @@ type Component struct {
 }
 
 type ComponentSpec struct {
-	Services []Service `json:"services,omitempty"`
+	// To indicate if we want to expose the service out side of the cluster as a route
+	ExposeService bool      `json:"exposeService,omitempty"`
+	Services      []Service `json:"services,omitempty"`
 	// DeploymentMode indicates the strategy to be adopted to install the resources into a namespace
 	// and next to create a pod. 2 strategies are currently supported; inner and outer loop
 	// where outer loop refers to a build of the code and the packaging of the application into a container's image
@@ -162,24 +164,24 @@ func init() {
 			}*/
 
 			/*
-			apiVersion: component.k8s.io/v1alpha1
-			kind: Component
-			metadata:
-			  name: my-spring-boot-service
-			spec:
-			  services:
-			    - name: my-postgresql-db   # Name of the instance to be created within the namespace
-			      class: dh-postgresql-apb # Class or name of the service selected from the catalog
-			      plan: dev                # Plan selected : dev, ....
-			      parameters:
-			      - name: postgresql_user
-			        value: "luke"
-			      - name: postgresql_password
-			        value: "secret"
-			      - name: postgresql_database
-			        value: "my_data"
-			      - name: postgresql_version
-			        value: "9.6"
+				apiVersion: component.k8s.io/v1alpha1
+				kind: Component
+				metadata:
+				  name: my-spring-boot-service
+				spec:
+				  services:
+				    - name: my-postgresql-db   # Name of the instance to be created within the namespace
+				      class: dh-postgresql-apb # Class or name of the service selected from the catalog
+				      plan: dev                # Plan selected : dev, ....
+				      parameters:
+				      - name: postgresql_user
+				        value: "luke"
+				      - name: postgresql_password
+				        value: "secret"
+				      - name: postgresql_database
+				        value: "my_data"
+				      - name: postgresql_version
+				        value: "9.6"
 			*/
 			component := Component{
 				TypeMeta: metav1.TypeMeta{

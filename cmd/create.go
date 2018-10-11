@@ -239,17 +239,17 @@ func init() {
 			}
 
 			/*
-						apiVersion: component.k8s.io/v1alpha1
-			kind: Component
-			metadata:
-			  name: my-spring-boot
-			spec:
-			  deployment: innerloop
-			  runtime: springboot
-			  version: 1.5.16
-			  envs:
-			  - name: SPRING_PROFILES_ACTIVE
-			    value: openshift-catalog
+							apiVersion: component.k8s.io/v1alpha1
+				kind: Component
+				metadata:
+				  name: my-spring-boot
+				spec:
+				  deployment: innerloop
+				  runtime: springboot
+				  version: 1.5.16
+				  envs:
+				  - name: SPRING_PROFILES_ACTIVE
+				    value: openshift-catalog
 			*/
 
 			component := Component{
@@ -261,6 +261,7 @@ func init() {
 					Name: "my-spring-boot",
 				},
 				Spec: ComponentSpec{
+					ExposeService:  true,
 					DeploymentMode: "innerloop",
 					Runtime:        "springboot",
 					Version:        "1.5.16",
