@@ -96,7 +96,7 @@ func Setup() config.Tool {
 	tool.RestConfig = GetK8RestConfig()
 	tool.Clientset = createClientSet(tool.KubeConfig, tool.RestConfig)
 
-	finishSetupAndSetApplicationName(tool)
+	//finishSetupAndSetApplicationName(tool)
 
 	return *tool
 }
