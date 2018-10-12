@@ -4,11 +4,13 @@ import (
 	"fmt"
 	scv1beta1 "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/manifoldco/promptui"
+	"github.com/pkg/errors"
 	"github.com/posener/complete"
 	log "github.com/sirupsen/logrus"
 	"github.com/snowdrop/spring-boot-cloud-devex/pkg/catalog"
 	"github.com/spf13/cobra"
 	"sort"
+	"strings"
 )
 
 func init() {
@@ -26,96 +28,120 @@ func init() {
 	}
 	catalogListCmd.Flags().StringVarP(&matching, "search", "s", "", "Only return services whose name matches the specified text")
 
+	var (
+		serviceClass string
+		planName     string
+		instanceName string
+		parameters   []string
+	)
 	catalogInstanceCmd := &cobra.Command{
 		Use:     "create",
 		Short:   "Create a service instance",
 		Long:    "Create a service instance and install it in a namespace.",
-		Example: ` sd catalog create <instance name>`,
-		//Args:    cobra.ExactArgs(1),
+		Example: ` sd catalog create`,
 		Run: func(cmd *cobra.Command, args []string) {
 			log.Info("Catalog create command called")
 
 			client := catalog.GetClient(GetK8RestConfig())
-			classesByCategory, _ := catalog.GetServiceClassesByCategory(client)
 
-			prompt := promptui.Select{
-				Label: "Which kind of service do you wish to create?",
-				Items: catalog.GetServiceClassesCategories(classesByCategory),
-			}
-
-			_, category, _ := prompt.Run()
-
-			templates := &promptui.SelectTemplates{
-				Active:   "\U00002620 {{ .Name | cyan }}",
-				Inactive: "  {{ .Name | cyan }}",
-				Selected: "\U00002620 {{ .Name | red | cyan }}",
-				Details: `
+			var uiClass catalog.UIClusterServiceClass
+			if len(serviceClass) == 0 {
+				classesByCategory, _ := catalog.GetServiceClassesByCategory(client)
+				prompt := promptui.Select{
+					Label: "Which kind of service do you wish to create?",
+					Items: catalog.GetServiceClassesCategories(classesByCategory),
+				}
+				_, category, _ := prompt.Run()
+				templates := &promptui.SelectTemplates{
+					Active:   "\U00002620 {{ .Name | cyan }}",
+					Inactive: "  {{ .Name | cyan }}",
+					Selected: "\U00002620 {{ .Name | red | cyan }}",
+					Details: `
 --------- Service Class ----------
 {{ "Name:" | faint }}	{{ .Name }}
 {{ "Description:" | faint }}	{{ .Description }}
 {{ "Long:" | faint }}	{{ .LongDescription }}`,
+				}
+				uiClasses := getUiServiceClasses(classesByCategory[category])
+				prompt = promptui.Select{
+					Label:     "Which " + category + " service class should we use?",
+					Items:     uiClasses,
+					Templates: templates,
+				}
+				i, _, _ := prompt.Run()
+				uiClass = uiClasses[i]
+			} else {
+				class, _ := catalog.GetServiceClass(client, serviceClass)
+				uiClass = catalog.ConvertToUI(class)
 			}
 
-			uiClasses := getUiServiceClasses(classesByCategory[category])
-			prompt = promptui.Select{
-				Label:     "Which " + category + " service class should we use?",
-				Items:     uiClasses,
-				Templates: templates,
+			plans, _ := catalog.GetMatchingPlans(client, uiClass.Class)
+
+			if len(planName) == 0 {
+				prompt := promptui.Select{
+					Label: "Which service plan should we use?",
+					Items: catalog.GetServicePlanNames(plans),
+				}
+				_, planName, _ = prompt.Run()
 			}
 
-			i, _, _ := prompt.Run()
-			uiClass := uiClasses[i]
-			className := uiClass.Name
-			class := uiClass.Class
+			plan, ok := plans[planName]
+			if !ok {
+				prompt := promptui.Select{
+					Label: fmt.Sprintf("Unknown plan '%s'. Here are the valid options", planName),
+					Items: catalog.GetServicePlanNames(plans),
+				}
+				_, planName, _ = prompt.Run()
 
-			plans, _ := catalog.GetMatchingPlans(client, class)
-			prompt = promptui.Select{
-				Label: "Which service plan should we use?",
-				Items: catalog.GetServicePlanNames(plans),
+				plan = plans[planName]
 			}
-
-			_, planName, _ := prompt.Run()
-
-			plan := plans[planName]
 
 			properties, _ := catalog.GetProperties(plan)
 
-			i = 0
+			var i = 0
 			values := make(map[string]string)
+			passedValues, err := getParametersAsMap(parameters)
 			for i < len(properties) && properties[i].Required {
 				prop := properties[i]
-				prompt := promptui.Prompt{
-					Label:     fmt.Sprintf("Enter a value for %s property %s", prop.Type, prop.Title),
-					AllowEdit: true,
+				if _, ok = passedValues[prop.Name]; !ok {
+					prompt := promptui.Prompt{
+						Label:     fmt.Sprintf("Enter a value for %s property %s", prop.Type, prop.Title),
+						AllowEdit: true,
+					}
+
+					result, _ := prompt.Run()
+					values[prop.Name] = result
 				}
 
-				result, _ := prompt.Run()
-				values[prop.Name] = result
 				i++
 			}
-
 			// if we have non-required properties, ask if user wants to provide values
 			if i < len(properties)-1 {
 				// todo
 			}
 
-			instancePrompt := promptui.Prompt{
-				Label:     "Finally, how should we name your service",
-				AllowEdit: true,
+			if len(instanceName) == 0 {
+				instancePrompt := promptui.Prompt{
+					Label:     "Finally, how should we name your service",
+					AllowEdit: true,
+				}
+				instanceName, _ = instancePrompt.Run()
 			}
-
-			instance, _ := instancePrompt.Run()
 
 			setup := Setup()
 
-			err := catalog.CreateServiceInstance(client, setup.Application.Namespace, instance, className, planName, "", values)
+			err = catalog.CreateServiceInstance(client, setup.Application.Namespace, instanceName, uiClass.Name, planName, "", values)
 			if err != nil {
 				panic(err)
 			}
 
-			log.Infof("Service %s using class %s has been created!", instance, className)
+			log.Infof("Service %s using class %s has been created!", instanceName, uiClass.Name)
 		},
 	}
+	catalogInstanceCmd.Flags().StringVar(&serviceClass, "class", "", "Service class name")
+	catalogInstanceCmd.Flags().StringVar(&planName, "plan", "", "Plan name")
+	catalogInstanceCmd.Flags().StringVar(&instanceName, "instance", "", "Instance name to use for the new service")
+	catalogInstanceCmd.Flags().StringSliceVarP(&parameters, "parameters", "p", []string{}, "Comma-separated name=value pairs")
 
 	var (
 		secret   string
@@ -169,6 +195,20 @@ func init() {
 
 	catalogCmd.Annotations = map[string]string{"command": "catalog"}
 	rootCmd.AddCommand(catalogCmd)
+}
+
+func getParametersAsMap(params []string) (parameters map[string]string, err error) {
+	parameters = make(map[string]string, len(params))
+	for _, value := range params {
+		equals := strings.IndexRune(value, '=')
+		if equals > 0 {
+			split := strings.Split(value, "=")
+			parameters[split[0]] = split[1]
+		} else {
+			return parameters, errors.Errorf("Invalid parameter, must follow 'name=value' format")
+		}
+	}
+	return parameters, nil
 }
 
 type uiServiceClasses []catalog.UIClusterServiceClass
