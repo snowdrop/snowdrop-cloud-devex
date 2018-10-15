@@ -139,6 +139,7 @@ func init() {
 		},
 	}
 	catalogInstanceCmd.Flags().StringVar(&serviceClass, "class", "", "Service class name")
+	Suggesters[GetFlagSuggesterName(catalogInstanceCmd, "class")] = classSuggester{}
 	catalogInstanceCmd.Flags().StringVar(&planName, "plan", "", "Plan name")
 	catalogInstanceCmd.Flags().StringVar(&instanceName, "instance", "", "Instance name to use for the new service")
 	catalogInstanceCmd.Flags().StringSliceVarP(&parameters, "parameters", "p", []string{}, "Comma-separated name=value pairs")
