@@ -78,7 +78,7 @@ After a few seconds, the application will be running on port 8080
 
 ```bash
 APP_BASE_PATH=http://$(oc get route my-spring-boot-app -o jsonpath='{.spec.host}')
-http $(APP_BASE_PATH)/api/fruits
+http ${APP_BASE_PATH}/api/fruits
 HTTP/1.1 200 
 Cache-control: private
 Content-Type: application/json;charset=UTF-8
