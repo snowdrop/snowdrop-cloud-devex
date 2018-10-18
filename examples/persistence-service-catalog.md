@@ -8,19 +8,20 @@
 
 - odo which will provide the ability to run the spring boot application on Openshift and also create the PostgreSQL database
 
+To build odo from source, perform the following commands (requires golang tools to be setup properly)
+
 ```bash
 cd $GOPATH/src/github.com/redhat-developer
 git clone https://github.com/redhat-developer/odo.git && cd odo
 make install && sudo cp $GOPATH/bin/odo /usr/local/bin
 ```
 
-- Create a Minishift's vm running okd 3.10 and service catalog 
+Alternatively you can install the latest odo release (requires you have [jq](https://stedolan.github.io/jq/) setup)
 
 ```bash
-minishift addons enable xpaas
-minishift addons enable admin-user
-MINISHIFT_ENABLE_EXPERIMENTAL=y minishift start --extra-clusterup-flags="--enable=service-catalog,automation-service-broker" 
-oc login -u admin -p admin
+curl -L -o odo $(curl -sL https://api.github.com/repos/redhat-developer/odo/releases/latest | jq -r '.assets[].browser_download_url' | grep 'odo-linux-amd64$') # use odo-darwin-64 for Mac
+chmod +x odo
+sudo cp odo /usr/local/bin
 ```
 
 ## Steps to follow to play the scenario
