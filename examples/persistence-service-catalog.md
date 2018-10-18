@@ -2,19 +2,9 @@
 
 ## Prerequisites
 
-- SD tool is installed (>= [0.15.0](https://github.com/snowdrop/spring-boot-cloud-devex/releases/tag/v0.15.0)). See README.md 
 - Minishift (>= v1.23.0+91235ee) with Service Catalog feature enabled
 
 ## Install tools
-
-- sd to scaffold the project and create the DeploymentConfig
-
-```bash
-sudo curl -L https://github.com/snowdrop/spring-boot-cloud-devex/releases/download/v0.15.0/sb-darwin-amd64 -o /usr/local/bin/sb
-or 
-sudo curl -L https://github.com/snowdrop/spring-boot-cloud-devex/releases/download/v0.15.0/sb-linux-amd64 -o /usr/local/bin/sb
-sudo chmod +x /usr/local/bin/sb
-```
 
 - odo which will provide the ability to run the spring boot application on Openshift and also create the PostgreSQL database
 
@@ -41,7 +31,9 @@ oc new-project odo
 cd /Temp/my-spring-boot
 # rm -rf {src,target,MANIFEST} && rm -rf *.{iml,xml,zip}
 # Scaffold a JPA Persistence Spring Boot Project
-sd create -t crud -i my-spring-boot
+curl -o app.zip http://spring-boot-generator.195.201.87.126.nip.io/app?template=crud
+unzip app.zip
+rm app.zip
 mvn clean package
 
 # Create the component with allow odo to run the application on Openshift
