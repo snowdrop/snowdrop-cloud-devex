@@ -6,7 +6,24 @@
 
 ## Install tools
 
+- Launch Minishift VM
+
+```bash
+# if you don't have a minishift VM, start as follows
+minishift addons enable xpaas
+minishift addons enable admin-user
+MINISHIFT_ENABLE_EXPERIMENTAL=y minishift start --extra-clusterup-flags="--enable=service-catalog,automation-service-broker" 
+# subsequent starts of the VM can be done simply with minishift start
+
+# If you do already have a minishift VM (which you would rather not delete) that has not been started with the previous commands, you need to do:
+minishift openshift component add service-catalog
+minishift openshift component automation-service-broker
+minishift start
+```
+
 - odo which will provide the ability to run the spring boot application on Openshift and also create the PostgreSQL database
+
+To build odo from source, perform the following commands (requires golang tools to be setup properly)
 
 ```bash
 cd $GOPATH/src/github.com/redhat-developer
@@ -14,13 +31,12 @@ git clone https://github.com/redhat-developer/odo.git && cd odo
 make install && sudo cp $GOPATH/bin/odo /usr/local/bin
 ```
 
-- Create a Minishift's vm running okd 3.10 and service catalog 
+Alternatively you can install the latest odo release (requires you have [jq](https://stedolan.github.io/jq/) setup)
 
 ```bash
-minishift addons enable xpaas
-minishift addons enable admin-user
-MINISHIFT_ENABLE_EXPERIMENTAL=y minishift start --extra-clusterup-flags="--enable=service-catalog,automation-service-broker" 
-oc login -u admin -p admin
+curl -L -o odo $(curl -sL https://api.github.com/repos/redhat-developer/odo/releases/latest | jq -r '.assets[].browser_download_url' | grep 'odo-linux-amd64$') # use odo-darwin-64 for Mac
+chmod +x odo
+sudo cp odo /usr/local/bin
 ```
 
 ## Steps to follow to play the scenario
@@ -37,7 +53,7 @@ rm app.zip
 mvn clean package
 
 # Create the component with allow odo to run the application on Openshift
-odo create redhat-openjdk18-openshift:1.3 my-spring-boot --binary /Temp/my-spring-boot/target/my-spring-boot-0.0.1-SNAPSHOT.jar --env SPRING_PROFILES_ACTIVE=openshift-catalog
+odo create redhat-openjdk18-openshift:1.4 my-spring-boot --binary ./target/demo-0.0.1-SNAPSHOT.jar --env SPRING_PROFILES_ACTIVE=openshift-catalog
 
 # Create a service's instance using the OABroker and postgresql DB + secret. Next bind/link the secret to the DC and restart it
 odo service create dh-postgresql-apb --plan dev -p postgresql_user=luke -p postgresql_password=secret -p postgresql_database=my_data -p postgresql_version=9.6
@@ -62,7 +78,7 @@ After a few seconds, the application will be running on port 8080
 
 ```bash
 APP_BASE_PATH=http://$(oc get route my-spring-boot-app -o jsonpath='{.spec.host}')
-http $(APP_BASE_PATH)/api/fruits
+http ${APP_BASE_PATH}/api/fruits
 HTTP/1.1 200 
 Cache-control: private
 Content-Type: application/json;charset=UTF-8
