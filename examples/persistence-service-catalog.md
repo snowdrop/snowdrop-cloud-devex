@@ -74,7 +74,7 @@ odo url create --port 8080
 
 After a few seconds, the application will be running on port 8080
 
-- Query the service
+- Query the service using curl or [httpie](https://httpie.org/doc) tool
 
 ```bash
 APP_BASE_PATH=http://$(oc get route my-spring-boot-app -o jsonpath='{.spec.host}')
