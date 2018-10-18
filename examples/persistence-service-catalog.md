@@ -28,6 +28,7 @@ make install && sudo cp $GOPATH/bin/odo /usr/local/bin
 
 ```bash
 minishift addons enable xpaas
+minishift addons enable admin-user
 MINISHIFT_ENABLE_EXPERIMENTAL=y minishift start --extra-clusterup-flags="--enable=service-catalog,automation-service-broker" 
 oc login -u admin -p admin
 ```
