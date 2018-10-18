@@ -103,4 +103,18 @@ X-Application-Context: application:openshift-catalog
 ]
 ```
 
+## Asciinema recording
+
+- Record the video using the demo script
+```bash
+asciinema rec -c './examples/crud-demo.sh' crud-demo.cast
+```
+
+- Play it locally
+
+```bash
+asciinema play crud-demo.cast
+```
+
+
 
