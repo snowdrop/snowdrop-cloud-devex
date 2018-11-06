@@ -10,6 +10,8 @@ import (
 	"strings"
 )
 
+var 		appName   string
+
 func newCommand(action string) *cobra.Command {
 	return newCommandWith(action, execAction)
 }
@@ -27,7 +29,7 @@ func newCommandWith(action string, toExec func(podName string, action string)) *
 
 			log.Infof("Exec %s command called", action)
 
-			_, pod := SetupAndWaitForPod()
+			_, pod := SetupAndWaitForPod(appName)
 			podName := pod.Name
 
 			log.Infof("%s the Spring Boot application ...", capitalizedAction)
@@ -47,11 +49,14 @@ func init() {
 	var ports string
 
 	execStartCmd := newCommand("start")
+	execStartCmd.Flags().StringVarP(&appName, "application", "", "","ArtifactId, application name to be used")
 	execStopCmd := newCommand("stop")
+	execStopCmd.Flags().StringVarP(&appName, "application", "", "","ArtifactId, application name to be used")
 	execRestartCmd := newCommandWith("restart", func(podName string, action string) {
 		oc.ExecCommand(oc.Command{Args: []string{"rsh", podName, config.SupervisordBin, config.SupervisordCtl, "stop", config.RunCmdName}})
 		oc.ExecCommand(oc.Command{Args: []string{"rsh", podName, config.SupervisordBin, config.SupervisordCtl, "start", config.RunCmdName}})
 	})
+	execRestartCmd.Flags().StringVarP(&appName, "application", "", "","ArtifactId, application name to be used")
 	execDebugCmd := newCommandWith("debug", func(podName string, action string) {
 		oc.ExecCommand(oc.Command{Args: []string{"rsh", podName, config.SupervisordBin, config.SupervisordCtl, "stop", config.RunCmdName}})
 		oc.ExecCommand(oc.Command{Args: []string{"rsh", podName, config.SupervisordBin, config.SupervisordCtl, "start", config.RunCmdName}})

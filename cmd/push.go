@@ -17,6 +17,7 @@ func init() {
 		mode      string
 		artefacts = []string{"src", "pom.xml"}
 		modes     = []string{"source", "binary"}
+		appName   string
 	)
 
 	pushCmd := &cobra.Command{
@@ -39,10 +40,9 @@ func init() {
 
 			log.Infof("Push command called with mode '%s'", mode)
 
-			setup, pod := SetupAndWaitForPod()
+			setup, pod := SetupAndWaitForPod(appName)
 			podName := pod.Name
 			containerName := setup.Application.Name
-
 			log.Info("Copy files from the local developer project to the pod")
 
 			switch mode {
@@ -93,6 +93,7 @@ func init() {
 
 	pushCmd.Flags().StringVarP(&mode, "mode", "", "source",
 		fmt.Sprintf("Mode used to push the code to the development pod. Supported modes are '%s'", strings.Join(modes, ",")))
+	pushCmd.Flags().StringVarP(&appName, "application", "", "","ArtifactId, application name to be used")
 	pushCmd.MarkFlagRequired("mode")
 	pushCmd.Annotations = map[string]string{"command": "push"}
 

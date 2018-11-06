@@ -19,7 +19,7 @@ func init() {
 
 			log.Info("Compile command called")
 
-			_, pod := SetupAndWaitForPod()
+			_, pod := SetupAndWaitForPod(appName)
 			podName := pod.Name
 
 			log.Info("Compile ...")
@@ -29,5 +29,6 @@ func init() {
 	}
 
 	compileCmd.Annotations = map[string]string{"command": "compile"}
+	compileCmd.Flags().StringVarP(&appName, "application", "", "","ArtifactId, application name to be used")
 	rootCmd.AddCommand(compileCmd)
 }

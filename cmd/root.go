@@ -101,8 +101,12 @@ func Setup() config.Tool {
 	return *tool
 }
 
-func SetupAndWaitForPod() (config.Tool, *v1.Pod) {
+func SetupAndWaitForPod(appName string) (config.Tool, *v1.Pod) {
 	setup := Setup()
+
+	if appName != "" {
+		setup.Application.Name = appName
+	}
 
 	// Wait till the dev pod is available
 	log.Info("Wait till the dev pod is available")
