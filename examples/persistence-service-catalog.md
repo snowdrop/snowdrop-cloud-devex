@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Minishift (>= v1.23.0+91235ee) with Service Catalog feature enabled
+- Minishift (>= v1.26.1) with Service Catalog feature enabled
 
 ## Install tools
 
@@ -12,13 +12,9 @@
 # if you don't have a minishift VM, start as follows
 minishift addons enable xpaas
 minishift addons enable admin-user
-MINISHIFT_ENABLE_EXPERIMENTAL=y minishift start --extra-clusterup-flags="--enable=service-catalog,automation-service-broker" 
-# subsequent starts of the VM can be done simply with minishift start
-
-# If you do already have a minishift VM (which you would rather not delete) that has not been started with the previous commands, you need to do:
+minishift start
 minishift openshift component add service-catalog
 minishift openshift component automation-service-broker
-minishift start
 ```
 
 - odo which will provide the ability to run the spring boot application on Openshift and also create the PostgreSQL database
