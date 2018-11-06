@@ -14,7 +14,7 @@ minishift addons enable xpaas
 minishift addons enable admin-user
 minishift start
 minishift openshift component add service-catalog
-minishift openshift component automation-service-broker
+minishift openshift component add automation-service-broker
 ```
 
 - odo which will provide the ability to run the spring boot application on Openshift and also create the PostgreSQL database
