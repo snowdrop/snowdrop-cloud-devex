@@ -51,7 +51,7 @@ rm app.zip
 mvn clean package
 
 # Create the component with allow odo to run the application on Openshift
-odo create redhat-openjdk18-openshift:1.4 my-spring-boot --binary ./target/demo-0.0.1-SNAPSHOT.jar --env SPRING_PROFILES_ACTIVE=openshift-catalog
+odo create redhat-openjdk18-openshift:1.4 my-spring-boot --binary ./target/my-spring-boot-0.0.1-SNAPSHOT.jar --env SPRING_PROFILES_ACTIVE=openshift-catalog
 
 # Create a service's instance using the OABroker and postgresql DB + secret. Next bind/link the secret to the DC and restart it
 odo service create dh-postgresql-apb --plan dev -p postgresql_user=luke -p postgresql_password=secret -p postgresql_database=my_data -p postgresql_version=9.6
