@@ -30,10 +30,12 @@ make install && sudo cp $GOPATH/bin/odo /usr/local/bin
 Alternatively you can install the latest odo release (requires you have [jq](https://stedolan.github.io/jq/) setup)
 
 ```bash
-curl -L -o odo $(curl -sL https://api.github.com/repos/redhat-developer/odo/releases/latest | jq -r '.assets[].browser_download_url' | grep 'odo-linux-amd64$') # use odo-darwin-64 for Mac
+curl -L -o odo $(curl -sL https://api.github.com/repos/redhat-developer/odo/releases/latest | jq -r '.assets[].browser_download_url' | grep 'odo-linux-amd64$')
 chmod +x odo
 sudo cp odo /usr/local/bin
 ```
+
+**REMARK** : Use `grep 'odo-darwin-amd64$'` for MacOS
 
 ## Steps to follow to play the scenario
 
