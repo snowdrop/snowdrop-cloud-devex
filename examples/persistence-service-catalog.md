@@ -45,7 +45,7 @@ oc new-project odo
 cd /Temp/my-spring-boot
 # rm -rf {src,target,MANIFEST} && rm -rf *.{iml,xml,zip}
 # Scaffold a JPA Persistence Spring Boot Project
-curl -o app.zip http://spring-boot-generator.195.201.87.126.nip.io/app?template=crud
+curl -o app.zip http://spring-boot-generator.195.201.87.126.nip.io/app?template=crud&artifactid=my-spring-boot
 unzip app.zip
 rm app.zip
 mvn clean package
