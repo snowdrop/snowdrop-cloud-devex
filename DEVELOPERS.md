@@ -88,7 +88,7 @@ RUN chgrp -R 0 /tmp/src/ && \
 Execute such commands to build the docker image of the `Java S2I` and publish it on `Quay.io`
  
 ```bash
-docker build -t spring-boot-http:latest .
+docker build -t spring-boot-http:latest ./spring-boot-s2i/Dockerfile
 TAG_ID=$(docker images -q <username>/spring-boot-http:latest)
 docker tag $TAG_ID quay.io/snowdrop/spring-boot-s2i
 docker push quay.io/snowdrop/spring-boot-s2i
